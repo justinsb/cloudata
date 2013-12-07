@@ -1,0 +1,7 @@
+option java_package = "com.cloudata.appendlog.data";
+
+message LogEntry {
+	required uint64 log_id = 1;
+	//required uint64 offset = 2;
+	required bytes value = 3;
+}
