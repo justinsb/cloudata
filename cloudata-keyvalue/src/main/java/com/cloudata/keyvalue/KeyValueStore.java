@@ -21,16 +21,16 @@ public class KeyValueStore {
 
     final Btree btree;
 
-    public KeyValueStore(File dir) throws IOException {
+    public KeyValueStore(File dir, boolean uniqueKeys) throws IOException {
         File data = new File(dir, "data");
-        PageStore pageStore = MmapPageStore.build(data);
-        this.btree = new Btree(pageStore);
+        PageStore pageStore = MmapPageStore.build(data, uniqueKeys);
+        this.btree = new Btree(pageStore, uniqueKeys);
     }
 
     public void put(ByteBuffer key, ByteBuffer value) {
         ReadWriteTransaction txn = btree.beginReadWrite();
 
-        txn.insert(key, value);
+        txn.insert(btree, key, value);
         txn.commit();
     }
 
@@ -57,7 +57,7 @@ public class KeyValueStore {
         ReadOnlyTransaction txn = btree.beginReadOnly();
 
         GetEntryListener listener = new GetEntryListener(key);
-        txn.walk(key, listener);
+        txn.walk(btree, key, listener);
 
         ByteBuffer value = listener.foundValue;
 

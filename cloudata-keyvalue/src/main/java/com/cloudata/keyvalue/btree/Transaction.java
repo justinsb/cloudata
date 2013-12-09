@@ -16,8 +16,8 @@ public abstract class Transaction {
 
     public abstract Page getPage(Page parent, int pageNumber);
 
-    public void walk(ByteBuffer from, EntryListener listener) {
-        Page rootPage = getRootPage(false);
+    public void walk(Btree btree, ByteBuffer from, EntryListener listener) {
+        Page rootPage = getRootPage(btree, false);
         if (rootPage == null) {
             log.info("No data; returning immediately from walk");
             return;
@@ -25,5 +25,5 @@ public abstract class Transaction {
         rootPage.walk(this, from, listener);
     }
 
-    protected abstract Page getRootPage(boolean create);
+    protected abstract Page getRootPage(Btree btree, boolean create);
 }

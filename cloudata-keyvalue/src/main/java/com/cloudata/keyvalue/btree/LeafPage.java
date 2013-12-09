@@ -17,11 +17,15 @@ public class LeafPage extends Page {
 
     Mutable mutable;
 
-    public LeafPage(Page parent, int pageNumber, ByteBuffer buffer) {
+    final boolean uniqueKeys;
+
+    public LeafPage(Page parent, int pageNumber, ByteBuffer buffer, boolean uniqueKeys) {
         super(parent, pageNumber, buffer);
+        this.uniqueKeys = uniqueKeys;
     }
 
     static class Mutable {
+        final boolean uniqueKeys;
         final List<Entry> entries;
         int totalKeySize;
         int totalValueSize;
@@ -54,15 +58,30 @@ public class LeafPage extends Page {
         void insert(ByteBuffer key, ByteBuffer value) {
             int position = lbound(key);
 
-            // TODO: Should we enforce uniqueness?
+            Entry newEntry = new Entry(key, value);
+            if (uniqueKeys) {
+                if (position < entries.size()) {
+                    ByteBuffer midKey = getKey(position);
+                    int comparison = ByteBuffers.compare(midKey, key);
+                    if (comparison == 0) {
+                        ByteBuffer oldValue = getValue(position);
 
-            entries.add(position, new Entry(key, value));
+                        entries.set(position, newEntry);
+
+                        totalValueSize += value.remaining() - oldValue.remaining();
+                        return;
+                    }
+                }
+            }
+
+            entries.add(position, newEntry);
 
             totalKeySize += key.remaining();
             totalValueSize += value.remaining();
         }
 
         Mutable(LeafPage page) {
+            this.uniqueKeys = page.uniqueKeys;
             int n = page.getEntryCount();
 
             this.entries = new ArrayList<Entry>(n);
@@ -312,7 +331,7 @@ public class LeafPage extends Page {
         return PAGE_TYPE;
     }
 
-    public static LeafPage createNew(Page parent, int pageNumber) {
+    public static LeafPage createNew(Page parent, int pageNumber, boolean uniqueKeys) {
         // TODO: Reuse a shared buffer?
         ByteBuffer empty = ByteBuffer.allocate(6);
         empty.putShort((short) 0);
@@ -321,7 +340,7 @@ public class LeafPage extends Page {
 
         empty.flip();
 
-        return new LeafPage(parent, pageNumber, empty);
+        return new LeafPage(parent, pageNumber, empty, uniqueKeys);
     }
 
     @Override

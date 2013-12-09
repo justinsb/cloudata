@@ -98,7 +98,8 @@ public class KeyValueStateMachine implements StateMachine {
 
                 dir.mkdirs();
 
-                return new KeyValueStore(dir);
+                boolean uniqueKeys = true;
+                return new KeyValueStore(dir, uniqueKeys);
             } catch (Exception e) {
                 log.warn("Error building KeyValueStore", e);
                 throw e;

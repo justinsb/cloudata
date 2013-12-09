@@ -7,9 +7,11 @@ public class Btree {
     private static final Logger log = LoggerFactory.getLogger(Btree.class);
 
     final PageStore pageStore;
+    final boolean uniqueKeys;
 
-    public Btree(PageStore pageStore) {
+    public Btree(PageStore pageStore, boolean uniqueKeys) {
         this.pageStore = pageStore;
+        this.uniqueKeys = uniqueKeys;
     }
 
     public ReadWriteTransaction beginReadWrite() {
@@ -20,6 +22,10 @@ public class Btree {
     public ReadOnlyTransaction beginReadOnly() {
         ReadOnlyTransaction txn = new ReadOnlyTransaction(pageStore);
         return txn;
+    }
+
+    public boolean isUniqueKeys() {
+        return uniqueKeys;
     }
 
 }

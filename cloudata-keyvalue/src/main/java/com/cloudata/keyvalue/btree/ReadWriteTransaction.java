@@ -99,8 +99,8 @@ public class ReadWriteTransaction extends Transaction {
         pageStore.commitTransaction(newRootPage);
     }
 
-    public void insert(ByteBuffer key, ByteBuffer value) {
-        getRootPage(true).insert(this, key, value);
+    public void insert(Btree btree, ByteBuffer key, ByteBuffer value) {
+        getRootPage(btree, true).insert(this, key, value);
     }
 
     int createdPageCount;
@@ -121,7 +121,7 @@ public class ReadWriteTransaction extends Transaction {
     int rootPageId;
 
     @Override
-    protected Page getRootPage(boolean create) {
+    protected Page getRootPage(Btree btree, boolean create) {
         if (rootPageId == 0) {
             rootPageId = pageStore.getRootPageId();
         }
@@ -133,7 +133,7 @@ public class ReadWriteTransaction extends Transaction {
             createdPageCount++;
             int pageNumber = -createdPageCount;
 
-            LeafPage newPage = LeafPage.createNew(null, pageNumber);
+            LeafPage newPage = LeafPage.createNew(null, pageNumber, btree.isUniqueKeys());
             createPage(null, pageNumber, newPage);
 
             rootPageId = pageNumber;

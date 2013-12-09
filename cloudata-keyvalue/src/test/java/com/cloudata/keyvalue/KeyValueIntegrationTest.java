@@ -78,10 +78,7 @@ public class KeyValueIntegrationTest {
 
         for (int i = 1; i < n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = new byte[i];
-            for (int j = 0; j < i; j++) {
-                data[j] = (byte) (j % 0xff);
-            }
+            byte[] data = buildValue(i);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
@@ -92,12 +89,51 @@ public class KeyValueIntegrationTest {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
-            Assert.assertEquals(i, data.length);
-
-            for (int j = 0; j < i; j++) {
-                Assert.assertEquals((byte) (j % 0xff), data[j]);
-            }
+            byte[] expected = buildValue(i);
+            Assert.assertArrayEquals(expected, data);
         }
 
+    }
+
+    @Test
+    public void testReplaceValue() throws Exception {
+        String url = SERVERS[0].getHttpUrl();
+
+        long logId = 3;
+
+        KeyValueClient client = new KeyValueClient(url);
+
+        int n = 20;
+
+        // Set i = i
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] data = buildValue(i);
+            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+        }
+
+        // Set i = i * 2
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] data = buildValue(i * 2);
+            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+        }
+
+        // Check i = i * 2
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
+            byte[] data = entry.getValue().toByteArray();
+            byte[] expected = buildValue(i * 2);
+            Assert.assertArrayEquals(expected, data);
+        }
+    }
+
+    private byte[] buildValue(int i) {
+        byte[] data = new byte[i];
+        for (int j = 0; j < i; j++) {
+            data[j] = (byte) (j % 0xff);
+        }
+        return data;
     }
 }

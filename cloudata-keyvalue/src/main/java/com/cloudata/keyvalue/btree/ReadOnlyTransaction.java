@@ -23,7 +23,7 @@ public class ReadOnlyTransaction extends Transaction {
     int rootPageId;
 
     @Override
-    protected Page getRootPage(boolean create) {
+    protected Page getRootPage(Btree btree, boolean create) {
         if (rootPageId == 0) {
             rootPageId = pageStore.getRootPageId();
         }

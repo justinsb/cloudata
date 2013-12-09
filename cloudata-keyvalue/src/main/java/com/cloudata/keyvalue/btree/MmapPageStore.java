@@ -18,12 +18,15 @@ public class MmapPageStore extends PageStore {
 
     int rootPage;
 
+    final boolean uniqueKeys;
+
     private static final int ALIGNMENT = 256;
 
     private static final int HEADER_SIZE = 16384;
 
-    private MmapPageStore(MappedByteBuffer buffer) {
+    private MmapPageStore(MappedByteBuffer buffer, boolean uniqueKeys) {
         this.buffer = buffer;
+        this.uniqueKeys = uniqueKeys;
 
         MetadataPage metadataPage = new MetadataPage(buffer, 0);
         this.rootPage = metadataPage.getRoot();
@@ -31,19 +34,19 @@ public class MmapPageStore extends PageStore {
         this.buffer.position(HEADER_SIZE);
     }
 
-    public static MmapPageStore build(File data) throws IOException {
+    public static MmapPageStore build(File data, boolean uniqueKeys) throws IOException {
         if (!data.exists()) {
             long size = 1024L * 1024L * 64L;
             MappedByteBuffer mmap = Mmap.mmapFile(data, size);
 
             MetadataPage.create(mmap, 0);
 
-            return new MmapPageStore(mmap);
+            return new MmapPageStore(mmap, uniqueKeys);
         } else {
             long size = data.length();
             MappedByteBuffer mmap = Mmap.mmapFile(data, size);
 
-            return new MmapPageStore(mmap);
+            return new MmapPageStore(mmap, uniqueKeys);
         }
     }
 
@@ -61,7 +64,7 @@ public class MmapPageStore extends PageStore {
             break;
 
         case LeafPage.PAGE_TYPE:
-            page = new LeafPage(parent, pageNumber, header.getPageSlice());
+            page = new LeafPage(parent, pageNumber, header.getPageSlice(), uniqueKeys);
             break;
 
         default:
