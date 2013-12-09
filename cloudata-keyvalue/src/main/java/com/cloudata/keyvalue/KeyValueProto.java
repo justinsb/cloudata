@@ -8,6 +8,88 @@ public final class KeyValueProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  /**
+   * Protobuf enum {@code KvAction}
+   */
+  public enum KvAction
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>SET = 1;</code>
+     */
+    SET(0, 1),
+    /**
+     * <code>DELETE = 2;</code>
+     */
+    DELETE(1, 2),
+    ;
+
+    /**
+     * <code>SET = 1;</code>
+     */
+    public static final int SET_VALUE = 1;
+    /**
+     * <code>DELETE = 2;</code>
+     */
+    public static final int DELETE_VALUE = 2;
+
+
+    public final int getNumber() { return value; }
+
+    public static KvAction valueOf(int value) {
+      switch (value) {
+        case 1: return SET;
+        case 2: return DELETE;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<KvAction>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<KvAction>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<KvAction>() {
+            public KvAction findValueByNumber(int number) {
+              return KvAction.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.cloudata.keyvalue.KeyValueProto.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final KvAction[] VALUES = values();
+
+    public static KvAction valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private KvAction(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:KvAction)
+  }
+
   public interface KvEntryOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -21,23 +103,33 @@ public final class KeyValueProto {
      */
     long getStoreId();
 
-    // required bytes key = 2;
+    // required .KvAction action = 2;
     /**
-     * <code>required bytes key = 2;</code>
+     * <code>required .KvAction action = 2;</code>
+     */
+    boolean hasAction();
+    /**
+     * <code>required .KvAction action = 2;</code>
+     */
+    com.cloudata.keyvalue.KeyValueProto.KvAction getAction();
+
+    // optional bytes key = 3;
+    /**
+     * <code>optional bytes key = 3;</code>
      */
     boolean hasKey();
     /**
-     * <code>required bytes key = 2;</code>
+     * <code>optional bytes key = 3;</code>
      */
     com.google.protobuf.ByteString getKey();
 
-    // required bytes value = 3;
+    // optional bytes value = 4;
     /**
-     * <code>required bytes value = 3;</code>
+     * <code>optional bytes value = 4;</code>
      */
     boolean hasValue();
     /**
-     * <code>required bytes value = 3;</code>
+     * <code>optional bytes value = 4;</code>
      */
     com.google.protobuf.ByteString getValue();
   }
@@ -97,13 +189,24 @@ public final class KeyValueProto {
               storeId_ = input.readUInt64();
               break;
             }
-            case 18: {
-              bitField0_ |= 0x00000002;
-              key_ = input.readBytes();
+            case 16: {
+              int rawValue = input.readEnum();
+              com.cloudata.keyvalue.KeyValueProto.KvAction value = com.cloudata.keyvalue.KeyValueProto.KvAction.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(2, rawValue);
+              } else {
+                bitField0_ |= 0x00000002;
+                action_ = value;
+              }
               break;
             }
             case 26: {
               bitField0_ |= 0x00000004;
+              key_ = input.readBytes();
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
               value_ = input.readBytes();
               break;
             }
@@ -163,33 +266,49 @@ public final class KeyValueProto {
       return storeId_;
     }
 
-    // required bytes key = 2;
-    public static final int KEY_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString key_;
+    // required .KvAction action = 2;
+    public static final int ACTION_FIELD_NUMBER = 2;
+    private com.cloudata.keyvalue.KeyValueProto.KvAction action_;
     /**
-     * <code>required bytes key = 2;</code>
+     * <code>required .KvAction action = 2;</code>
      */
-    public boolean hasKey() {
+    public boolean hasAction() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>required bytes key = 2;</code>
+     * <code>required .KvAction action = 2;</code>
+     */
+    public com.cloudata.keyvalue.KeyValueProto.KvAction getAction() {
+      return action_;
+    }
+
+    // optional bytes key = 3;
+    public static final int KEY_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString key_;
+    /**
+     * <code>optional bytes key = 3;</code>
+     */
+    public boolean hasKey() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes key = 3;</code>
      */
     public com.google.protobuf.ByteString getKey() {
       return key_;
     }
 
-    // required bytes value = 3;
-    public static final int VALUE_FIELD_NUMBER = 3;
+    // optional bytes value = 4;
+    public static final int VALUE_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString value_;
     /**
-     * <code>required bytes value = 3;</code>
+     * <code>optional bytes value = 4;</code>
      */
     public boolean hasValue() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>required bytes value = 3;</code>
+     * <code>optional bytes value = 4;</code>
      */
     public com.google.protobuf.ByteString getValue() {
       return value_;
@@ -197,6 +316,7 @@ public final class KeyValueProto {
 
     private void initFields() {
       storeId_ = 0L;
+      action_ = com.cloudata.keyvalue.KeyValueProto.KvAction.SET;
       key_ = com.google.protobuf.ByteString.EMPTY;
       value_ = com.google.protobuf.ByteString.EMPTY;
     }
@@ -209,11 +329,7 @@ public final class KeyValueProto {
         memoizedIsInitialized = 0;
         return false;
       }
-      if (!hasKey()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasValue()) {
+      if (!hasAction()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -228,10 +344,13 @@ public final class KeyValueProto {
         output.writeUInt64(1, storeId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, key_);
+        output.writeEnum(2, action_.getNumber());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, value_);
+        output.writeBytes(3, key_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, value_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -248,11 +367,15 @@ public final class KeyValueProto {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, key_);
+          .computeEnumSize(2, action_.getNumber());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, value_);
+          .computeBytesSize(3, key_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, value_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -372,10 +495,12 @@ public final class KeyValueProto {
         super.clear();
         storeId_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000001);
-        key_ = com.google.protobuf.ByteString.EMPTY;
+        action_ = com.cloudata.keyvalue.KeyValueProto.KvAction.SET;
         bitField0_ = (bitField0_ & ~0x00000002);
-        value_ = com.google.protobuf.ByteString.EMPTY;
+        key_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
+        value_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -411,9 +536,13 @@ public final class KeyValueProto {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.key_ = key_;
+        result.action_ = action_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
+        }
+        result.key_ = key_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
         }
         result.value_ = value_;
         result.bitField0_ = to_bitField0_;
@@ -435,6 +564,9 @@ public final class KeyValueProto {
         if (other.hasStoreId()) {
           setStoreId(other.getStoreId());
         }
+        if (other.hasAction()) {
+          setAction(other.getAction());
+        }
         if (other.hasKey()) {
           setKey(other.getKey());
         }
@@ -450,11 +582,7 @@ public final class KeyValueProto {
           
           return false;
         }
-        if (!hasKey()) {
-          
-          return false;
-        }
-        if (!hasValue()) {
+        if (!hasAction()) {
           
           return false;
         }
@@ -513,73 +641,109 @@ public final class KeyValueProto {
         return this;
       }
 
-      // required bytes key = 2;
-      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      // required .KvAction action = 2;
+      private com.cloudata.keyvalue.KeyValueProto.KvAction action_ = com.cloudata.keyvalue.KeyValueProto.KvAction.SET;
       /**
-       * <code>required bytes key = 2;</code>
+       * <code>required .KvAction action = 2;</code>
        */
-      public boolean hasKey() {
+      public boolean hasAction() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>required bytes key = 2;</code>
+       * <code>required .KvAction action = 2;</code>
+       */
+      public com.cloudata.keyvalue.KeyValueProto.KvAction getAction() {
+        return action_;
+      }
+      /**
+       * <code>required .KvAction action = 2;</code>
+       */
+      public Builder setAction(com.cloudata.keyvalue.KeyValueProto.KvAction value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        action_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required .KvAction action = 2;</code>
+       */
+      public Builder clearAction() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        action_ = com.cloudata.keyvalue.KeyValueProto.KvAction.SET;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes key = 3;
+      private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes key = 3;</code>
+       */
+      public boolean hasKey() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes key = 3;</code>
        */
       public com.google.protobuf.ByteString getKey() {
         return key_;
       }
       /**
-       * <code>required bytes key = 2;</code>
+       * <code>optional bytes key = 3;</code>
        */
       public Builder setKey(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         key_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required bytes key = 2;</code>
+       * <code>optional bytes key = 3;</code>
        */
       public Builder clearKey() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         key_ = getDefaultInstance().getKey();
         onChanged();
         return this;
       }
 
-      // required bytes value = 3;
+      // optional bytes value = 4;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>required bytes value = 3;</code>
+       * <code>optional bytes value = 4;</code>
        */
       public boolean hasValue() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>required bytes value = 3;</code>
+       * <code>optional bytes value = 4;</code>
        */
       public com.google.protobuf.ByteString getValue() {
         return value_;
       }
       /**
-       * <code>required bytes value = 3;</code>
+       * <code>optional bytes value = 4;</code>
        */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         value_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>required bytes value = 3;</code>
+       * <code>optional bytes value = 4;</code>
        */
       public Builder clearValue() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         value_ = getDefaultInstance().getValue();
         onChanged();
         return this;
@@ -610,9 +774,11 @@ public final class KeyValueProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\"src/main/proto/KeyValueProto.proto\"7\n\007" +
-      "KvEntry\022\020\n\010store_id\030\001 \002(\004\022\013\n\003key\030\002 \002(\014\022\r" +
-      "\n\005value\030\003 \002(\014B\027\n\025com.cloudata.keyvalue"
+      "\n\"src/main/proto/KeyValueProto.proto\"R\n\007" +
+      "KvEntry\022\020\n\010store_id\030\001 \002(\004\022\031\n\006action\030\002 \002(" +
+      "\0162\t.KvAction\022\013\n\003key\030\003 \001(\014\022\r\n\005value\030\004 \001(\014" +
+      "*\037\n\010KvAction\022\007\n\003SET\020\001\022\n\n\006DELETE\020\002B\027\n\025com" +
+      ".cloudata.keyvalue"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -624,7 +790,7 @@ public final class KeyValueProto {
           internal_static_KvEntry_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_KvEntry_descriptor,
-              new java.lang.String[] { "StoreId", "Key", "Value", });
+              new java.lang.String[] { "StoreId", "Action", "Key", "Value", });
           return null;
         }
       };

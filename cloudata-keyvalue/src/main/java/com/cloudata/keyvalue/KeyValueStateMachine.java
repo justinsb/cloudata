@@ -15,6 +15,7 @@ import org.robotninjas.barge.StateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
@@ -47,9 +48,16 @@ public class KeyValueStateMachine implements StateMachine {
 
     public boolean put(long storeId, byte[] key, byte[] value) throws InterruptedException, RaftException {
         KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
-                .setValue(ByteString.copyFrom(value)).build();
+                .setAction(KvAction.SET).setValue(ByteString.copyFrom(value)).build();
 
         log.debug("Proposing operation {}", entry);
+
+        return raft.commit(entry.toByteArray());
+    }
+
+    public boolean delete(long storeId, byte[] key) throws RaftException, InterruptedException {
+        KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
+                .setAction(KvAction.DELETE).build();
 
         return raft.commit(entry.toByteArray());
     }
@@ -68,7 +76,9 @@ public class KeyValueStateMachine implements StateMachine {
             ByteString value = entry.getValue();
 
             KeyValueStore keyValueStore = getKeyValueStore(storeId);
-            keyValueStore.put(key.asReadOnlyByteBuffer(), value.asReadOnlyByteBuffer());
+
+            keyValueStore.doAction(entry.getAction(), key != null ? key.asReadOnlyByteBuffer() : null,
+                    value != null ? value.asReadOnlyByteBuffer() : null);
         } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing operation", e);
             throw new IllegalArgumentException("Error deserializing key value operation", e);
@@ -111,4 +121,5 @@ public class KeyValueStateMachine implements StateMachine {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
         return keyValueStore.get(key.asReadOnlyBuffer());
     }
+
 }

@@ -1,5 +1,8 @@
 package com.cloudata.keyvalue.btree;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,13 +12,16 @@ public class Btree {
     final PageStore pageStore;
     final boolean uniqueKeys;
 
+    final Lock writeLock = new ReentrantLock();
+
     public Btree(PageStore pageStore, boolean uniqueKeys) {
         this.pageStore = pageStore;
         this.uniqueKeys = uniqueKeys;
     }
 
     public ReadWriteTransaction beginReadWrite() {
-        ReadWriteTransaction txn = new ReadWriteTransaction(pageStore);
+        writeLock.lock();
+        ReadWriteTransaction txn = new ReadWriteTransaction(pageStore, writeLock);
         return txn;
     }
 

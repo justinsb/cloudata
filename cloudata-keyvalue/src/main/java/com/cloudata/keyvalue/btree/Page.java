@@ -3,6 +3,8 @@ package com.cloudata.keyvalue.btree;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
+
 public abstract class Page {
     protected final Page parent;
     protected final ByteBuffer buffer;
@@ -18,7 +20,7 @@ public abstract class Page {
 
     public abstract boolean walk(Transaction txn, ByteBuffer from, EntryListener listener);
 
-    public abstract void insert(Transaction txn, ByteBuffer key, ByteBuffer value);
+    public abstract void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value);
 
     public abstract ByteBuffer getKeyLbound();
 
@@ -39,4 +41,5 @@ public abstract class Page {
     public abstract byte getPageType();
 
     public abstract void dump(PrintStream os);
+
 }

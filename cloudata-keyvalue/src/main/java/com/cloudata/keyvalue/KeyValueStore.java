@@ -7,8 +7,8 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.btree.Btree;
-import com.cloudata.keyvalue.btree.ByteBuffers;
 import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.MmapPageStore;
 import com.cloudata.keyvalue.btree.PageStore;
@@ -24,14 +24,17 @@ public class KeyValueStore {
     public KeyValueStore(File dir, boolean uniqueKeys) throws IOException {
         File data = new File(dir, "data");
         PageStore pageStore = MmapPageStore.build(data, uniqueKeys);
+
+        log.warn("Building new btree @{}", dir);
+
         this.btree = new Btree(pageStore, uniqueKeys);
     }
 
-    public void put(ByteBuffer key, ByteBuffer value) {
-        ReadWriteTransaction txn = btree.beginReadWrite();
-
-        txn.insert(btree, key, value);
-        txn.commit();
+    public void doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
+        try (ReadWriteTransaction txn = btree.beginReadWrite()) {
+            txn.doAction(btree, action, key, value);
+            txn.commit();
+        }
     }
 
     static class GetEntryListener implements EntryListener {
@@ -44,7 +47,7 @@ public class KeyValueStore {
 
         @Override
         public boolean found(ByteBuffer key, ByteBuffer value) {
-            log.debug("Found {}={}", ByteBuffers.toHex(key), ByteBuffers.toHex(value));
+            // log.debug("Found {}={}", ByteBuffers.toHex(key), ByteBuffers.toHex(value));
             if (key.equals(findKey)) {
                 foundValue = value;
             }
@@ -54,17 +57,16 @@ public class KeyValueStore {
     };
 
     public ByteBuffer get(final ByteBuffer key) {
-        ReadOnlyTransaction txn = btree.beginReadOnly();
+        try (ReadOnlyTransaction txn = btree.beginReadOnly()) {
+            GetEntryListener listener = new GetEntryListener(key);
+            txn.walk(btree, key, listener);
 
-        GetEntryListener listener = new GetEntryListener(key);
-        txn.walk(btree, key, listener);
+            ByteBuffer value = listener.foundValue;
 
-        ByteBuffer value = listener.foundValue;
+            // log.debug("Value for {}: {}", key, value);
 
-        log.debug("Value for {}: {}", key, value);
-        txn.done();
-
-        return value;
+            return value;
+        }
     }
 
 }

@@ -4,10 +4,12 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
+import java.util.concurrent.locks.Lock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 
@@ -31,8 +33,8 @@ public class ReadWriteTransaction extends Transaction {
 
     }
 
-    public ReadWriteTransaction(PageStore pageStore) {
-        super(pageStore);
+    public ReadWriteTransaction(PageStore pageStore, Lock lock) {
+        super(pageStore, lock);
     }
 
     @Override
@@ -84,6 +86,8 @@ public class ReadWriteTransaction extends Transaction {
             int newPageNumber = pageStore.writePage(page);
             // page.changePageNumber(newPageNumber);
 
+            log.info("Wrote page @{} {}", newPageNumber, page);
+
             if (trackedPage.parent != null) {
                 BranchPage parentPage = (BranchPage) trackedPage.parent.page;
 
@@ -99,8 +103,8 @@ public class ReadWriteTransaction extends Transaction {
         pageStore.commitTransaction(newRootPage);
     }
 
-    public void insert(Btree btree, ByteBuffer key, ByteBuffer value) {
-        getRootPage(btree, true).insert(this, key, value);
+    public void doAction(Btree btree, KvAction action, ByteBuffer key, ByteBuffer value) {
+        getRootPage(btree, true).doAction(this, action, key, value);
     }
 
     int createdPageCount;

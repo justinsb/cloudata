@@ -47,7 +47,7 @@ public class KeyValueClient {
                 break;
 
             default:
-                throw new IllegalStateException();
+                throw new IllegalStateException("Unexpected status: " + status);
             }
         } finally {
             response.close();
@@ -71,6 +71,12 @@ public class KeyValueClient {
         public ByteString getValue() {
             return value;
         }
+
+        @Override
+        public String toString() {
+            return "KeyValueEntry [key=" + Hex.forDebug(key) + ", value=" + Hex.forDebug(value) + "]";
+        }
+
     }
 
     public KeyValueEntry read(long storeId, ByteString key) throws IOException {
@@ -87,7 +93,7 @@ public class KeyValueClient {
                 return null;
 
             default:
-                throw new IllegalStateException();
+                throw new IllegalStateException("Unexpected status: " + status);
             }
 
             InputStream is = response.getEntityInputStream();
@@ -101,5 +107,24 @@ public class KeyValueClient {
 
     private String toUrlPath(long storeId, ByteString key) {
         return Long.toString(storeId) + "/" + Hex.toHex(key);
+    }
+
+    public void delete(long storeId, ByteString key) {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, key)).delete(ClientResponse.class);
+
+        try {
+            int status = response.getStatus();
+
+            switch (status) {
+            case 200:
+            case 204:
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected status: " + status);
+            }
+        } finally {
+            response.close();
+        }
     }
 }

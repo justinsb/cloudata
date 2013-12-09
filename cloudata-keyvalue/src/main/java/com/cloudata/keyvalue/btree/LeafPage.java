@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
+
 public class LeafPage extends Page {
     private static final Logger log = LoggerFactory.getLogger(LeafPage.class);
 
@@ -39,10 +41,10 @@ public class LeafPage extends Page {
                 int mid = min + half;
 
                 ByteBuffer midKey = getKey(mid);
-                log.debug("comparison (dirty): @{} = {}", mid, midKey);
+                // log.debug("comparison (dirty): @{} = {}", mid, midKey);
                 int comparison = ByteBuffers.compare(midKey, find);
-                log.debug("comparison (dirty): {} vs {}: {}", ByteBuffers.toHex(midKey), ByteBuffers.toHex(find),
-                        comparison);
+                // log.debug("comparison (dirty): {} vs {}: {}", ByteBuffers.toHex(midKey), ByteBuffers.toHex(find),
+                // comparison);
 
                 if (comparison < 0) {
                     min = mid + 1;
@@ -55,29 +57,67 @@ public class LeafPage extends Page {
             return min;
         }
 
-        void insert(ByteBuffer key, ByteBuffer value) {
+        boolean doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
+            boolean changed = false;
+
             int position = lbound(key);
 
-            Entry newEntry = new Entry(key, value);
-            if (uniqueKeys) {
-                if (position < entries.size()) {
-                    ByteBuffer midKey = getKey(position);
-                    int comparison = ByteBuffers.compare(midKey, key);
-                    if (comparison == 0) {
-                        ByteBuffer oldValue = getValue(position);
+            switch (action) {
+            case SET:
+                Entry newEntry = new Entry(key, value);
+                if (uniqueKeys) {
+                    if (position < entries.size()) {
+                        ByteBuffer midKey = getKey(position);
+                        int comparison = ByteBuffers.compare(midKey, key);
+                        if (comparison == 0) {
+                            ByteBuffer oldValue = getValue(position);
 
-                        entries.set(position, newEntry);
+                            entries.set(position, newEntry);
 
-                        totalValueSize += value.remaining() - oldValue.remaining();
-                        return;
+                            totalValueSize += value.remaining() - oldValue.remaining();
+                            changed = true;
+                        }
                     }
                 }
+
+                if (!changed) {
+                    entries.add(position, newEntry);
+
+                    totalKeySize += key.remaining();
+                    totalValueSize += value.remaining();
+                }
+
+                break;
+
+            case DELETE:
+                if (uniqueKeys) {
+                    if (position < entries.size()) {
+                        ByteBuffer midKey = getKey(position);
+                        int comparison = ByteBuffers.compare(midKey, key);
+                        if (comparison == 0) {
+                            ByteBuffer oldValue = getValue(position);
+
+                            entries.remove(position);
+
+                            totalKeySize -= key.remaining();
+                            totalValueSize -= oldValue.remaining();
+                            changed = true;
+                            log.info("Deleted entry @{}", position);
+                        } else {
+                            log.info("Key not found in delete");
+                        }
+                    }
+                } else {
+                    // TODO: Support specifying entry by key & value
+                    throw new UnsupportedOperationException();
+                }
+                break;
+
+            default:
+                throw new UnsupportedOperationException();
             }
 
-            entries.add(position, newEntry);
-
-            totalKeySize += key.remaining();
-            totalValueSize += value.remaining();
+            return changed;
         }
 
         Mutable(LeafPage page) {
@@ -205,10 +245,10 @@ public class LeafPage extends Page {
             int mid = min + half;
 
             ByteBuffer midKey = getKey(mid);
-            log.debug("comparison: @{} = {}", mid, midKey);
+            // log.debug("comparison: @{} = {}", mid, midKey);
             int comparison = ByteBuffers.compare(midKey, find);
 
-            log.debug("comparison: {} vs {}: {}", ByteBuffers.toHex(midKey), ByteBuffers.toHex(find), comparison);
+            // log.debug("comparison: {} vs {}: {}", ByteBuffers.toHex(midKey), ByteBuffers.toHex(find), comparison);
 
             if (comparison < 0) {
                 min = mid + 1;
@@ -218,7 +258,7 @@ public class LeafPage extends Page {
             }
         }
 
-        log.debug("lbound for {} is: {}", find, min);
+        // log.debug("lbound for {} is: {}", find, min);
 
         return min;
     }
@@ -287,8 +327,8 @@ public class LeafPage extends Page {
     }
 
     @Override
-    public void insert(Transaction txn, ByteBuffer key, ByteBuffer value) {
-        getMutable().insert(key, value);
+    public void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+        getMutable().doAction(action, key, value);
     }
 
     @Override
@@ -345,7 +385,13 @@ public class LeafPage extends Page {
 
     @Override
     public String toString() {
-        return "LeafPage [entryCount=" + getEntryCount() + "]";
+        int count;
+        if (mutable != null) {
+            count = mutable.getEntryCount();
+        } else {
+            count = getEntryCount();
+        }
+        return "LeafPage [entryCount=" + count + "]";
     }
 
     @Override

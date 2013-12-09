@@ -1,17 +1,23 @@
 package com.cloudata.keyvalue.btree;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.locks.Lock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Transaction {
+public abstract class Transaction implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(Transaction.class);
 
     final PageStore pageStore;
 
-    public Transaction(PageStore pageStore) {
+    private final Lock lock;
+
+    boolean releasedLock;
+
+    public Transaction(PageStore pageStore, Lock lock) {
         this.pageStore = pageStore;
+        this.lock = lock;
     }
 
     public abstract Page getPage(Page parent, int pageNumber);
@@ -26,4 +32,20 @@ public abstract class Transaction {
     }
 
     protected abstract Page getRootPage(Btree btree, boolean create);
+
+    @Override
+    public void close() {
+        unlock();
+    }
+
+    protected void unlock() {
+        synchronized (this) {
+            if (lock != null && !releasedLock) {
+                lock.unlock();
+                releasedLock = true;
+
+            }
+        }
+    }
+
 }

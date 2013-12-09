@@ -20,4 +20,11 @@ public class Hex {
         return sb.toString();
     }
 
+    public static String forDebug(ByteString key) {
+        if (key == null) {
+            return "(null)";
+        }
+        return toHex(key);
+    }
+
 }

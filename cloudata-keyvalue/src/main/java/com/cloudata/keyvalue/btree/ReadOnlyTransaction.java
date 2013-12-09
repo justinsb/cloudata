@@ -7,11 +7,7 @@ public class ReadOnlyTransaction extends Transaction {
     private static final Logger log = LoggerFactory.getLogger(ReadOnlyTransaction.class);
 
     public ReadOnlyTransaction(PageStore pageStore) {
-        super(pageStore);
-    }
-
-    public void done() {
-
+        super(pageStore, null);
     }
 
     @Override

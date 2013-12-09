@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
+
 public class BranchPage extends Page {
     public static final byte PAGE_TYPE = 'B';
 
@@ -263,7 +265,7 @@ public class BranchPage extends Page {
     }
 
     @Override
-    public void insert(Transaction txn, ByteBuffer key, ByteBuffer value) {
+    public void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
         int pos = lbound(key);
         int pageNumber = getPageNumber(pos);
 
@@ -271,7 +273,7 @@ public class BranchPage extends Page {
 
         ByteBuffer oldLbound = childPage.getKeyLbound();
 
-        childPage.insert(txn, key, value);
+        childPage.doAction(txn, action, key, value);
 
         ByteBuffer newLbound = childPage.getKeyLbound();
 
