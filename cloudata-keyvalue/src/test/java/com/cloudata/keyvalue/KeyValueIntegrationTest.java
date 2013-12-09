@@ -163,6 +163,7 @@ public class KeyValueIntegrationTest {
             if (i % 2 == 0) {
                 Assert.assertNull(entry);
             } else {
+                Assert.assertNotNull(entry);
                 byte[] data = entry.getValue().toByteArray();
                 byte[] expected = buildValue(i);
                 Assert.assertArrayEquals(expected, data);

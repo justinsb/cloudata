@@ -21,12 +21,12 @@ public class Btree {
 
     public ReadWriteTransaction beginReadWrite() {
         writeLock.lock();
-        ReadWriteTransaction txn = new ReadWriteTransaction(pageStore, writeLock);
+        ReadWriteTransaction txn = pageStore.beginReadWriteTransaction(writeLock);
         return txn;
     }
 
     public ReadOnlyTransaction beginReadOnly() {
-        ReadOnlyTransaction txn = new ReadOnlyTransaction(pageStore);
+        ReadOnlyTransaction txn = pageStore.beginReadOnlyTransaction();
         return txn;
     }
 

@@ -16,20 +16,32 @@ public class MmapPageStore extends PageStore {
 
     final MappedByteBuffer buffer;
 
-    int rootPage;
-
     final boolean uniqueKeys;
 
     private static final int ALIGNMENT = 256;
 
     private static final int HEADER_SIZE = 16384;
 
+    private static final int MASTERPAGE_SLOTS = 8;
+
     private MmapPageStore(MappedByteBuffer buffer, boolean uniqueKeys) {
         this.buffer = buffer;
         this.uniqueKeys = uniqueKeys;
 
-        MetadataPage metadataPage = new MetadataPage(buffer, 0);
-        this.rootPage = metadataPage.getRoot();
+        MasterPage latest = null;
+
+        for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
+            int position = i * MasterPage.SIZE;
+            MasterPage metadataPage = new MasterPage(buffer, position);
+            if (latest == null) {
+                latest = metadataPage;
+            } else if (latest.getTransactionId() < metadataPage.getTransactionId()) {
+                latest = metadataPage;
+            }
+        }
+
+        this.nextTransactionId = latest.getTransactionId() + 1;
+        setCurrent(latest.getRoot(), latest.getTransactionPageId());
 
         this.buffer.position(HEADER_SIZE);
     }
@@ -39,7 +51,10 @@ public class MmapPageStore extends PageStore {
             long size = 1024L * 1024L * 64L;
             MappedByteBuffer mmap = Mmap.mmapFile(data, size);
 
-            MetadataPage.create(mmap, 0);
+            for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
+                mmap.position(i * MasterPage.SIZE);
+                MasterPage.create(mmap, 0, 0, 0);
+            }
 
             return new MmapPageStore(mmap, uniqueKeys);
         } else {
@@ -65,6 +80,10 @@ public class MmapPageStore extends PageStore {
 
         case LeafPage.PAGE_TYPE:
             page = new LeafPage(parent, pageNumber, header.getPageSlice(), uniqueKeys);
+            break;
+
+        case TransactionPage.PAGE_TYPE:
+            page = new TransactionPage(parent, pageNumber, header.getPageSlice());
             break;
 
         default:
@@ -123,20 +142,30 @@ public class MmapPageStore extends PageStore {
     }
 
     @Override
-    public int getRootPageId() {
-        return rootPage;
-    }
+    public void commitTransaction(TransactionPage transactionPage) {
+        // Shouldn't need to be synchronized, but harmless...
+        synchronized (this) {
+            transactionPage.setPreviousTransactionPage(currentTransactionPage);
 
-    @Override
-    public void commitTransaction(int newRootPage) {
-        ByteBuffer mmap = this.buffer.duplicate();
-        mmap.position(0);
+            long transactionId = transactionPage.getTransactionId();
 
-        MetadataPage.create(mmap, newRootPage);
+            int transactionPageId = writePage(transactionPage);
 
-        log.info("Committing transaction.  New root={}", newRootPage);
+            int newRootPage = transactionPage.getRootPage();
 
-        this.rootPage = newRootPage;
+            int slot = transactionPageId % MASTERPAGE_SLOTS;
+
+            int position = slot * MasterPage.SIZE;
+
+            ByteBuffer mmap = this.buffer.duplicate();
+            mmap.position(position);
+
+            MasterPage.create(mmap, newRootPage, transactionPageId, transactionId);
+
+            log.info("Committing transaction {}.  New root={}", transactionId, newRootPage);
+
+            setCurrent(newRootPage, transactionPageId);
+        }
     }
 
 }

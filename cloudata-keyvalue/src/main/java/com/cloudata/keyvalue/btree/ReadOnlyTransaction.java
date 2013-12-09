@@ -6,8 +6,11 @@ import org.slf4j.LoggerFactory;
 public class ReadOnlyTransaction extends Transaction {
     private static final Logger log = LoggerFactory.getLogger(ReadOnlyTransaction.class);
 
-    public ReadOnlyTransaction(PageStore pageStore) {
+    final int rootPageId;
+
+    public ReadOnlyTransaction(PageStore pageStore, int rootPageId) {
         super(pageStore, null);
+        this.rootPageId = rootPageId;
     }
 
     @Override
@@ -16,14 +19,8 @@ public class ReadOnlyTransaction extends Transaction {
         return pageStore.fetchPage(parent, pageNumber);
     }
 
-    int rootPageId;
-
     @Override
     protected Page getRootPage(Btree btree, boolean create) {
-        if (rootPageId == 0) {
-            rootPageId = pageStore.getRootPageId();
-        }
-
         if (rootPageId == 0) {
             if (!create) {
                 return null;

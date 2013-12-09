@@ -18,6 +18,8 @@ public class ReadWriteTransaction extends Transaction {
 
     final Map<Integer, TrackedPage> trackedPages = Maps.newHashMap();
 
+    private int rootPageId;
+
     static class TrackedPage {
         final Page page;
         final TrackedPage parent;
@@ -30,11 +32,11 @@ public class ReadWriteTransaction extends Transaction {
             this.parent = parent;
             this.originalPageNumber = originalPageNumber;
         }
-
     }
 
-    public ReadWriteTransaction(PageStore pageStore, Lock lock) {
+    public ReadWriteTransaction(PageStore pageStore, Lock lock, int rootPageId) {
         super(pageStore, lock);
+        this.rootPageId = rootPageId;
     }
 
     @Override
@@ -60,6 +62,13 @@ public class ReadWriteTransaction extends Transaction {
             if (trackedPage.dirtyCount == 0) {
                 ready.add(trackedPage);
             }
+        }
+
+        if (rootPageId == 0) {
+            if (!ready.isEmpty()) {
+                throw new IllegalStateException();
+            }
+            return;
         }
 
         int newRootPage = -1;
@@ -100,7 +109,17 @@ public class ReadWriteTransaction extends Transaction {
 
         assert newRootPage != -1;
 
-        pageStore.commitTransaction(newRootPage);
+        TransactionPage transactionPage;
+        long transactionId = pageStore.assignTransactionId();
+        {
+            createdPageCount++;
+            int pageNumber = -createdPageCount;
+
+            transactionPage = TransactionPage.createNew(pageNumber, transactionId);
+        }
+        transactionPage.setRootPageId(newRootPage);
+
+        pageStore.commitTransaction(transactionPage);
     }
 
     public void doAction(Btree btree, KvAction action, ByteBuffer key, ByteBuffer value) {
@@ -122,14 +141,8 @@ public class ReadWriteTransaction extends Transaction {
         trackedPages.put(pageNumber, trackedPage);
     }
 
-    int rootPageId;
-
     @Override
     protected Page getRootPage(Btree btree, boolean create) {
-        if (rootPageId == 0) {
-            rootPageId = pageStore.getRootPageId();
-        }
-
         if (rootPageId == 0) {
             if (!create) {
                 return null;
