@@ -1,0 +1,3 @@
+[submodule "barge"]
+	path = barge
+	url = git@github.com:justinsb/barge.git

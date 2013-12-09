@@ -10,6 +10,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>barge</module>
 		<module>cloudata-appendlog</module>
 		<module>cloudata-keyvalue</module>
 		<module>cloudata-shared</module>
