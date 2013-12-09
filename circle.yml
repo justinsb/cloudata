@@ -4,7 +4,7 @@ checkout:
     - git submodule sync
     - git submodule update --init # use submodules
 
-## Customize test commands
-test:
+## Customize dependencies commands
+dependencies:
   pre:
     - cd barge; mvn install
