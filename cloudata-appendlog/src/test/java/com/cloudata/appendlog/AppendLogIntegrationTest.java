@@ -82,7 +82,7 @@ public class AppendLogIntegrationTest {
             appendLogClient.append(logId, data);
         }
 
-        long position = 256;
+        long position = 0;
         for (int i = 1; i < 100; i++) {
             AppendLogEntry entry = appendLogClient.read(logId, position);
             byte[] data = entry.getData();

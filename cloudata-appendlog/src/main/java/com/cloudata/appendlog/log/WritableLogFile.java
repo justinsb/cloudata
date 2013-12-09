@@ -60,9 +60,11 @@ public class WritableLogFile extends LogFile {
     public ByteBuffer find(long offset) {
         long position = offset - streamOffset;
 
-        if (position < LogFileHeader.HEADER_SIZE) {
+        if (position < 0) {
             return null;
         }
+
+        position += LogFileHeader.HEADER_SIZE;
 
         MappedByteBuffer mmap;
         int writePosition;

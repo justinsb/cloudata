@@ -35,6 +35,12 @@ public class ReadOnlyLogFile extends LogFile {
     public ByteBuffer find(long offset) {
         long position = offset - streamOffset;
 
+        if (position < 0) {
+            return null;
+        }
+
+        position += LogFileHeader.HEADER_SIZE;
+
         if (position >= data.limit()) {
             return null;
         }
@@ -50,7 +56,7 @@ public class ReadOnlyLogFile extends LogFile {
 
     @Override
     public long findSupremum() {
-        return streamOffset + file.length();
+        return streamOffset + file.length() - LogFileHeader.HEADER_SIZE;
     }
 
     @Override
