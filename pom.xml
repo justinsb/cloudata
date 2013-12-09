@@ -12,8 +12,24 @@
 	<modules>
 		<module>cloudata-appendlog</module>
 		<module>cloudata-keyvalue</module>
+		<module>cloudata-shared</module>
 	</modules>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.cloudata</groupId>
+				<artifactId>cloudata-shared</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.11</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>

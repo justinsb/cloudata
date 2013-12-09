@@ -9,7 +9,8 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>cloudata-appendlog</artifactId>
+	<artifactId>cloudata-keyvalue</artifactId>
+
 
 	<dependencies>
 		<dependency>
