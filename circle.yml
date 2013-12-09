@@ -7,6 +7,4 @@ checkout:
 ## Customize test commands
 test:
   pre:
-    - mvn install
-        pwd:
-          barge
+    - cd barge; mvn install
