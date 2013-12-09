@@ -1,5 +1,6 @@
 package com.cloudata.appendlog.web;
 
+import com.cloudata.util.ByteBufferProvider;
 import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 

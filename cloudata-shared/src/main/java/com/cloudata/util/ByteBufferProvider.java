@@ -1,4 +1,4 @@
-package com.cloudata.appendlog.web;
+package com.cloudata.util;
 
 import java.io.IOException;
 import java.io.OutputStream;

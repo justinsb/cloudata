@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.util.Hex;
 import com.google.protobuf.ByteString;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;

@@ -1,4 +1,4 @@
-package com.cloudata.keyvalue;
+package com.cloudata.util;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ByteString.ByteIterator;
