@@ -8,3 +8,4 @@ checkout:
 dependencies:
   pre:
     - cd barge; mvn install
+    - cd cloudata-shared; mvn install
