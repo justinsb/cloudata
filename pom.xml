@@ -10,9 +10,9 @@
 	<packaging>pom</packaging>
 
 	<modules>
+		<module>cloudata-shared</module>
 		<module>cloudata-appendlog</module>
 		<module>cloudata-keyvalue</module>
-		<module>cloudata-shared</module>
 	</modules>
 
 	<dependencyManagement>
