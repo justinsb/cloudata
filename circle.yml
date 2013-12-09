@@ -3,3 +3,8 @@ checkout:
   post:
     - git submodule sync
     - git submodule update --init # use submodules
+
+## Customize test commands
+test:
+  override:
+    - pushd raft; mvn install; popd; mvn test
