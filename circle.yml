@@ -6,5 +6,7 @@ checkout:
 
 ## Customize test commands
 test:
-  override:
-    - pushd raft; mvn install; popd; mvn test
+  pre:
+    - mvn install
+        pwd:
+          barge
