@@ -11,6 +11,7 @@
 
 	<modules>
 		<module>cloudata-appendlog</module>
+		<module>cloudata-keyvalue</module>
 	</modules>
 
 
