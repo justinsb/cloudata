@@ -11,7 +11,27 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.util.Hex;
 import com.google.common.collect.Lists;
+import com.google.common.primitives.Shorts;
 
+/**
+ * LeafPage stores a leaf of a btree
+ * 
+ * The data format looks like this:
+ * 
+ * short: # of entries
+ * 
+ * (short short)*: start position of key and start position of value
+ * 
+ * (short short): end position of last key and value
+ * 
+ * key data
+ * 
+ * value data
+ * 
+ * 
+ * There is a special case format when the # of entries is 1. Then instead of storing the (short short) with the end
+ * positions, we instead store an (int) with the length of the value. This allows for values > 32KB.
+ */
 public class LeafPage extends Page {
     private static final Logger log = LoggerFactory.getLogger(LeafPage.class);
 
@@ -215,6 +235,7 @@ public class LeafPage extends Page {
         }
 
         public int getSerializedSize() {
+            // Notice that the alternate format still has the same header size :-)
             int n = entries.size();
             return 2 + (INDEX_ENTRY_SIZE * (n + 1)) + totalKeySize + totalValueSize;
         }
@@ -225,8 +246,8 @@ public class LeafPage extends Page {
             int n = entries.size();
             buffer.putShort((short) n);
 
-            short keyStart = (short) (2 + (INDEX_ENTRY_SIZE * (n + 1)));
-            short valueStart = (short) (keyStart + totalKeySize);
+            short keyStart = Shorts.checkedCast(2 + (INDEX_ENTRY_SIZE * (n + 1)));
+            short valueStart = Shorts.checkedCast(keyStart + totalKeySize);
 
             for (int i = 0; i < n; i++) {
                 buffer.putShort(keyStart);
@@ -237,10 +258,16 @@ public class LeafPage extends Page {
                 valueStart += entry.value.remaining();
             }
 
-            // Write a dummy tail entry so we know the total sizes
-            // TODO: We can't do this if we want to use this for overflow values (>64KB)
-            buffer.putShort(keyStart);
-            buffer.putShort(valueStart);
+            if (n == 1) {
+                // Special case: we write the value length to allow huge values
+                assert totalValueSize == entries.get(0).value.remaining();
+                buffer.putInt(totalValueSize);
+            } else {
+                // Write a dummy tail entry so we know the total sizes
+                // TODO: We can't do this if we want to use this for overflow values (>64KB)
+                buffer.putShort(keyStart);
+                buffer.putShort(valueStart);
+            }
 
             for (int i = 0; i < n; i++) {
                 Entry entry = entries.get(i);
@@ -392,11 +419,23 @@ public class LeafPage extends Page {
     private ByteBuffer getKey(int i) {
         assert mutable == null;
 
-        ByteBuffer ret = buffer.duplicate();
-        int offset = 2 + (i * INDEX_ENTRY_SIZE);
-        int start = ret.getShort(offset);
-        int end = ret.getShort(offset + INDEX_ENTRY_SIZE);
+        int n = getEntryCount();
 
+        assert 0 <= i && i < n;
+
+        ByteBuffer ret = buffer.duplicate();
+        int start;
+        int end;
+        if (n == 1) {
+            // Alternate format: the first key ends where the first value begins
+            // TODO: Should we instead have a 'blob' page? Could mean less copying around of data..
+            start = ret.getShort(2);
+            end = ret.getShort(4);
+        } else {
+            int offset = 2 + (i * INDEX_ENTRY_SIZE);
+            start = ret.getShort(offset);
+            end = ret.getShort(offset + INDEX_ENTRY_SIZE);
+        }
         ret.position(start);
         ret.limit(end);
 
@@ -406,11 +445,21 @@ public class LeafPage extends Page {
     private ByteBuffer getValue(int i) {
         assert mutable == null;
 
-        ByteBuffer ret = buffer.duplicate();
-        int offset = 2 + (i * INDEX_ENTRY_SIZE) + 2;
-        int start = ret.getShort(offset);
-        int end = ret.getShort(offset + INDEX_ENTRY_SIZE);
+        int n = getEntryCount();
+        assert 0 <= i && i < n;
 
+        ByteBuffer ret = buffer.duplicate();
+        int start;
+        int end;
+        if (n == 1) {
+            // Alternate format: the value length is a 32 bit int
+            start = ret.getShort(4);
+            end = start + ret.getInt(6);
+        } else {
+            int offset = 2 + (i * INDEX_ENTRY_SIZE) + 2;
+            start = ret.getShort(offset);
+            end = ret.getShort(offset + INDEX_ENTRY_SIZE);
+        }
         ret.position(start);
         ret.limit(end);
 

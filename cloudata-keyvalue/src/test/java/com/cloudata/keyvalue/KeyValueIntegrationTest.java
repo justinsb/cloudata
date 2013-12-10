@@ -92,11 +92,12 @@ public class KeyValueIntegrationTest {
             byte[] expected = buildValue(i);
             Assert.assertArrayEquals(expected, data);
         }
-
     }
 
     @Test
     public void testPageSplit() throws Exception {
+        // We set values that are too big for one page (32KB currently),
+        // but aren't individually bigger than a page
         String url = SERVERS[0].getHttpUrl();
 
         long logId = newLogId();
@@ -121,7 +122,35 @@ public class KeyValueIntegrationTest {
             byte[] expected = buildValue(i * 1000);
             Assert.assertArrayEquals(expected, data);
         }
+    }
 
+    @Test
+    public void testHugeValues() throws Exception {
+        // We set values that are too big for a short
+        String url = SERVERS[0].getHttpUrl();
+
+        long logId = newLogId();
+
+        KeyValueClient client = new KeyValueClient(url);
+
+        int n = 30;
+
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] data = buildValue(i * 10000);
+            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+        }
+
+        // TODO: Remove the need for a sleep... wait for commit
+        Thread.sleep(1000);
+
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
+            byte[] data = entry.getValue().toByteArray();
+            byte[] expected = buildValue(i * 10000);
+            Assert.assertArrayEquals(expected, data);
+        }
     }
 
     @Test
