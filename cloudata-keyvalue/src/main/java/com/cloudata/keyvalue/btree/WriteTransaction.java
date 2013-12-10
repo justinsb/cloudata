@@ -1,6 +1,7 @@
 package com.cloudata.keyvalue.btree;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -13,8 +14,8 @@ import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 
-public class ReadWriteTransaction extends Transaction {
-    private static final Logger log = LoggerFactory.getLogger(ReadWriteTransaction.class);
+public class WriteTransaction extends Transaction {
+    private static final Logger log = LoggerFactory.getLogger(WriteTransaction.class);
 
     final Map<Integer, TrackedPage> trackedPages = Maps.newHashMap();
 
@@ -22,7 +23,7 @@ public class ReadWriteTransaction extends Transaction {
 
     static class TrackedPage {
         final Page page;
-        final TrackedPage parent;
+        TrackedPage parent;
         final int originalPageNumber;
 
         int dirtyCount;
@@ -31,10 +32,14 @@ public class ReadWriteTransaction extends Transaction {
             this.page = page;
             this.parent = parent;
             this.originalPageNumber = originalPageNumber;
+
+            if (parent != null) {
+                parent.dirtyCount++;
+            }
         }
     }
 
-    public ReadWriteTransaction(PageStore pageStore, Lock lock, int rootPageId) {
+    public WriteTransaction(PageStore pageStore, Lock lock, int rootPageId) {
         super(pageStore, lock);
         this.rootPageId = rootPageId;
     }
@@ -46,6 +51,9 @@ public class ReadWriteTransaction extends Transaction {
             TrackedPage trackedParent = null;
             if (parent != null) {
                 trackedParent = trackedPages.get(parent.getPageNumber());
+                if (trackedParent == null) {
+                    throw new IllegalStateException();
+                }
             }
             Page page = pageStore.fetchPage(parent, pageNumber);
             trackedPage = new TrackedPage(page, trackedParent, pageNumber);
@@ -71,12 +79,54 @@ public class ReadWriteTransaction extends Transaction {
             return;
         }
 
-        int newRootPage = -1;
+        Integer newRootPage = null;
 
         while (!ready.isEmpty()) {
             TrackedPage trackedPage = ready.remove();
 
             Page page = trackedPage.page;
+
+            if (page.isDirty()) {
+                int oldPageNumber = trackedPage.page.getPageNumber();
+
+                if (page.shouldSplit()) {
+                    BranchPage parentPage;
+                    if (trackedPage.parent != null) {
+                        parentPage = (BranchPage) trackedPage.parent.page;
+                    } else {
+                        int branchPageNumber = assignPageNumber();
+
+                        parentPage = BranchPage.createNew(null, branchPageNumber, page);
+
+                        trackedPage.parent = new TrackedPage(parentPage, null, branchPageNumber);
+                        trackedPage.parent.dirtyCount++;
+                    }
+
+                    List<Page> extraPages = parentPage.splitChild(this, oldPageNumber, page);
+
+                    for (Page extraPage : extraPages) {
+                        TrackedPage tracked = new TrackedPage(extraPage, trackedPage.parent, extraPage.getPageNumber());
+                        ready.add(tracked);
+                    }
+                }
+
+                int newPageNumber = pageStore.writePage(page);
+                // page.changePageNumber(newPageNumber);
+
+                log.info("Wrote page @{} {}", newPageNumber, page);
+
+                if (trackedPage.parent != null) {
+                    BranchPage parentPage = (BranchPage) trackedPage.parent.page;
+
+                    parentPage.renumberChild(oldPageNumber, newPageNumber);
+                } else {
+                    // No parent => this must be the root page
+                    assert newRootPage == null;
+                    assert page.getParent() == null;
+
+                    newRootPage = newPageNumber;
+                }
+            }
 
             if (trackedPage.parent != null) {
                 trackedPage.parent.dirtyCount--;
@@ -85,38 +135,12 @@ public class ReadWriteTransaction extends Transaction {
                     ready.add(trackedPage.parent);
                 }
             }
-
-            if (!page.isDirty()) {
-                continue;
-            }
-
-            int pageNumber = trackedPage.page.getPageNumber();
-
-            int newPageNumber = pageStore.writePage(page);
-            // page.changePageNumber(newPageNumber);
-
-            log.info("Wrote page @{} {}", newPageNumber, page);
-
-            if (trackedPage.parent != null) {
-                BranchPage parentPage = (BranchPage) trackedPage.parent.page;
-
-                parentPage.renumberChild(pageNumber, newPageNumber);
-            } else {
-                // No parent => this must be the root page
-                newRootPage = newPageNumber;
-            }
         }
 
-        assert newRootPage != -1;
+        assert newRootPage != null;
 
-        TransactionPage transactionPage;
         long transactionId = pageStore.assignTransactionId();
-        {
-            createdPageCount++;
-            int pageNumber = -createdPageCount;
-
-            transactionPage = TransactionPage.createNew(pageNumber, transactionId);
-        }
+        TransactionPage transactionPage = TransactionPage.createNew(assignPageNumber(), transactionId);
         transactionPage.setRootPageId(newRootPage);
 
         pageStore.commitTransaction(transactionPage);
@@ -128,6 +152,10 @@ public class ReadWriteTransaction extends Transaction {
 
     int createdPageCount;
 
+    public int assignPageNumber() {
+        return -(++createdPageCount);
+    }
+
     private void createPage(Page parent, int pageNumber, Page newPage) {
         assert pageNumber == newPage.getPageNumber();
         assert !trackedPages.containsKey(pageNumber);
@@ -135,6 +163,9 @@ public class ReadWriteTransaction extends Transaction {
         TrackedPage trackedParent = null;
         if (parent != null) {
             trackedParent = trackedPages.get(parent.getPageNumber());
+            if (trackedParent == null) {
+                throw new IllegalStateException();
+            }
         }
 
         TrackedPage trackedPage = new TrackedPage(newPage, trackedParent, pageNumber);
@@ -147,8 +178,7 @@ public class ReadWriteTransaction extends Transaction {
             if (!create) {
                 return null;
             }
-            createdPageCount++;
-            int pageNumber = -createdPageCount;
+            int pageNumber = assignPageNumber();
 
             LeafPage newPage = LeafPage.createNew(null, pageNumber, btree.isUniqueKeys());
             createPage(null, pageNumber, newPage);

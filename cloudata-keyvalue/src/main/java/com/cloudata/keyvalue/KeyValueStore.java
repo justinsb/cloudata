@@ -13,7 +13,7 @@ import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.MmapPageStore;
 import com.cloudata.keyvalue.btree.PageStore;
 import com.cloudata.keyvalue.btree.ReadOnlyTransaction;
-import com.cloudata.keyvalue.btree.ReadWriteTransaction;
+import com.cloudata.keyvalue.btree.WriteTransaction;
 
 public class KeyValueStore {
 
@@ -31,7 +31,7 @@ public class KeyValueStore {
     }
 
     public void doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
-        try (ReadWriteTransaction txn = btree.beginReadWrite()) {
+        try (WriteTransaction txn = btree.beginReadWrite()) {
             txn.doAction(btree, action, key, value);
             txn.commit();
         }

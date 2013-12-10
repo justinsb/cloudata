@@ -19,9 +19,9 @@ public class Btree {
         this.uniqueKeys = uniqueKeys;
     }
 
-    public ReadWriteTransaction beginReadWrite() {
+    public WriteTransaction beginReadWrite() {
         writeLock.lock();
-        ReadWriteTransaction txn = pageStore.beginReadWriteTransaction(writeLock);
+        WriteTransaction txn = pageStore.beginReadWriteTransaction(writeLock);
         return txn;
     }
 

@@ -67,7 +67,7 @@ public class KeyValueIntegrationTest {
     }
 
     @Test
-    public void simpleTest() throws Exception {
+    public void testSetAndGet() throws Exception {
         String url = SERVERS[0].getHttpUrl();
 
         long logId = newLogId();
@@ -90,6 +90,35 @@ public class KeyValueIntegrationTest {
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
             byte[] expected = buildValue(i);
+            Assert.assertArrayEquals(expected, data);
+        }
+
+    }
+
+    @Test
+    public void testPageSplit() throws Exception {
+        String url = SERVERS[0].getHttpUrl();
+
+        long logId = newLogId();
+
+        KeyValueClient client = new KeyValueClient(url);
+
+        int n = 30;
+
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] data = buildValue(i * 1000);
+            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+        }
+
+        // TODO: Remove the need for a sleep... wait for commit
+        Thread.sleep(1000);
+
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
+            byte[] data = entry.getValue().toByteArray();
+            byte[] expected = buildValue(i * 1000);
             Assert.assertArrayEquals(expected, data);
         }
 

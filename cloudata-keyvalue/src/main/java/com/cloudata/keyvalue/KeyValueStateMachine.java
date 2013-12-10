@@ -50,7 +50,7 @@ public class KeyValueStateMachine implements StateMachine {
         KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
                 .setAction(KvAction.SET).setValue(ByteString.copyFrom(value)).build();
 
-        log.debug("Proposing operation {}", entry);
+        log.debug("Proposing operation {}", entry.getAction());
 
         return raft.commit(entry.toByteArray());
     }
@@ -68,7 +68,7 @@ public class KeyValueStateMachine implements StateMachine {
         // (we need idempotency)
         try {
             KvEntry entry = KvEntry.parseFrom(ByteString.copyFrom(op));
-            log.debug("Committing operation {}", entry);
+            log.debug("Committing operation {}", entry.getAction());
 
             long storeId = entry.getStoreId();
 

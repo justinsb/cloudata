@@ -44,10 +44,10 @@ public abstract class PageStore {
         }
     }
 
-    public ReadWriteTransaction beginReadWriteTransaction(Lock writeLock) {
+    public WriteTransaction beginReadWriteTransaction(Lock writeLock) {
         synchronized (this) {
             log.info("Starting new read-write transaction with root page: {}", currentRootPage);
-            return new ReadWriteTransaction(this, writeLock, currentRootPage);
+            return new WriteTransaction(this, writeLock, currentRootPage);
         }
     }
 }

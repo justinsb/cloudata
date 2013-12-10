@@ -92,8 +92,10 @@ public class MmapPageStore extends PageStore {
 
         log.info("Fetched page {}: {}", pageNumber, page);
 
-        // page.dump(System.out);
-        // System.out.flush();
+        synchronized (System.out) {
+            page.dump(System.out);
+            System.out.flush();
+        }
 
         return page;
     }

@@ -1,7 +1,9 @@
 package com.cloudata.keyvalue.btree;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 
@@ -42,4 +44,14 @@ public abstract class Page {
 
     public abstract void dump(PrintStream os);
 
+    public abstract List<Page> split(WriteTransaction txn);
+
+    public abstract boolean shouldSplit();
+
+    public String dump() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream ps = new PrintStream(baos);
+        dump(ps);
+        return new String(baos.toByteArray());
+    }
 }

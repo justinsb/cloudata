@@ -2,6 +2,7 @@ package com.cloudata.keyvalue.btree;
 
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 
@@ -102,6 +103,16 @@ public class TransactionPage extends Page {
     public void setPreviousTransactionPage(int previousTransactionPage) {
         this.previousTransactionPage = previousTransactionPage;
         this.dirty = true;
+    }
+
+    @Override
+    public List<Page> split(WriteTransaction txn) {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean shouldSplit() {
+        return false;
     }
 
 }

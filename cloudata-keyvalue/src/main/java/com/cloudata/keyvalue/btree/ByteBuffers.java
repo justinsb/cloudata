@@ -4,19 +4,6 @@ import java.nio.ByteBuffer;
 
 public class ByteBuffers {
 
-    public static String toHex(ByteBuffer b) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = b.position(); i < b.limit(); i++) {
-            int v = b.get(i) & 0xff;
-            String s = Integer.toHexString(v);
-            if (s.length() == 1) {
-                sb.append('0');
-            }
-            sb.append(s);
-        }
-        return sb.toString();
-    }
-
     public static int compare(ByteBuffer l, ByteBuffer r) {
         int n = Math.min(l.remaining(), r.remaining());
 
