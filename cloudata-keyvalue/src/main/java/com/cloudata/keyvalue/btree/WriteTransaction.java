@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 
@@ -63,6 +65,8 @@ public class WriteTransaction extends Transaction {
     }
 
     public void commit() {
+        List<Integer> freed = Lists.newArrayList();
+
         Queue<TrackedPage> ready = Queues.newArrayDeque();
 
         for (Entry<Integer, TrackedPage> entry : trackedPages.entrySet()) {
@@ -126,6 +130,10 @@ public class WriteTransaction extends Transaction {
 
                     newRootPage = newPageNumber;
                 }
+
+                if (oldPageNumber > 0) {
+                    freed.add(oldPageNumber);
+                }
             }
 
             if (trackedPage.parent != null) {
@@ -142,6 +150,9 @@ public class WriteTransaction extends Transaction {
         long transactionId = pageStore.assignTransactionId();
         TransactionPage transactionPage = TransactionPage.createNew(assignPageNumber(), transactionId);
         transactionPage.setRootPageId(newRootPage);
+        transactionPage.addToFreelist(freed);
+
+        log.info("Freed pages: {}", Joiner.on(",").join(freed));
 
         pageStore.commitTransaction(transactionPage);
     }

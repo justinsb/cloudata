@@ -147,13 +147,13 @@ public class MmapPageStore extends PageStore {
     public void commitTransaction(TransactionPage transactionPage) {
         // Shouldn't need to be synchronized, but harmless...
         synchronized (this) {
-            transactionPage.setPreviousTransactionPage(currentTransactionPage);
+            transactionPage.setPreviousTransactionPageId(currentTransactionPage);
 
             long transactionId = transactionPage.getTransactionId();
 
             int transactionPageId = writePage(transactionPage);
 
-            int newRootPage = transactionPage.getRootPage();
+            int newRootPage = transactionPage.getRootPageId();
 
             int slot = transactionPageId % MASTERPAGE_SLOTS;
 
