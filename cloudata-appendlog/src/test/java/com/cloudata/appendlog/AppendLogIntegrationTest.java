@@ -40,6 +40,8 @@ public class AppendLogIntegrationTest {
 
             SERVERS[i].start();
         }
+
+        Thread.sleep(2000);
     }
 
     @AfterClass
