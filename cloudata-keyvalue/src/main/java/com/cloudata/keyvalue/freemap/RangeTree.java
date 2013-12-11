@@ -52,7 +52,7 @@ public class RangeTree {
     private static final int HEADER_SIZE = 8;
 
     final TreeSet<Range> tree;
-    final AllocationStrategy allocationStrategy = new FirstFitAllocationStrategy();
+    final AllocationStrategy allocationStrategy = new FirstFitAllocationStrategy(false);
 
     public RangeTree() {
         this.tree = Sets.newTreeSet(OverlapComparator.INSTANCE);
@@ -155,6 +155,12 @@ public class RangeTree {
     class FirstFitAllocationStrategy extends AllocationStrategy {
         int cursor;
 
+        final boolean rotate;
+
+        public FirstFitAllocationStrategy(boolean rotate) {
+            this.rotate = rotate;
+        }
+
         @Override
         int allocate(int size) {
             return allocate(cursor, size);
@@ -163,7 +169,12 @@ public class RangeTree {
         private int allocate(int start, int size) {
             Range probe = new Range(start, start + size);
 
-            NavigableSet<Range> next = tree.tailSet(probe, true);
+            NavigableSet<Range> next;
+            if (rotate) {
+                next = tree.tailSet(probe, true);
+            } else {
+                next = tree;
+            }
             Iterator<Range> it = next.iterator();
             while (it.hasNext()) {
                 Range range = it.next();
@@ -174,11 +185,15 @@ public class RangeTree {
                 }
             }
 
-            if (start == 0) {
+            if (rotate) {
+                if (start == 0) {
+                    return -1;
+                }
+                cursor = 0;
+                return allocate(0, size);
+            } else {
                 return -1;
             }
-            cursor = 0;
-            return allocate(0, size);
         }
     }
 
