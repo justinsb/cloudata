@@ -46,7 +46,7 @@ public class KeyValueStateMachine implements StateMachine {
     // return logFileSet.readLog(logId, begin, max);
     // }
 
-    public boolean put(long storeId, byte[] key, byte[] value) throws InterruptedException, RaftException {
+    public Object put(long storeId, byte[] key, byte[] value) throws InterruptedException, RaftException {
         KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
                 .setAction(KvAction.SET).setValue(ByteString.copyFrom(value)).build();
 
@@ -55,7 +55,7 @@ public class KeyValueStateMachine implements StateMachine {
         return raft.commit(entry.toByteArray());
     }
 
-    public boolean delete(long storeId, byte[] key) throws RaftException, InterruptedException {
+    public Object delete(long storeId, byte[] key) throws RaftException, InterruptedException {
         KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
                 .setAction(KvAction.DELETE).build();
 
@@ -63,7 +63,7 @@ public class KeyValueStateMachine implements StateMachine {
     }
 
     @Override
-    public void applyOperation(@Nonnull ByteBuffer op) {
+    public Object applyOperation(@Nonnull ByteBuffer op) {
         // TODO: We need to prevent repetition during replay
         // (we need idempotency)
         try {
@@ -79,6 +79,8 @@ public class KeyValueStateMachine implements StateMachine {
 
             keyValueStore.doAction(entry.getAction(), key != null ? key.asReadOnlyByteBuffer() : null,
                     value != null ? value.asReadOnlyByteBuffer() : null);
+
+            return null;
         } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing operation", e);
             throw new IllegalArgumentException("Error deserializing key value operation", e);

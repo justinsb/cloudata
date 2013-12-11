@@ -41,7 +41,7 @@ public class KeyValueIntegrationTest {
             SERVERS[i].start();
         }
 
-        // TODO: Remove the need for a sleep
+        // TODO: Remove the need for a sleep here
         Thread.sleep(1000);
     }
 
@@ -82,15 +82,36 @@ public class KeyValueIntegrationTest {
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
-        // TODO: Remove the need for a sleep... wait for commit
-        Thread.sleep(1000);
-
         for (int i = 1; i < n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
             byte[] expected = buildValue(i);
             Assert.assertArrayEquals(expected, data);
+        }
+    }
+
+    @Test
+    public void testReadYourWrites() throws Exception {
+        String url = SERVERS[0].getHttpUrl();
+
+        long logId = newLogId();
+
+        KeyValueClient client = new KeyValueClient(url);
+
+        int n = 20;
+
+        for (int i = 1; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] data = buildValue(i);
+            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+
+            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
+            Assert.assertNotNull(entry);
+
+            byte[] actual = entry.getValue().toByteArray();
+            byte[] expected = buildValue(i);
+            Assert.assertArrayEquals(expected, actual);
         }
     }
 
@@ -111,9 +132,6 @@ public class KeyValueIntegrationTest {
             byte[] data = buildValue(i * 1000);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
-
-        // TODO: Remove the need for a sleep... wait for commit
-        Thread.sleep(1000);
 
         for (int i = 1; i < n; i++) {
             byte[] key = Integer.toString(i).getBytes();
@@ -140,9 +158,6 @@ public class KeyValueIntegrationTest {
             byte[] data = buildValue(i * 10000);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
-
-        // TODO: Remove the need for a sleep... wait for commit
-        Thread.sleep(1000);
 
         for (int i = 1; i < n; i++) {
             byte[] key = Integer.toString(i).getBytes();
@@ -228,8 +243,6 @@ public class KeyValueIntegrationTest {
                 client.delete(logId, ByteString.copyFrom(key));
             }
         }
-
-        Thread.sleep(5000);
 
         // Check
         for (int i = 1; i < n; i++) {

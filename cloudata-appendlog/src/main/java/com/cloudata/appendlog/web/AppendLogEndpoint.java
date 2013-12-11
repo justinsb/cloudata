@@ -63,9 +63,7 @@ public class AppendLogEndpoint {
         try {
             byte[] v = ByteStreams.toByteArray(value);
 
-            if (!database.appendToLog(logId, v)) {
-                return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
-            }
+            database.appendToLog(logId, v);
 
             return Response.ok().build();
         } catch (InterruptedException e) {

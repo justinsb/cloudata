@@ -56,9 +56,7 @@ public class KeyValueEndpoint {
             byte[] k = BaseEncoding.base16().decode(key);
             byte[] v = ByteStreams.toByteArray(value);
 
-            if (!stateMachine.put(storeId, k, v)) {
-                return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
-            }
+            stateMachine.put(storeId, k, v);
 
             return Response.ok().build();
         } catch (InterruptedException e) {
@@ -82,9 +80,7 @@ public class KeyValueEndpoint {
         try {
             byte[] k = BaseEncoding.base16().decode(key);
 
-            if (!stateMachine.delete(storeId, k)) {
-                return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
-            }
+            stateMachine.delete(storeId, k);
 
             return Response.noContent().build();
         } catch (InterruptedException e) {

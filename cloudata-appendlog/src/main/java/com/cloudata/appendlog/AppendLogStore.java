@@ -48,7 +48,7 @@ public class AppendLogStore implements StateMachine {
         return logFileSet.readLog(logId, begin, max);
     }
 
-    public boolean appendToLog(long logId, byte[] value) throws InterruptedException, RaftException {
+    public Object appendToLog(long logId, byte[] value) throws InterruptedException, RaftException {
         ByteBuffer buffer = ByteBuffer.wrap(value);
 
         LogEntry entry = LogEntry.newBuilder().setLogId(logId).setValue(ByteString.copyFrom(buffer)).build();
@@ -59,7 +59,7 @@ public class AppendLogStore implements StateMachine {
     }
 
     @Override
-    public void applyOperation(@Nonnull ByteBuffer op) {
+    public Object applyOperation(@Nonnull ByteBuffer op) {
         // TODO: We need to prevent repetition during replay
         // (we need idempotency)
         try {
@@ -71,6 +71,8 @@ public class AppendLogStore implements StateMachine {
 
             LogFileSet logFileSet = getLogFileSet(logId);
             logFileSet.append(value.asReadOnlyByteBuffer());
+
+            return null;
         } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing operation", e);
             throw new IllegalArgumentException("Error deserializing log entry", e);
