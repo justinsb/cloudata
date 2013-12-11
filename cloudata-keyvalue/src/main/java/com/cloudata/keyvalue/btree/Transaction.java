@@ -43,7 +43,6 @@ public abstract class Transaction implements AutoCloseable {
             if (lock != null && !releasedLock) {
                 lock.unlock();
                 releasedLock = true;
-
             }
         }
     }

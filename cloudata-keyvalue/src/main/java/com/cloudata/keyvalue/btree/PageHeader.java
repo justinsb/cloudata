@@ -49,4 +49,9 @@ public class PageHeader {
         dest.putInt(0);
     }
 
+    public int getDataSize() {
+        int length = buffer.getInt(offset + OFFSET_LENGTH);
+        return length;
+    }
+
 }

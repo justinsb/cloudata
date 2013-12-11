@@ -16,7 +16,7 @@ public class ReadOnlyTransaction extends Transaction {
     @Override
     public Page getPage(Page parent, int pageNumber) {
         // TODO: Should we have a small cache?
-        return pageStore.fetchPage(parent, pageNumber);
+        return pageStore.fetchPage(parent, pageNumber).page;
     }
 
     @Override

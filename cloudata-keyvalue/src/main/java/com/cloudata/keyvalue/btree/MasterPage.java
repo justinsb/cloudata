@@ -3,7 +3,6 @@ package com.cloudata.keyvalue.btree;
 import java.nio.ByteBuffer;
 
 public class MasterPage {
-
     public final static int SIZE = 16;
 
     final ByteBuffer buffer;

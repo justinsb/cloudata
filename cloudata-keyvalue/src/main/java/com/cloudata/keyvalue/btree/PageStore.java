@@ -5,6 +5,8 @@ import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.freemap.SpaceMapEntry;
+
 public abstract class PageStore {
 
     private static final Logger log = LoggerFactory.getLogger(PageStore.class);
@@ -12,7 +14,18 @@ public abstract class PageStore {
     protected int currentTransactionPage;
     private int currentRootPage;
 
-    public abstract Page fetchPage(Page parent, int pageNumber);
+    public static class PageRecord {
+        public final Page page;
+        public final SpaceMapEntry space;
+
+        public PageRecord(Page page, SpaceMapEntry space) {
+            this.page = page;
+            this.space = space;
+        }
+
+    }
+
+    public abstract PageRecord fetchPage(Page parent, int pageNumber);
 
     /**
      * Writes the page to the PageStore (disk, usually)
@@ -20,7 +33,7 @@ public abstract class PageStore {
      * @param page
      * @return the new page number
      */
-    public abstract int writePage(Page page);
+    public abstract SpaceMapEntry writePage(Page page);
 
     public abstract void commitTransaction(TransactionPage transaction);
 

@@ -4,11 +4,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
+import java.util.Collections;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.freemap.FreeSpaceMap;
+import com.cloudata.keyvalue.freemap.SpaceMapEntry;
 import com.cloudata.util.Mmap;
+import com.google.common.collect.Lists;
 
 public class MmapPageStore extends PageStore {
 
@@ -17,6 +22,10 @@ public class MmapPageStore extends PageStore {
     final MappedByteBuffer buffer;
 
     final boolean uniqueKeys;
+
+    final FreeSpaceMap freeSpaceMap;
+
+    private int freeSpaceSnapshotTransactionCount;
 
     private static final int ALIGNMENT = 256;
 
@@ -29,7 +38,6 @@ public class MmapPageStore extends PageStore {
         this.uniqueKeys = uniqueKeys;
 
         MasterPage latest = null;
-
         for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
             int position = i * MasterPage.SIZE;
             MasterPage metadataPage = new MasterPage(buffer, position);
@@ -43,7 +51,51 @@ public class MmapPageStore extends PageStore {
         this.nextTransactionId = latest.getTransactionId() + 1;
         setCurrent(latest.getRoot(), latest.getTransactionPageId());
 
+        this.freeSpaceMap = recoverFreeSpaceMap(latest);
+
         this.buffer.position(HEADER_SIZE);
+    }
+
+    private FreeSpaceMap recoverFreeSpaceMap(MasterPage latest) {
+        int transactionPageId = latest.getTransactionPageId();
+        List<TransactionPage> history = Lists.newArrayList();
+        FreeSpaceMap.SnapshotPage fsmSnapshot = null;
+
+        if (transactionPageId != 0) {
+            TransactionPage transactionPage = (TransactionPage) fetchPage(null, transactionPageId).page;
+
+            TransactionPage current = transactionPage;
+
+            while (true) {
+                history.add(current);
+                if (current.getFreeSpaceSnapshotId() != 0) {
+                    fsmSnapshot = (FreeSpaceMap.SnapshotPage) fetchPage(null, current.getFreeSpaceSnapshotId()).page;
+                    break;
+                }
+
+                int previousTransactionPageId = current.getPreviousTransactionPageId();
+                if (previousTransactionPageId == 0) {
+                    break;
+                }
+                TransactionPage previousTransaction = (TransactionPage) fetchPage(null, previousTransactionPageId).page;
+                assert (previousTransaction != null);
+            }
+
+            Collections.reverse(history);
+        }
+
+        FreeSpaceMap fsm;
+        if (fsmSnapshot == null) {
+            fsm = FreeSpaceMap.createEmpty(HEADER_SIZE / ALIGNMENT, this.buffer.limit() / ALIGNMENT);
+        } else {
+            fsm = FreeSpaceMap.createFromSnapshot(fsmSnapshot);
+        }
+
+        for (TransactionPage txn : history) {
+            fsm.replay(txn);
+        }
+
+        return fsm;
     }
 
     public static MmapPageStore build(File data, boolean uniqueKeys) throws IOException {
@@ -66,10 +118,22 @@ public class MmapPageStore extends PageStore {
     }
 
     @Override
-    public Page fetchPage(Page parent, int pageNumber) {
+    public PageRecord fetchPage(Page parent, int pageNumber) {
         int offset = pageNumber * ALIGNMENT;
 
         PageHeader header = new PageHeader(buffer, offset);
+
+        SpaceMapEntry space;
+
+        {
+            int dataSize = header.getDataSize();
+            int totalSize = dataSize + PageHeader.HEADER_SIZE;
+            int slots = totalSize / ALIGNMENT;
+            if ((totalSize % ALIGNMENT) != 0) {
+                slots++;
+            }
+            space = new SpaceMapEntry(pageNumber, slots);
+        }
 
         Page page;
 
@@ -97,28 +161,51 @@ public class MmapPageStore extends PageStore {
             System.out.flush();
         }
 
-        return page;
+        return new PageRecord(page, space);
     }
 
     @Override
-    public int writePage(Page page) {
+    public SpaceMapEntry writePage(Page page) {
         int dataSize = page.getSerializedSize();
 
         int totalSize = dataSize + PageHeader.HEADER_SIZE;
 
-        if (totalSize > buffer.remaining()) {
-            // TODO: Reclaim old space
-            // TODO: Incorporate padding into calculation?
-            throw new UnsupportedOperationException();
+        // int padding = totalSize % ALIGNMENT;
+        // if (padding != 0) {
+        // padding = ALIGNMENT - padding;
+        // }
+
+        int position;
+        SpaceMapEntry allocation;
+        {
+            int allocateSlots = totalSize / ALIGNMENT;
+            if ((totalSize % ALIGNMENT) != 0) {
+                allocateSlots++;
+            }
+            int allocated = freeSpaceMap.allocate(allocateSlots);
+            if (allocated < 0) {
+                // TODO: Grow database
+                throw new IllegalStateException();
+            }
+
+            position = allocated * ALIGNMENT;
+            allocation = new SpaceMapEntry(allocated, allocateSlots);
         }
 
-        int position = buffer.position();
+        // if (totalSize > buffer.remaining()) {
+        // // TODO: Reclaim old space
+        // // TODO: Incorporate padding into calculation?
+        // throw new UnsupportedOperationException();
+        // }
+        //
+        // int position = buffer.position();
         assert (position % ALIGNMENT) == 0;
 
         // int newPageNumber = (position + (ALIGNMENT - 1)) / ALIGNMENT;
-        int newPageNumber = position / ALIGNMENT;
+        // int newPageNumber = position / ALIGNMENT;
 
         ByteBuffer writeBuffer = buffer.duplicate();
+        writeBuffer.position(position);
         PageHeader.write(writeBuffer, page.getPageType(), dataSize);
 
         writeBuffer.limit(writeBuffer.position() + dataSize);
@@ -133,14 +220,10 @@ public class MmapPageStore extends PageStore {
             throw new IllegalStateException();
         }
 
-        int padding = totalSize % ALIGNMENT;
-        if (padding != 0) {
-            padding = ALIGNMENT - padding;
-        }
-        buffer.position(buffer.position() + totalSize + padding);
-        assert (buffer.position() % ALIGNMENT) == 0;
+        // buffer.position(buffer.position() + totalSize + padding);
+        // assert (buffer.position() % ALIGNMENT) == 0;
 
-        return newPageNumber;
+        return allocation;
     }
 
     @Override
@@ -149,24 +232,32 @@ public class MmapPageStore extends PageStore {
         synchronized (this) {
             transactionPage.setPreviousTransactionPageId(currentTransactionPage);
 
+            if (freeSpaceSnapshotTransactionCount > 64) {
+                SpaceMapEntry fsmPageId = freeSpaceMap.writeSnapshot(this);
+                transactionPage.setFreeSpaceSnapshotId(fsmPageId.getPageId());
+                freeSpaceSnapshotTransactionCount = 0;
+            } else {
+                freeSpaceSnapshotTransactionCount++;
+            }
+
             long transactionId = transactionPage.getTransactionId();
 
-            int transactionPageId = writePage(transactionPage);
+            SpaceMapEntry transactionPageId = writePage(transactionPage);
 
             int newRootPage = transactionPage.getRootPageId();
 
-            int slot = transactionPageId % MASTERPAGE_SLOTS;
+            int slot = (int) (transactionId % MASTERPAGE_SLOTS);
 
             int position = slot * MasterPage.SIZE;
 
             ByteBuffer mmap = this.buffer.duplicate();
             mmap.position(position);
 
-            MasterPage.create(mmap, newRootPage, transactionPageId, transactionId);
+            MasterPage.create(mmap, newRootPage, transactionPageId.getPageId(), transactionId);
 
             log.info("Committing transaction {}.  New root={}", transactionId, newRootPage);
 
-            setCurrent(newRootPage, transactionPageId);
+            setCurrent(newRootPage, transactionPageId.getPageId());
         }
     }
 
