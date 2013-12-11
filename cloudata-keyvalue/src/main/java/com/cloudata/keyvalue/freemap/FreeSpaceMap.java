@@ -21,7 +21,7 @@ public class FreeSpaceMap {
 
     private FreeSpaceMap(int start, int end) {
         this.freeRanges = new RangeTree();
-        this.freeRanges.add(start, end - start);
+        this.freeRanges.release(start, end - start);
     }
 
     private FreeSpaceMap(SnapshotPage snapshot) {
@@ -35,18 +35,18 @@ public class FreeSpaceMap {
             int start = txn.getFreedStart(i);
             int size = txn.getFreedLength(i);
 
-            freeRanges.add(start, size);
+            freeRanges.release(start, size);
         }
 
         for (int i = 0; i < txn.getAllocatedCount(); i++) {
             int start = txn.getAllocatedStart(i);
             int size = txn.getAllocatedLength(i);
 
-            freeRanges.remove(start, size);
+            freeRanges.replayAllocate(start, size);
         }
 
         // The free space map can't include the transaction itself
-        freeRanges.remove(txnRecord.space.start, txnRecord.space.length);
+        freeRanges.replayAllocate(txnRecord.space.start, txnRecord.space.length);
     }
 
     public static FreeSpaceMap createEmpty(int start, int end) {
@@ -60,6 +60,20 @@ public class FreeSpaceMap {
         // fsm.freeRanges.remove(snapshotRecord.space.start, snapshotRecord.space.length);
 
         return fsm;
+    }
+
+    public SpaceMapEntry writeSnapshot(PageStore pageStore) {
+        ByteBuffer empty = ByteBuffer.allocate(0);
+        SnapshotPage page = new SnapshotPage(null, Integer.MIN_VALUE, empty);
+        return pageStore.writePage(page);
+    }
+
+    public int allocate(int size) {
+        return this.freeRanges.allocate(size);
+    }
+
+    public void reclaimAll(List<SpaceMapEntry> entries) {
+        freeRanges.releaseAll(entries);
     }
 
     // public void reclaimSpace(TransactionPage t) {
@@ -157,16 +171,6 @@ public class FreeSpaceMap {
         public boolean shouldSplit() {
             return false;
         }
-    }
-
-    public SpaceMapEntry writeSnapshot(PageStore pageStore) {
-        ByteBuffer empty = ByteBuffer.allocate(0);
-        SnapshotPage page = new SnapshotPage(null, Integer.MIN_VALUE, empty);
-        return pageStore.writePage(page);
-    }
-
-    public int allocate(int size) {
-        return this.freeRanges.allocate(size);
     }
 
 }

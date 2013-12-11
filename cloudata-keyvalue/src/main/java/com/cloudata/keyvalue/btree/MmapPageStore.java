@@ -25,7 +25,7 @@ public class MmapPageStore extends PageStore {
 
     final FreeSpaceMap freeSpaceMap;
 
-    private int freeSpaceSnapshotTransactionCount;
+    final List<SpaceMapEntry> deferredReclaim;
 
     private static final int ALIGNMENT = 256;
 
@@ -36,6 +36,7 @@ public class MmapPageStore extends PageStore {
     private MmapPageStore(MappedByteBuffer buffer, boolean uniqueKeys) {
         this.buffer = buffer;
         this.uniqueKeys = uniqueKeys;
+        this.deferredReclaim = Lists.newArrayList();
 
         MasterPage latest = null;
         for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
@@ -49,7 +50,7 @@ public class MmapPageStore extends PageStore {
         }
 
         this.nextTransactionId = latest.getTransactionId() + 1;
-        setCurrent(latest.getRoot(), latest.getTransactionPageId());
+        setCurrent(latest.getRoot(), latest.getTransactionId(), latest.getTransactionPageId());
 
         this.freeSpaceMap = recoverFreeSpaceMap(latest);
 
@@ -61,6 +62,7 @@ public class MmapPageStore extends PageStore {
         List<PageRecord> history = Lists.newArrayList();
         PageRecord fsmSnapshot = null;
 
+        // Walk the list of transactions backwards until we find a FSM snapshot
         if (transactionPageId != 0) {
             PageRecord current = fetchPage(null, transactionPageId);
 
@@ -227,17 +229,18 @@ public class MmapPageStore extends PageStore {
     }
 
     @Override
-    public void commitTransaction(TransactionPage transactionPage) {
+    public SpaceMapEntry commitTransaction(TransactionPage transactionPage) {
         // Shouldn't need to be synchronized, but harmless...
         synchronized (this) {
             transactionPage.setPreviousTransactionPageId(currentTransactionPage);
 
-            if (freeSpaceSnapshotTransactionCount > 64) {
+            if (deferredReclaim.size() > 64) {
+                freeSpaceMap.reclaimAll(deferredReclaim);
+
                 SpaceMapEntry fsmPageId = freeSpaceMap.writeSnapshot(this);
                 transactionPage.setFreeSpaceSnapshotId(fsmPageId.getPageId());
-                freeSpaceSnapshotTransactionCount = 0;
-            } else {
-                freeSpaceSnapshotTransactionCount++;
+
+                deferredReclaim.clear();
             }
 
             long transactionId = transactionPage.getTransactionId();
@@ -257,7 +260,18 @@ public class MmapPageStore extends PageStore {
 
             log.info("Committing transaction {}.  New root={}", transactionId, newRootPage);
 
-            setCurrent(newRootPage, transactionPageId.getPageId());
+            setCurrent(newRootPage, transactionId, transactionPageId.getPageId());
+
+            return transactionPageId;
+        }
+    }
+
+    @Override
+    protected void reclaim(WriteTransaction txn, SpaceMapEntry txnSpace) {
+        synchronized (this) {
+            deferredReclaim.addAll(txn.getFreed());
+            // TODO: Any reason not to release the transaction at the same time?
+            deferredReclaim.add(txnSpace);
         }
     }
 

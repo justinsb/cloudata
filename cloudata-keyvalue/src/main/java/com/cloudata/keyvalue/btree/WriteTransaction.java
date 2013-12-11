@@ -23,7 +23,16 @@ public class WriteTransaction extends Transaction {
 
     final Map<Integer, TrackedPage> trackedPages = Maps.newHashMap();
 
+    final List<SpaceMapEntry> freed = Lists.newArrayList();
+    final List<SpaceMapEntry> allocated = Lists.newArrayList();
+
     private int rootPageId;
+
+    private long transactionId;
+
+    public long getTransactionId() {
+        return transactionId;
+    }
 
     static class TrackedPage {
         final Page page;
@@ -69,9 +78,6 @@ public class WriteTransaction extends Transaction {
     }
 
     public void commit() {
-        List<SpaceMapEntry> freed = Lists.newArrayList();
-        List<SpaceMapEntry> allocated = Lists.newArrayList();
-
         Queue<TrackedPage> ready = Queues.newArrayDeque();
 
         for (Entry<Integer, TrackedPage> entry : trackedPages.entrySet()) {
@@ -164,7 +170,9 @@ public class WriteTransaction extends Transaction {
 
         log.info("Freed pages: {}", Joiner.on(",").join(freed));
 
-        pageStore.commitTransaction(transactionPage);
+        this.spaceMapEntry = pageStore.commitTransaction(transactionPage);
+
+        this.transactionId = transactionId;
     }
 
     public void doAction(Btree btree, KvAction action, ByteBuffer key, ByteBuffer value) {
@@ -172,6 +180,8 @@ public class WriteTransaction extends Transaction {
     }
 
     int createdPageCount;
+
+    private SpaceMapEntry spaceMapEntry;
 
     public int assignPageNumber() {
         return -(++createdPageCount);
@@ -209,6 +219,18 @@ public class WriteTransaction extends Transaction {
         }
 
         return getPage(null, rootPageId);
+    }
+
+    public List<SpaceMapEntry> getFreed() {
+        return freed;
+    }
+
+    public SpaceMapEntry getTransactionSpaceMapEntry() {
+        return spaceMapEntry;
+    }
+
+    public List<SpaceMapEntry> getAllocated() {
+        return allocated;
     }
 
 }

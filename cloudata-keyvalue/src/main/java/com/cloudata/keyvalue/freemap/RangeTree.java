@@ -3,6 +3,7 @@ package com.cloudata.keyvalue.freemap;
 import java.nio.ByteBuffer;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
@@ -75,7 +76,21 @@ public class RangeTree {
         }
     }
 
-    void add(int start, int size) {
+    public void releaseAll(List<SpaceMapEntry> entries) {
+        synchronized (tree) {
+            for (SpaceMapEntry freed : entries) {
+                add(freed.start, freed.length);
+            }
+        }
+    }
+
+    public void replayAllocate(int start, int size) {
+        synchronized (tree) {
+            remove(start, size);
+        }
+    }
+
+    private void add(int start, int size) {
         int end = start + size;
         Range probe = new Range(start, end);
 
@@ -105,7 +120,7 @@ public class RangeTree {
         }
     }
 
-    void remove(int start, int size) {
+    private void remove(int start, int size) {
         int end = start + size;
         Range probe = new Range(start, end);
 

@@ -36,6 +36,8 @@ public abstract class Transaction implements AutoCloseable {
     @Override
     public void close() {
         unlock();
+
+        pageStore.finished(this);
     }
 
     protected void unlock() {

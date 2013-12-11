@@ -7,10 +7,12 @@ public class ReadOnlyTransaction extends Transaction {
     private static final Logger log = LoggerFactory.getLogger(ReadOnlyTransaction.class);
 
     final int rootPageId;
+    final long snapshotTransactionId;
 
-    public ReadOnlyTransaction(PageStore pageStore, int rootPageId) {
+    public ReadOnlyTransaction(PageStore pageStore, int rootPageId, long snapshotTransactionId) {
         super(pageStore, null);
         this.rootPageId = rootPageId;
+        this.snapshotTransactionId = snapshotTransactionId;
     }
 
     @Override
@@ -29,5 +31,9 @@ public class ReadOnlyTransaction extends Transaction {
         }
 
         return getPage(null, rootPageId);
+    }
+
+    public long getSnapshotTransactionId() {
+        return snapshotTransactionId;
     }
 }
