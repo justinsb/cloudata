@@ -3,6 +3,7 @@ package com.cloudata.keyvalue;
 import java.io.File;
 import java.util.List;
 
+import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
 
@@ -47,8 +48,8 @@ public class KeyValueServer {
 
         KeyValueStateMachine stateMachine = new KeyValueStateMachine();
 
-        this.raft = RaftService.newBuilder().local(local).members(peers).logDir(logDir).timeout(300)
-                .build(stateMachine);
+        ClusterConfig config = ClusterConfig.from(local, peers);
+        this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(stateMachine);
 
         stateMachine.init(raft, stateDir);
 

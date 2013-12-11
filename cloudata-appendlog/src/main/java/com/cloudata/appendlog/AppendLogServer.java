@@ -3,6 +3,7 @@ package com.cloudata.appendlog;
 import java.io.File;
 import java.util.List;
 
+import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
 
@@ -47,8 +48,8 @@ public class AppendLogServer {
 
         AppendLogStore appendLogStore = new AppendLogStore();
 
-        this.raft = RaftService.newBuilder().local(local).members(peers).logDir(logDir).timeout(300)
-                .build(appendLogStore);
+        ClusterConfig config = ClusterConfig.from(local, peers);
+        this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(appendLogStore);
 
         appendLogStore.init(raft, stateDir);
 
