@@ -58,27 +58,27 @@ public class MmapPageStore extends PageStore {
 
     private FreeSpaceMap recoverFreeSpaceMap(MasterPage latest) {
         int transactionPageId = latest.getTransactionPageId();
-        List<TransactionPage> history = Lists.newArrayList();
-        FreeSpaceMap.SnapshotPage fsmSnapshot = null;
+        List<PageRecord> history = Lists.newArrayList();
+        PageRecord fsmSnapshot = null;
 
         if (transactionPageId != 0) {
-            TransactionPage transactionPage = (TransactionPage) fetchPage(null, transactionPageId).page;
-
-            TransactionPage current = transactionPage;
+            PageRecord current = fetchPage(null, transactionPageId);
 
             while (true) {
+                TransactionPage transactionPage = (TransactionPage) current.page;
                 history.add(current);
-                if (current.getFreeSpaceSnapshotId() != 0) {
-                    fsmSnapshot = (FreeSpaceMap.SnapshotPage) fetchPage(null, current.getFreeSpaceSnapshotId()).page;
+                if (transactionPage.getFreeSpaceSnapshotId() != 0) {
+                    fsmSnapshot = fetchPage(null, transactionPage.getFreeSpaceSnapshotId());
                     break;
                 }
 
-                int previousTransactionPageId = current.getPreviousTransactionPageId();
+                int previousTransactionPageId = transactionPage.getPreviousTransactionPageId();
                 if (previousTransactionPageId == 0) {
                     break;
                 }
-                TransactionPage previousTransaction = (TransactionPage) fetchPage(null, previousTransactionPageId).page;
-                assert (previousTransaction != null);
+                PageRecord previous = fetchPage(null, previousTransactionPageId);
+                assert (previous != null);
+                current = previous;
             }
 
             Collections.reverse(history);
@@ -91,8 +91,8 @@ public class MmapPageStore extends PageStore {
             fsm = FreeSpaceMap.createFromSnapshot(fsmSnapshot);
         }
 
-        for (TransactionPage txn : history) {
-            fsm.replay(txn);
+        for (PageRecord txnRecord : history) {
+            fsm.replay(txnRecord);
         }
 
         return fsm;

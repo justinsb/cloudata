@@ -8,6 +8,7 @@ import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.Page;
 import com.cloudata.keyvalue.btree.PageStore;
+import com.cloudata.keyvalue.btree.PageStore.PageRecord;
 import com.cloudata.keyvalue.btree.Transaction;
 import com.cloudata.keyvalue.btree.TransactionPage;
 import com.cloudata.keyvalue.btree.WriteTransaction;
@@ -27,7 +28,9 @@ public class FreeSpaceMap {
         this.freeRanges = snapshot.deserialize();
     }
 
-    public void replay(TransactionPage txn) {
+    public void replay(PageRecord txnRecord) {
+        TransactionPage txn = (TransactionPage) txnRecord.page;
+
         for (int i = 0; i < txn.getFreedCount(); i++) {
             int start = txn.getFreedStart(i);
             int size = txn.getFreedLength(i);
@@ -41,14 +44,22 @@ public class FreeSpaceMap {
 
             freeRanges.remove(start, size);
         }
+
+        // The free space map can't include the transaction itself
+        freeRanges.remove(txnRecord.space.start, txnRecord.space.length);
     }
 
     public static FreeSpaceMap createEmpty(int start, int end) {
         return new FreeSpaceMap(start, end);
     }
 
-    public static FreeSpaceMap createFromSnapshot(SnapshotPage snapshot) {
-        return new FreeSpaceMap(snapshot);
+    public static FreeSpaceMap createFromSnapshot(PageRecord snapshotRecord) {
+        FreeSpaceMap fsm = new FreeSpaceMap((SnapshotPage) snapshotRecord.page);
+
+        // Note: The snapshot _does_ include the FSM snapshot page :-)
+        // fsm.freeRanges.remove(snapshotRecord.space.start, snapshotRecord.space.length);
+
+        return fsm;
     }
 
     // public void reclaimSpace(TransactionPage t) {
