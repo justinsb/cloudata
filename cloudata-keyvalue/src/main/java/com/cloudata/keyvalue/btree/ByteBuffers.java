@@ -54,4 +54,29 @@ public class ByteBuffers {
 
         return Integer.compare(il, ir);
     }
+
+    public static long parseLong(ByteBuffer buff) {
+        long v = 0;
+        boolean negative = false;
+        for (int i = buff.position(); i < buff.limit(); i++) {
+            byte b = buff.get(i);
+
+            if (b >= '0' && b <= '9') {
+                v = (v * 10) + (b - '0');
+                continue;
+            } else if (b == '-') {
+                if (i == 0) {
+                    negative = true;
+                    continue;
+                }
+            }
+
+            throw new IllegalArgumentException();
+        }
+
+        if (negative) {
+            v = -v;
+        }
+        return v;
+    }
 }

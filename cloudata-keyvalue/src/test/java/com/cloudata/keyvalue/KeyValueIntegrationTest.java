@@ -92,6 +92,26 @@ public class KeyValueIntegrationTest {
     }
 
     @Test
+    public void testIncrement() throws Exception {
+        String url = SERVERS[0].getHttpUrl();
+
+        long logId = newLogId();
+
+        KeyValueClient client = new KeyValueClient(url);
+
+        int n = 20;
+
+        for (int i = 1; i < n; i++) {
+            byte[] key = "A".getBytes();
+            KeyValueEntry entry = client.increment(logId, ByteString.copyFrom(key));
+            Assert.assertNotNull(entry);
+            byte[] actual = entry.getValue().toByteArray();
+            byte[] expected = Integer.toString(i).getBytes();
+            Assert.assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
     public void testReadYourWrites() throws Exception {
         String url = SERVERS[0].getHttpUrl();
 

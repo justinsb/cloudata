@@ -91,13 +91,14 @@ public class LeafPage extends Page {
             return pos;
         }
 
-        boolean doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
-            boolean changed = false;
+        Object doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
+            Object ret = null;
 
             int position = firstGTE(key);
 
             switch (action) {
-            case SET:
+            case SET: {
+                boolean done = false;
                 Entry newEntry = new Entry(key, value);
                 if (uniqueKeys) {
                     if (position < entries.size()) {
@@ -109,21 +110,62 @@ public class LeafPage extends Page {
                             entries.set(position, newEntry);
 
                             totalValueSize += value.remaining() - oldValue.remaining();
-                            changed = true;
+                            done = true;
                         }
                     }
                 }
 
-                if (!changed) {
+                if (!done) {
                     entries.add(position, newEntry);
 
                     totalKeySize += key.remaining();
                     totalValueSize += value.remaining();
                 }
+                break;
+            }
+
+            case INCREMENT: {
+                boolean done = false;
+
+                if (uniqueKeys) {
+                    if (position < entries.size()) {
+                        ByteBuffer midKey = getKey(position);
+                        int comparison = ByteBuffers.compare(midKey, key);
+                        if (comparison == 0) {
+                            ByteBuffer oldValue = getValue(position);
+                            long oldValueLong = ByteBuffers.parseLong(oldValue);
+
+                            oldValueLong++;
+
+                            ByteBuffer newValue = ByteBuffer.wrap(Long.toString(oldValueLong).getBytes());
+                            Entry newEntry = new Entry(key, newValue);
+
+                            entries.set(position, newEntry);
+
+                            totalValueSize += newValue.remaining() - oldValue.remaining();
+                            done = true;
+                            ret = newValue;
+                        }
+                    }
+
+                    if (!done) {
+                        ByteBuffer newValue = ByteBuffer.wrap(Long.toString(1).getBytes());
+                        Entry newEntry = new Entry(key, newValue);
+                        entries.add(position, newEntry);
+
+                        totalKeySize += key.remaining();
+                        totalValueSize += newValue.remaining();
+                        ret = newValue;
+                    }
+
+                } else {
+                    throw new UnsupportedOperationException();
+                }
 
                 break;
+            }
 
-            case DELETE:
+            case DELETE: {
                 if (uniqueKeys) {
                     if (position < entries.size()) {
                         ByteBuffer midKey = getKey(position);
@@ -135,10 +177,11 @@ public class LeafPage extends Page {
 
                             totalKeySize -= key.remaining();
                             totalValueSize -= oldValue.remaining();
-                            changed = true;
+                            ret = true;
                             log.info("Deleted entry @{}", position);
                         } else {
                             log.info("Key not found in delete");
+                            ret = false;
                         }
                     }
                 } else {
@@ -147,11 +190,13 @@ public class LeafPage extends Page {
                 }
                 break;
 
+            }
+
             default:
                 throw new UnsupportedOperationException();
             }
 
-            return changed;
+            return ret;
         }
 
         Mutable(LeafPage page) {
@@ -474,8 +519,8 @@ public class LeafPage extends Page {
     }
 
     @Override
-    public void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
-        getMutable().doAction(action, key, value);
+    public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+        return getMutable().doAction(action, key, value);
     }
 
     @Override

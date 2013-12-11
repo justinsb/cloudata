@@ -46,10 +46,16 @@ public class KeyValueStateMachine implements StateMachine {
     // return logFileSet.readLog(logId, begin, max);
     // }
 
-    public Object put(long storeId, byte[] key, byte[] value) throws InterruptedException, RaftException {
-        KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
-                .setAction(KvAction.SET).setValue(ByteString.copyFrom(value)).build();
+    // public Object put(long storeId, byte[] key, byte[] value) throws InterruptedException, RaftException {
+    // KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
+    // .setAction(KvAction.SET).setValue(ByteString.copyFrom(value)).build();
+    //
+    // log.debug("Proposing operation {}", entry.getAction());
+    //
+    // return raft.commit(entry.toByteArray());
+    // }
 
+    public Object doAction(KvEntry entry) throws InterruptedException, RaftException {
         log.debug("Proposing operation {}", entry.getAction());
 
         return raft.commit(entry.toByteArray());
@@ -77,10 +83,10 @@ public class KeyValueStateMachine implements StateMachine {
 
             KeyValueStore keyValueStore = getKeyValueStore(storeId);
 
-            keyValueStore.doAction(entry.getAction(), key != null ? key.asReadOnlyByteBuffer() : null,
+            Object ret = keyValueStore.doAction(entry.getAction(), key != null ? key.asReadOnlyByteBuffer() : null,
                     value != null ? value.asReadOnlyByteBuffer() : null);
 
-            return null;
+            return ret;
         } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing operation", e);
             throw new IllegalArgumentException("Error deserializing key value operation", e);

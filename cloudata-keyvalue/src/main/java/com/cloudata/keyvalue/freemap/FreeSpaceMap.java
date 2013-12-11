@@ -138,7 +138,7 @@ public class FreeSpaceMap {
         }
 
         @Override
-        public void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+        public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
             throw new IllegalStateException();
         }
 

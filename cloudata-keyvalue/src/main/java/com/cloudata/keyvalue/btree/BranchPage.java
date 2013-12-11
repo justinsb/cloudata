@@ -412,7 +412,7 @@ public class BranchPage extends Page {
     }
 
     @Override
-    public void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+    public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
         int pos = findPos(key);
         if (pos < 0) {
             pos = 0;
@@ -424,13 +424,15 @@ public class BranchPage extends Page {
 
         ByteBuffer oldLbound = childPage.getKeyLbound();
 
-        childPage.doAction(txn, action, key, value);
+        Object ret = childPage.doAction(txn, action, key, value);
 
         ByteBuffer newLbound = childPage.getKeyLbound();
 
         if (!oldLbound.equals(newLbound)) {
             getMutable().updateLbound(txn, pageNumber);
         }
+
+        return ret;
     }
 
     @Override

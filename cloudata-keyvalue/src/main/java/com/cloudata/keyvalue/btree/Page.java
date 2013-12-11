@@ -22,7 +22,7 @@ public abstract class Page {
 
     public abstract boolean walk(Transaction txn, ByteBuffer from, EntryListener listener);
 
-    public abstract void doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value);
+    public abstract Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value);
 
     public abstract ByteBuffer getKeyLbound();
 

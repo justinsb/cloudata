@@ -52,7 +52,30 @@ public class KeyValueClient {
         } finally {
             response.close();
         }
+    }
 
+    public KeyValueEntry increment(long storeId, ByteString key) throws Exception {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, key)).queryParam("action", "increment")
+                .post(ClientResponse.class);
+
+        try {
+            int status = response.getStatus();
+
+            switch (status) {
+            case 200:
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected status: " + status);
+            }
+
+            InputStream is = response.getEntityInputStream();
+            ByteString value = ByteString.readFrom(is);
+
+            return new KeyValueEntry(key, value);
+        } finally {
+            response.close();
+        }
     }
 
     public static class KeyValueEntry {

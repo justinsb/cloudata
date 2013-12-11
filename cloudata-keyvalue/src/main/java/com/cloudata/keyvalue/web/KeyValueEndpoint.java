@@ -12,6 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -20,9 +21,12 @@ import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
 
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
+import com.google.protobuf.ByteString;
 
 @Path("/{storeId}/")
 public class KeyValueEndpoint {
@@ -48,17 +52,42 @@ public class KeyValueEndpoint {
         return Response.ok(v).build();
     }
 
+    enum PostAction {
+        SET, INCREMENT
+    }
+
     @POST
     @Path("{key}")
     // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    public Response post(@PathParam("key") String key, InputStream value) throws IOException {
+    public Response post(@PathParam("key") String key, @QueryParam("action") String actionString, InputStream value)
+            throws IOException {
         try {
             byte[] k = BaseEncoding.base16().decode(key);
             byte[] v = ByteStreams.toByteArray(value);
 
-            stateMachine.put(storeId, k, v);
+            KvAction action = KvAction.SET;
 
-            return Response.ok().build();
+            if (actionString != null) {
+                actionString = actionString.toUpperCase();
+                action = KvAction.valueOf(actionString);
+            }
+
+            Object ret = null;
+
+            KvEntry.Builder entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(k))
+                    .setAction(action).setValue(ByteString.copyFrom(v));
+
+            switch (action) {
+            case SET:
+            case INCREMENT:
+                ret = stateMachine.doAction(entry.build());
+                break;
+
+            default:
+                throw new IllegalArgumentException();
+            }
+
+            return Response.ok(ret).build();
         } catch (InterruptedException e) {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         } catch (NoLeaderException e) {

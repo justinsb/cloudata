@@ -30,10 +30,11 @@ public class KeyValueStore {
         this.btree = new Btree(pageStore, uniqueKeys);
     }
 
-    public void doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
+    public Object doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
         try (WriteTransaction txn = btree.beginReadWrite()) {
-            txn.doAction(btree, action, key, value);
+            Object ret = txn.doAction(btree, action, key, value);
             txn.commit();
+            return ret;
         }
     }
 

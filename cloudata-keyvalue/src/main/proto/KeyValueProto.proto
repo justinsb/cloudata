@@ -10,4 +10,5 @@ message KvEntry {
 enum KvAction {
 	SET = 1;
 	DELETE = 2;
+	INCREMENT = 3;
 }
