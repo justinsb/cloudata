@@ -1,6 +1,7 @@
 package com.cloudata.keyvalue;
 
 import java.io.File;
+import java.net.SocketAddress;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -36,7 +37,8 @@ public class KeyValueIntegrationTest {
             int httpPort = 9990 + i;
 
             File baseDir = new File(TEMPDIR, "" + i);
-            SERVERS[i] = new KeyValueServer(baseDir, local, members, httpPort);
+            SocketAddress redisAddress = null;
+            SERVERS[i] = new KeyValueServer(baseDir, local, members, httpPort, redisAddress);
 
             SERVERS[i].start();
         }

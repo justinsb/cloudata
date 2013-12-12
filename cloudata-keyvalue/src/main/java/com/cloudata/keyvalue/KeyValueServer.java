@@ -1,12 +1,15 @@
 package com.cloudata.keyvalue;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.List;
 
 import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
 
+import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.web.WebModule;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -26,13 +29,16 @@ public class KeyValueServer {
     private final List<Replica> peers;
     private RaftService raft;
     private SelectorThread selector;
+    private final SocketAddress redisSocketAddress;
+    private RedisEndpoint redisEndpoint;
 
-    public KeyValueServer(File baseDir, Replica local, List<Replica> peers, int httpPort) {
-        super();
+    public KeyValueServer(File baseDir, Replica local, List<Replica> peers, int httpPort,
+            SocketAddress redisSocketAddress) {
         this.baseDir = baseDir;
         this.local = local;
         this.peers = peers;
         this.httpPort = httpPort;
+        this.redisSocketAddress = redisSocketAddress;
     }
 
     public synchronized void start() throws Exception {
@@ -63,6 +69,11 @@ public class KeyValueServer {
         IoCComponentProviderFactory ioc = new GuiceComponentProviderFactory(rc, injector);
 
         this.selector = GrizzlyServerFactory.create(baseUri, rc, ioc);
+
+        if (redisSocketAddress != null) {
+            this.redisEndpoint = new RedisEndpoint(redisSocketAddress);
+            this.redisEndpoint.start();
+        }
     }
 
     public String getHttpUrl() {
@@ -79,7 +90,10 @@ public class KeyValueServer {
 
         File baseDir = new File(args[0]);
         int httpPort = (9990 + port);
-        final KeyValueServer server = new KeyValueServer(baseDir, local, members, httpPort);
+        int redisPort = 6379 + port - 1;
+
+        SocketAddress redisSocketAddress = new InetSocketAddress(redisPort);
+        final KeyValueServer server = new KeyValueServer(baseDir, local, members, httpPort, redisSocketAddress);
         server.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
