@@ -109,7 +109,10 @@ public class KeyValueEndpoint {
         try {
             byte[] k = BaseEncoding.base16().decode(key);
 
-            stateMachine.delete(storeId, k);
+            KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(k))
+                    .setAction(KvAction.DELETE).build();
+
+            stateMachine.doAction(entry);
 
             return Response.noContent().build();
         } catch (InterruptedException e) {

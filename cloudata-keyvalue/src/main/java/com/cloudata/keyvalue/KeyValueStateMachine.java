@@ -15,7 +15,6 @@ import org.robotninjas.barge.StateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
@@ -61,13 +60,6 @@ public class KeyValueStateMachine implements StateMachine {
 
     public Object doAction(KvEntry entry) throws InterruptedException, RaftException {
         log.debug("Proposing operation {}", entry.getAction());
-
-        return raft.commit(entry.toByteArray());
-    }
-
-    public Object delete(long storeId, byte[] key) throws RaftException, InterruptedException {
-        KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(key))
-                .setAction(KvAction.DELETE).build();
 
         return raft.commit(entry.toByteArray());
     }
