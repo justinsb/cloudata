@@ -62,4 +62,38 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         }
     }
 
+    @Test
+    public void testDecrement() throws Exception {
+        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS[0].getRedisSocketAddress();
+
+        Jedis jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
+
+        byte[] key = "DECR".getBytes();
+        for (int i = 1; i < 100; i++) {
+            Long value = jedis.decr(key);
+
+            Assert.assertEquals(-i, value.longValue());
+        }
+    }
+
+    @Test
+    public void testDecrementBy() throws Exception {
+        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS[0].getRedisSocketAddress();
+
+        Jedis jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
+
+        long counter = 0;
+        Random r = new Random();
+        byte[] key = "DECRBY".getBytes();
+        for (int i = 1; i < 100; i++) {
+            long delta = r.nextInt();
+
+            Long value = jedis.decrBy(key, delta);
+
+            counter -= delta;
+
+            Assert.assertEquals(counter, value.longValue());
+        }
+    }
+
 }
