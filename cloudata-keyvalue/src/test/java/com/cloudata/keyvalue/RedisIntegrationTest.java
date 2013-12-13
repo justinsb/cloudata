@@ -1,6 +1,7 @@
 package com.cloudata.keyvalue;
 
 import java.net.InetSocketAddress;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,11 +34,31 @@ public class RedisIntegrationTest extends IntegrationTestBase {
 
         Jedis jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
 
-        byte[] key = "A".getBytes();
+        byte[] key = "INCR".getBytes();
         for (int i = 1; i < 100; i++) {
             Long value = jedis.incr(key);
 
-            Assert.assertEquals(i, value.intValue());
+            Assert.assertEquals(i, value.longValue());
+        }
+    }
+
+    @Test
+    public void testIncrementBy() throws Exception {
+        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS[0].getRedisSocketAddress();
+
+        Jedis jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
+
+        long counter = 0;
+        Random r = new Random();
+        byte[] key = "INCRBY".getBytes();
+        for (int i = 1; i < 100; i++) {
+            long delta = r.nextInt();
+
+            Long value = jedis.incrBy(key, delta);
+
+            counter += delta;
+
+            Assert.assertEquals(counter, value.longValue());
         }
     }
 

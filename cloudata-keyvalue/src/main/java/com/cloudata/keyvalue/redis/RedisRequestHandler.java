@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.redis.commands.EchoCommand;
 import com.cloudata.keyvalue.redis.commands.GetCommand;
+import com.cloudata.keyvalue.redis.commands.IncrByCommand;
 import com.cloudata.keyvalue.redis.commands.IncrCommand;
 import com.cloudata.keyvalue.redis.commands.PingCommand;
 import com.cloudata.keyvalue.redis.commands.QuitCommand;
@@ -42,6 +43,7 @@ public class RedisRequestHandler extends SimpleChannelInboundHandler<RedisReques
         addMethod("get", new GetCommand());
 
         addMethod("incr", new IncrCommand());
+        addMethod("incrby", new IncrByCommand());
     }
 
     static void addMethod(String name, RedisCommand action) {
