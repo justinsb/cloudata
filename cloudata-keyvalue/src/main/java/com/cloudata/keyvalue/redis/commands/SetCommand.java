@@ -10,6 +10,7 @@ import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.redis.response.ErrorRedisReponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
 import com.cloudata.keyvalue.redis.response.StatusRedisResponse;
+import com.google.protobuf.ByteString;
 
 public class SetCommand implements RedisCommand {
     @Override
@@ -19,11 +20,11 @@ public class SetCommand implements RedisCommand {
             return ErrorRedisReponse.NOT_IMPLEMENTED;
         }
 
-        byte[] key = command.get(1);
+        ByteString key = command.getByteString(1);
         byte[] value = command.get(2);
 
         KeyOperation operation = new SetOperation(ByteBuffer.wrap(value));
-        server.getKeyValueStore().doAction(ByteBuffer.wrap(key), operation);
+        server.doAction(key, operation);
 
         return StatusRedisResponse.OK;
     }

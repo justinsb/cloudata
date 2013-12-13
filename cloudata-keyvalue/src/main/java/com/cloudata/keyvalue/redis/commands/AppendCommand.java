@@ -9,6 +9,7 @@ import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.redis.response.ErrorRedisReponse;
 import com.cloudata.keyvalue.redis.response.IntegerRedisResponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
+import com.google.protobuf.ByteString;
 
 public class AppendCommand implements RedisCommand {
     @Override
@@ -18,12 +19,12 @@ public class AppendCommand implements RedisCommand {
             return ErrorRedisReponse.NOT_IMPLEMENTED;
         }
 
-        byte[] key = command.get(1);
+        ByteString key = command.getByteString(1);
         byte[] value = command.get(2);
 
         AppendOperation operation = new AppendOperation(ByteBuffer.wrap(value));
-        server.getKeyValueStore().doAction(ByteBuffer.wrap(key), operation);
+        Number ret = (Number) server.doAction(key, operation);
 
-        return IntegerRedisResponse.valueOf(operation.getNewLength());
+        return IntegerRedisResponse.valueOf(ret.longValue());
     }
 }

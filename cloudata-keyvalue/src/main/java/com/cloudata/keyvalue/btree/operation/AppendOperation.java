@@ -2,7 +2,11 @@ package com.cloudata.keyvalue.btree.operation;
 
 import java.nio.ByteBuffer;
 
-public class AppendOperation extends KeyOperation {
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.KeyValueProto.KvEntry;
+import com.google.protobuf.ByteString;
+
+public class AppendOperation extends KeyOperation<Integer> {
 
     final ByteBuffer appendValue;
     private int newLength;
@@ -27,7 +31,16 @@ public class AppendOperation extends KeyOperation {
         }
     }
 
-    public int getNewLength() {
+    @Override
+    public KvEntry.Builder serialize() {
+        KvEntry.Builder b = KvEntry.newBuilder();
+        b.setAction(KvAction.APPEND);
+        b.setValue(ByteString.copyFrom(appendValue));
+        return b;
+    }
+
+    @Override
+    public Integer getResult() {
         return newLength;
     }
 

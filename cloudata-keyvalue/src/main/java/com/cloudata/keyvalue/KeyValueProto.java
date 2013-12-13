@@ -25,6 +25,10 @@ public final class KeyValueProto {
      * <code>INCREMENT = 3;</code>
      */
     INCREMENT(2, 3),
+    /**
+     * <code>APPEND = 4;</code>
+     */
+    APPEND(3, 4),
     ;
 
     /**
@@ -39,6 +43,10 @@ public final class KeyValueProto {
      * <code>INCREMENT = 3;</code>
      */
     public static final int INCREMENT_VALUE = 3;
+    /**
+     * <code>APPEND = 4;</code>
+     */
+    public static final int APPEND_VALUE = 4;
 
 
     public final int getNumber() { return value; }
@@ -48,6 +56,7 @@ public final class KeyValueProto {
         case 1: return SET;
         case 2: return DELETE;
         case 3: return INCREMENT;
+        case 4: return APPEND;
         default: return null;
       }
     }
@@ -867,9 +876,9 @@ public final class KeyValueProto {
       "\n\"src/main/proto/KeyValueProto.proto\"h\n\007" +
       "KvEntry\022\020\n\010store_id\030\001 \002(\004\022\031\n\006action\030\002 \002(" +
       "\0162\t.KvAction\022\013\n\003key\030\003 \001(\014\022\r\n\005value\030\004 \001(\014" +
-      "\022\024\n\014increment_by\030\005 \001(\003*.\n\010KvAction\022\007\n\003SE" +
-      "T\020\001\022\n\n\006DELETE\020\002\022\r\n\tINCREMENT\020\003B\027\n\025com.cl" +
-      "oudata.keyvalue"
+      "\022\024\n\014increment_by\030\005 \001(\003*:\n\010KvAction\022\007\n\003SE" +
+      "T\020\001\022\n\n\006DELETE\020\002\022\r\n\tINCREMENT\020\003\022\n\n\006APPEND" +
+      "\020\004B\027\n\025com.cloudata.keyvalue"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

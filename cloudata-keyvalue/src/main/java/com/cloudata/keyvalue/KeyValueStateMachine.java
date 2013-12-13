@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
+import com.cloudata.keyvalue.btree.operation.AppendOperation;
 import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
 import com.cloudata.keyvalue.btree.operation.KeyOperation;
@@ -58,10 +59,15 @@ public class KeyValueStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public Object doAction(KvEntry entry) throws InterruptedException, RaftException {
+    public Object doAction(long storeId, ByteString key, KeyOperation operation) throws InterruptedException,
+            RaftException {
+        KvEntry.Builder entry = operation.serialize();
+        entry.setKey(key);
+        entry.setStoreId(storeId);
+
         log.debug("Proposing operation {}", entry.getAction());
 
-        return raft.commit(entry.toByteArray());
+        return raft.commit(entry.build().toByteArray());
     }
 
     @Override
@@ -79,9 +85,13 @@ public class KeyValueStateMachine implements StateMachine {
 
             KeyValueStore keyValueStore = getKeyValueStore(storeId);
 
-            KeyOperation operation;
+            KeyOperation<?> operation;
 
             switch (entry.getAction()) {
+
+            case APPEND:
+                operation = new AppendOperation(value.asReadOnlyByteBuffer());
+                break;
 
             case DELETE:
                 operation = new DeleteOperation();
@@ -103,7 +113,10 @@ public class KeyValueStateMachine implements StateMachine {
             default:
                 throw new UnsupportedOperationException();
             }
-            Object ret = keyValueStore.doAction(key != null ? key.asReadOnlyByteBuffer() : null, operation);
+
+            keyValueStore.doAction(key != null ? key.asReadOnlyByteBuffer() : null, operation);
+
+            Object ret = operation.getResult();
 
             return ret;
         } catch (InvalidProtocolBufferException e) {
@@ -115,7 +128,7 @@ public class KeyValueStateMachine implements StateMachine {
         }
     }
 
-    KeyValueStore getKeyValueStore(long id) {
+    private KeyValueStore getKeyValueStore(long id) {
         try {
             return keyValueStoreCache.get(id);
         } catch (ExecutionException e) {

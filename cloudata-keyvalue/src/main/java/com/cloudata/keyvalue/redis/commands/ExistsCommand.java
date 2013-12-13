@@ -18,7 +18,7 @@ public class ExistsCommand implements RedisCommand {
     public RedisResponse execute(RedisServer server, RedisRequest command) throws RedisException {
         byte[] key = command.get(1);
 
-        ByteBuffer value = server.getKeyValueStore().get(ByteBuffer.wrap(key));
+        ByteBuffer value = server.get(ByteBuffer.wrap(key));
 
         if (value == null) {
             return IntegerRedisResponse.ZERO;

@@ -12,6 +12,7 @@ import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.redis.response.IntegerRedisResponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
+import com.google.protobuf.ByteString;
 
 public class IncrByCommand implements RedisCommand {
     private static final Logger log = LoggerFactory.getLogger(IncrByCommand.class);
@@ -23,11 +24,12 @@ public class IncrByCommand implements RedisCommand {
         return execute(server, command, delta);
     }
 
-    protected IntegerRedisResponse execute(RedisServer server, RedisRequest command, long deltaLong) {
-        byte[] key = command.get(1);
+    protected IntegerRedisResponse execute(RedisServer server, RedisRequest command, long deltaLong)
+            throws RedisException {
+        ByteString key = command.getByteString(1);
 
         IncrementOperation operation = new IncrementOperation(deltaLong);
-        ByteBuffer value = (ByteBuffer) server.getKeyValueStore().doAction(ByteBuffer.wrap(key), operation);
+        ByteBuffer value = (ByteBuffer) server.doAction(key, operation);
 
         long v = ByteBuffers.parseLong(value);
         return new IntegerRedisResponse(v);

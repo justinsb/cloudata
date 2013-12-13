@@ -3,6 +3,7 @@ package com.cloudata.keyvalue.redis;
 import java.nio.ByteBuffer;
 
 import com.cloudata.keyvalue.btree.ByteBuffers;
+import com.google.protobuf.ByteString;
 
 public class RedisRequest {
     final byte[][] command;
@@ -65,6 +66,11 @@ public class RedisRequest {
         long v = ByteBuffers.parseLong(ByteBuffer.wrap(data));
 
         return v;
+    }
+
+    public ByteString getByteString(int i) {
+        byte[] data = get(i);
+        return ByteString.copyFrom(data);
     }
 
 }

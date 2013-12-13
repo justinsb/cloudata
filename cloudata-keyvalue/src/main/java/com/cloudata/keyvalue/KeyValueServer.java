@@ -73,8 +73,7 @@ public class KeyValueServer {
 
         if (redisSocketAddress != null) {
             long storeId = 1;
-            KeyValueStore keyValueStore = stateMachine.getKeyValueStore(storeId);
-            RedisServer redisServer = new RedisServer(keyValueStore);
+            RedisServer redisServer = new RedisServer(stateMachine, storeId);
 
             this.redisEndpoint = new RedisEndpoint(redisSocketAddress, redisServer);
             this.redisEndpoint.start();

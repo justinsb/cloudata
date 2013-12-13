@@ -18,8 +18,7 @@ public class GetCommand implements RedisCommand {
     public RedisResponse execute(RedisServer server, RedisRequest command) throws RedisException {
         byte[] key = command.get(1);
 
-        ByteBuffer value = server.getKeyValueStore().get(ByteBuffer.wrap(key));
-        log.info("Got response from get: {}", value);
+        ByteBuffer value = server.get(ByteBuffer.wrap(key));
 
         if (value == null) {
             return BulkRedisResponse.NIL_REPLY;

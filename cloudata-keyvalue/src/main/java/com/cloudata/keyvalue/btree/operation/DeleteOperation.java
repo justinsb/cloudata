@@ -2,7 +2,10 @@ package com.cloudata.keyvalue.btree.operation;
 
 import java.nio.ByteBuffer;
 
-public class DeleteOperation extends KeyOperation {
+import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.KeyValueProto.KvEntry;
+
+public class DeleteOperation extends KeyOperation<Integer> {
 
     private int deleteCount;
 
@@ -14,8 +17,15 @@ public class DeleteOperation extends KeyOperation {
         return null; // Delete the value
     }
 
-    public int getDeleteCount() {
-        return deleteCount;
+    @Override
+    public KvEntry.Builder serialize() {
+        KvEntry.Builder b = KvEntry.newBuilder();
+        b.setAction(KvAction.DELETE);
+        return b;
     }
 
+    @Override
+    public Integer getResult() {
+        return deleteCount;
+    }
 }

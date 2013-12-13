@@ -22,8 +22,11 @@ import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
-import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.keyvalue.KeyValueStateMachine;
+import com.cloudata.keyvalue.btree.operation.DeleteOperation;
+import com.cloudata.keyvalue.btree.operation.IncrementOperation;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
+import com.cloudata.keyvalue.btree.operation.SetOperation;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
@@ -74,18 +77,21 @@ public class KeyValueEndpoint {
 
             Object ret = null;
 
-            KvEntry.Builder entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(k))
-                    .setAction(action).setValue(ByteString.copyFrom(v));
-
+            KeyOperation operation;
             switch (action) {
             case SET:
+                operation = new SetOperation(ByteBuffer.wrap(v));
+                break;
+
             case INCREMENT:
-                ret = stateMachine.doAction(entry.build());
+                operation = new IncrementOperation(1);
                 break;
 
             default:
                 throw new IllegalArgumentException();
             }
+
+            ret = stateMachine.doAction(storeId, ByteString.copyFrom(k), operation);
 
             return Response.ok(ret).build();
         } catch (InterruptedException e) {
@@ -109,10 +115,7 @@ public class KeyValueEndpoint {
         try {
             byte[] k = BaseEncoding.base16().decode(key);
 
-            KvEntry entry = KvEntry.newBuilder().setStoreId(storeId).setKey(ByteString.copyFrom(k))
-                    .setAction(KvAction.DELETE).build();
-
-            stateMachine.doAction(entry);
+            stateMachine.doAction(storeId, ByteString.copyFrom(k), new DeleteOperation());
 
             return Response.noContent().build();
         } catch (InterruptedException e) {
