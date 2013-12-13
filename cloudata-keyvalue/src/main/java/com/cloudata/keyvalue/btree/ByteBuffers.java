@@ -79,4 +79,12 @@ public class ByteBuffers {
         }
         return v;
     }
+
+    public static ByteBuffer clone(ByteBuffer b) {
+        int n = b.remaining();
+        ByteBuffer buff = ByteBuffer.allocate(n);
+        buff.put(b.duplicate());
+        buff.flip();
+        return buff;
+    }
 }

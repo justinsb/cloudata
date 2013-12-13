@@ -1,13 +1,20 @@
-package com.cloudata.keyvalue.redis;
+package com.cloudata.keyvalue.redis.response;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudata.keyvalue.redis.Codec;
 import com.google.common.base.Charsets;
 
 public class BulkRedisResponse extends RedisResponse {
+    private static final Logger log = LoggerFactory.getLogger(BulkRedisResponse.class);
+
     public static final BulkRedisResponse NIL_REPLY = new BulkRedisResponse();
 
     public static final char MARKER = '$';
@@ -22,11 +29,18 @@ public class BulkRedisResponse extends RedisResponse {
     public BulkRedisResponse(byte[] bytes) {
         this.data = Unpooled.wrappedBuffer(bytes);
         this.length = bytes.length;
+
+        log.debug("Built response: {}", this);
+        log.debug("Built response length={}", length);
     }
 
     public BulkRedisResponse(ByteBuf bytes) {
         this.data = bytes;
-        this.length = bytes.capacity();
+        this.length = bytes.readableBytes();
+    }
+
+    public BulkRedisResponse(ByteBuffer data) {
+        this(Unpooled.wrappedBuffer(data));
     }
 
     // @Override
@@ -57,12 +71,16 @@ public class BulkRedisResponse extends RedisResponse {
 
     @Override
     public void encode(ByteBuf os) {
+        log.debug("Writing message: {}", this);
+
         os.writeByte(MARKER);
         Codec.writeLong(os, length);
-        if (length > 0) {
-            os.writeBytes(data);
+        os.writeBytes(CRLF);
 
-            // Special case: null response does not have a CRLF
+        if (length >= 0) {
+            assert data.readableBytes() == length;
+            os.writeBytes(data.duplicate());
+            // Special case: null response does not have a CRLF after the data
             os.writeBytes(CRLF);
         }
     }
@@ -71,7 +89,7 @@ public class BulkRedisResponse extends RedisResponse {
     public void encodeInline(ByteBuf os) {
         if (length > 0) {
             os.writeByte('+');
-            os.writeBytes(data);
+            os.writeBytes(data.duplicate());
         }
         os.writeBytes(CRLF);
     }

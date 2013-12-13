@@ -71,7 +71,7 @@ public abstract class PageStore {
 
     public ReadOnlyTransaction beginReadOnlyTransaction() {
         synchronized (this) {
-            log.info("Starting new read-write transaction with root page: {}", currentRootPage);
+            log.info("Starting new read-only transaction with root page: {}", currentRootPage);
             ReadOnlyTransaction txn = new ReadOnlyTransaction(this, currentRootPage, currentTransactionId);
             readTransactions.add(txn);
             return txn;

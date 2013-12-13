@@ -1,4 +1,4 @@
-package com.cloudata.keyvalue.redis;
+package com.cloudata.keyvalue.redis.response;
 
 import io.netty.buffer.ByteBuf;
 
@@ -8,7 +8,10 @@ public class StatusRedisResponse extends RedisResponse {
     public static final byte MARKER = '+';
 
     public static final StatusRedisResponse OK = new StatusRedisResponse("OK");
-    public static final StatusRedisResponse QUIT = new StatusRedisResponse("QUIT");
+
+    // This is a special variant of "OK" which will close the connection
+    public static final StatusRedisResponse QUIT = new StatusRedisResponse("OK");
+
     public static final StatusRedisResponse PONG = new StatusRedisResponse("PONG");
 
     private final String status;

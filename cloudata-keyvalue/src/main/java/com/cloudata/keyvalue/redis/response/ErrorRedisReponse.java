@@ -1,4 +1,4 @@
-package com.cloudata.keyvalue.redis;
+package com.cloudata.keyvalue.redis.response;
 
 import io.netty.buffer.ByteBuf;
 
@@ -8,6 +8,8 @@ public class ErrorRedisReponse extends RedisResponse {
     public static final byte MARKER = '-';
 
     public static final ErrorRedisReponse NOT_IMPLEMENTED = new ErrorRedisReponse("Not yet implemented");
+
+    public static final ErrorRedisReponse INTERNAL_ERROR = new ErrorRedisReponse("Internal error");
 
     private final String message;
     private final byte[] messageBytes;

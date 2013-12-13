@@ -1,4 +1,6 @@
-package com.cloudata.keyvalue.redis;
+package com.cloudata.keyvalue.redis.response;
+
+import com.cloudata.keyvalue.redis.Codec;
 
 import io.netty.buffer.ByteBuf;
 

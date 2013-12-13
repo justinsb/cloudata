@@ -8,21 +8,28 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 import java.net.SocketAddress;
+
+;
 
 public class RedisEndpoint {
     DefaultEventExecutorGroup group;
 
     final SocketAddress localAddress;
 
-    public RedisEndpoint(SocketAddress localAddress) {
+    final RedisServer redisServer;
+
+    public RedisEndpoint(SocketAddress localAddress, RedisServer redisServer) {
         this.localAddress = localAddress;
+        this.redisServer = redisServer;
     }
 
     public void start() throws InterruptedException {
-        final RedisRequestHandler commandHandler = new RedisRequestHandler(new RedisServer());
+        final RedisRequestHandler commandHandler = new RedisRequestHandler(redisServer);
 
         ServerBootstrap b = new ServerBootstrap();
         int nThreads = 1;

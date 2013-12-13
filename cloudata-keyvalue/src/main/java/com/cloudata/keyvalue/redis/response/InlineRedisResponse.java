@@ -1,4 +1,4 @@
-package com.cloudata.keyvalue.redis;
+package com.cloudata.keyvalue.redis.response;
 
 import io.netty.buffer.ByteBuf;
 

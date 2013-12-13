@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.btree.Btree;
+import com.cloudata.keyvalue.btree.ByteBuffers;
 import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.MmapPageStore;
 import com.cloudata.keyvalue.btree.PageStore;
@@ -63,7 +64,12 @@ public class KeyValueStore {
             txn.walk(btree, key, listener);
 
             ByteBuffer value = listener.foundValue;
+            // log.debug("Value for {}: {}", key, value);
 
+            if (value != null) {
+                // Once the transaction goes away the values may be invalid
+                value = ByteBuffers.clone(value);
+            }
             // log.debug("Value for {}: {}", key, value);
 
             return value;

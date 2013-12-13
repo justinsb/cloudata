@@ -96,7 +96,7 @@ public class KeyValueStateMachine implements StateMachine {
         }
     }
 
-    private KeyValueStore getKeyValueStore(long id) {
+    KeyValueStore getKeyValueStore(long id) {
         try {
             return keyValueStoreCache.get(id);
         } catch (ExecutionException e) {

@@ -213,7 +213,7 @@ public class TransactionPage extends Page {
 
     @Override
     public void dump(PrintStream os) {
-        throw new UnsupportedOperationException();
+        os.println("TransactionPage: " + getTransactionId());
     }
 
     public void setRootPageId(int newRootPageId) {

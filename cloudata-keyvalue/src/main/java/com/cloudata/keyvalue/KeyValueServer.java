@@ -10,6 +10,7 @@ import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
 
 import com.cloudata.keyvalue.redis.RedisEndpoint;
+import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -71,7 +72,11 @@ public class KeyValueServer {
         this.selector = GrizzlyServerFactory.create(baseUri, rc, ioc);
 
         if (redisSocketAddress != null) {
-            this.redisEndpoint = new RedisEndpoint(redisSocketAddress);
+            long storeId = 1;
+            KeyValueStore keyValueStore = stateMachine.getKeyValueStore(storeId);
+            RedisServer redisServer = new RedisServer(keyValueStore);
+
+            this.redisEndpoint = new RedisEndpoint(redisSocketAddress, redisServer);
             this.redisEndpoint.start();
         }
     }

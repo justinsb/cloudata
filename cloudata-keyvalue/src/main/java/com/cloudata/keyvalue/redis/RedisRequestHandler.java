@@ -6,6 +6,19 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudata.keyvalue.redis.commands.EchoCommand;
+import com.cloudata.keyvalue.redis.commands.GetCommand;
+import com.cloudata.keyvalue.redis.commands.PingCommand;
+import com.cloudata.keyvalue.redis.commands.QuitCommand;
+import com.cloudata.keyvalue.redis.commands.RedisCommand;
+import com.cloudata.keyvalue.redis.commands.SetCommand;
+import com.cloudata.keyvalue.redis.response.ErrorRedisReponse;
+import com.cloudata.keyvalue.redis.response.InlineRedisResponse;
+import com.cloudata.keyvalue.redis.response.RedisResponse;
+import com.cloudata.keyvalue.redis.response.StatusRedisResponse;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
@@ -15,11 +28,17 @@ import com.google.protobuf.ByteString;
  */
 @ChannelHandler.Sharable
 public class RedisRequestHandler extends SimpleChannelInboundHandler<RedisRequest> {
+    private static final Logger log = LoggerFactory.getLogger(RedisRequestHandler.class);
 
     static final Map<ByteString, RedisCommand> methods = Maps.newHashMap();
 
     static {
+        addMethod("echo", new EchoCommand());
         addMethod("ping", new PingCommand());
+        addMethod("quit", new QuitCommand());
+
+        addMethod("set", new SetCommand());
+        addMethod("get", new GetCommand());
     }
 
     static void addMethod(String name, RedisCommand action) {
@@ -75,14 +94,22 @@ public class RedisRequestHandler extends SimpleChannelInboundHandler<RedisReques
             }
         }
 
+        log.debug("Executing command: {}", msg);
+
         RedisCommand command = methods.get(ByteString.copyFrom(name));
         RedisResponse reply;
         if (command == null) {
             reply = new ErrorRedisReponse("unknown command '" + new String(name, Charsets.US_ASCII) + "'");
         } else {
-            reply = command.execute(server, msg);
+            try {
+                reply = command.execute(server, msg);
+            } catch (Throwable t) {
+                log.warn("Error executing command", t);
+                reply = ErrorRedisReponse.INTERNAL_ERROR;
+            }
         }
         if (reply == StatusRedisResponse.QUIT) {
+            // TODO: Pipelined responses? Do we need to flush?
             ctx.close();
         } else {
             if (msg.isInline()) {

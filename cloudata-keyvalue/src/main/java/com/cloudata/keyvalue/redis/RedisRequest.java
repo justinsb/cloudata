@@ -25,4 +25,34 @@ public class RedisRequest {
         return command[0];
     }
 
+    public byte[] get(int i) {
+        return command[i];
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(" [");
+        for (int i = 0; i < command.length; i++) {
+            if (i != 0) {
+                sb.append(",");
+            }
+            byte[] a = command[i];
+            if (a == null) {
+                sb.append("(null)");
+            }
+            sb.append(new String(a));
+        }
+        if (inline) {
+            sb.append(" (inline)");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public int getArgc() {
+        return command.length;
+    }
+
 }

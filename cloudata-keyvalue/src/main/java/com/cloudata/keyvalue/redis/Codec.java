@@ -37,7 +37,7 @@ public class Codec {
         }
     }
 
-    public static long readLong(ByteBuf buf) throws IOException {
+    public static long readLongWithCrlf(ByteBuf buf) throws IOException {
         long v = 0;
         boolean negative = false;
         int read = buf.readByte();
