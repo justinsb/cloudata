@@ -1,6 +1,8 @@
 package com.cloudata.keyvalue;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
@@ -9,6 +11,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import redis.clients.jedis.Jedis;
+
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class RedisIntegrationTest extends IntegrationTestBase {
 
@@ -33,6 +38,29 @@ public class RedisIntegrationTest extends IntegrationTestBase {
             byte[] actual = jedis.get(key);
 
             Assert.assertArrayEquals(value, actual);
+        }
+    }
+
+    @Test
+    public void testSetAndDelete() throws Exception {
+        List<byte[]> allKeys = Lists.newArrayList();
+        for (int i = 1; i < 100; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+
+            byte[] value = buildValue(i);
+
+            jedis.set(key, value);
+
+            allKeys.add(key);
+        }
+
+        Collections.shuffle(allKeys);
+
+        for (List<byte[]> partition : Iterables.partition(allKeys, 8)) {
+            byte[][] array = partition.toArray(new byte[partition.size()][]);
+
+            Long count = jedis.del(array);
+            Assert.assertEquals(partition.size(), count.longValue());
         }
     }
 
