@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.Page;
 import com.cloudata.keyvalue.btree.PageStore;
@@ -12,6 +11,7 @@ import com.cloudata.keyvalue.btree.PageStore.PageRecord;
 import com.cloudata.keyvalue.btree.Transaction;
 import com.cloudata.keyvalue.btree.TransactionPage;
 import com.cloudata.keyvalue.btree.WriteTransaction;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 
 public class FreeSpaceMap {
 
@@ -138,7 +138,7 @@ public class FreeSpaceMap {
         }
 
         @Override
-        public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+        public Object doAction(Transaction txn, ByteBuffer key, KeyOperation operation) {
             throw new IllegalStateException();
         }
 

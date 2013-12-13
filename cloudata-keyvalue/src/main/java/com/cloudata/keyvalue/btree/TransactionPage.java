@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 import com.cloudata.keyvalue.freemap.SpaceMapEntry;
 import com.google.common.collect.Lists;
 
@@ -182,7 +182,7 @@ public class TransactionPage extends Page {
     }
 
     @Override
-    public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+    public Object doAction(Transaction txn, ByteBuffer key, KeyOperation operation) {
         throw new UnsupportedOperationException();
     }
 

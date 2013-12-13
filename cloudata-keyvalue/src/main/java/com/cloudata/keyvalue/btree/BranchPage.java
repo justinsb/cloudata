@@ -9,7 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 import com.cloudata.util.Hex;
 
 public class BranchPage extends Page {
@@ -412,7 +412,7 @@ public class BranchPage extends Page {
     }
 
     @Override
-    public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
+    public Object doAction(Transaction txn, ByteBuffer key, KeyOperation operation) {
         int pos = findPos(key);
         if (pos < 0) {
             pos = 0;
@@ -424,7 +424,7 @@ public class BranchPage extends Page {
 
         ByteBuffer oldLbound = childPage.getKeyLbound();
 
-        Object ret = childPage.doAction(txn, action, key, value);
+        Object ret = childPage.doAction(txn, key, operation);
 
         ByteBuffer newLbound = childPage.getKeyLbound();
 

@@ -141,6 +141,16 @@ public final class KeyValueProto {
      * <code>optional bytes value = 4;</code>
      */
     com.google.protobuf.ByteString getValue();
+
+    // optional int64 increment_by = 5;
+    /**
+     * <code>optional int64 increment_by = 5;</code>
+     */
+    boolean hasIncrementBy();
+    /**
+     * <code>optional int64 increment_by = 5;</code>
+     */
+    long getIncrementBy();
   }
   /**
    * Protobuf type {@code KvEntry}
@@ -217,6 +227,11 @@ public final class KeyValueProto {
             case 34: {
               bitField0_ |= 0x00000008;
               value_ = input.readBytes();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              incrementBy_ = input.readInt64();
               break;
             }
           }
@@ -323,11 +338,28 @@ public final class KeyValueProto {
       return value_;
     }
 
+    // optional int64 increment_by = 5;
+    public static final int INCREMENT_BY_FIELD_NUMBER = 5;
+    private long incrementBy_;
+    /**
+     * <code>optional int64 increment_by = 5;</code>
+     */
+    public boolean hasIncrementBy() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int64 increment_by = 5;</code>
+     */
+    public long getIncrementBy() {
+      return incrementBy_;
+    }
+
     private void initFields() {
       storeId_ = 0L;
       action_ = com.cloudata.keyvalue.KeyValueProto.KvAction.SET;
       key_ = com.google.protobuf.ByteString.EMPTY;
       value_ = com.google.protobuf.ByteString.EMPTY;
+      incrementBy_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -361,6 +393,9 @@ public final class KeyValueProto {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(4, value_);
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt64(5, incrementBy_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -385,6 +420,10 @@ public final class KeyValueProto {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(4, value_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(5, incrementBy_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -510,6 +549,8 @@ public final class KeyValueProto {
         bitField0_ = (bitField0_ & ~0x00000004);
         value_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000008);
+        incrementBy_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -554,6 +595,10 @@ public final class KeyValueProto {
           to_bitField0_ |= 0x00000008;
         }
         result.value_ = value_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.incrementBy_ = incrementBy_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -581,6 +626,9 @@ public final class KeyValueProto {
         }
         if (other.hasValue()) {
           setValue(other.getValue());
+        }
+        if (other.hasIncrementBy()) {
+          setIncrementBy(other.getIncrementBy());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -758,6 +806,39 @@ public final class KeyValueProto {
         return this;
       }
 
+      // optional int64 increment_by = 5;
+      private long incrementBy_ ;
+      /**
+       * <code>optional int64 increment_by = 5;</code>
+       */
+      public boolean hasIncrementBy() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int64 increment_by = 5;</code>
+       */
+      public long getIncrementBy() {
+        return incrementBy_;
+      }
+      /**
+       * <code>optional int64 increment_by = 5;</code>
+       */
+      public Builder setIncrementBy(long value) {
+        bitField0_ |= 0x00000010;
+        incrementBy_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 increment_by = 5;</code>
+       */
+      public Builder clearIncrementBy() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        incrementBy_ = 0L;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:KvEntry)
     }
 
@@ -783,11 +864,12 @@ public final class KeyValueProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\"src/main/proto/KeyValueProto.proto\"R\n\007" +
+      "\n\"src/main/proto/KeyValueProto.proto\"h\n\007" +
       "KvEntry\022\020\n\010store_id\030\001 \002(\004\022\031\n\006action\030\002 \002(" +
       "\0162\t.KvAction\022\013\n\003key\030\003 \001(\014\022\r\n\005value\030\004 \001(\014" +
-      "*.\n\010KvAction\022\007\n\003SET\020\001\022\n\n\006DELETE\020\002\022\r\n\tINC" +
-      "REMENT\020\003B\027\n\025com.cloudata.keyvalue"
+      "\022\024\n\014increment_by\030\005 \001(\003*.\n\010KvAction\022\007\n\003SE" +
+      "T\020\001\022\n\n\006DELETE\020\002\022\r\n\tINCREMENT\020\003B\027\n\025com.cl" +
+      "oudata.keyvalue"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -799,7 +881,7 @@ public final class KeyValueProto {
           internal_static_KvEntry_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_KvEntry_descriptor,
-              new java.lang.String[] { "StoreId", "Action", "Key", "Value", });
+              new java.lang.String[] { "StoreId", "Action", "Key", "Value", "IncrementBy", });
           return null;
         }
       };

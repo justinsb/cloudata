@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 
 public abstract class Page {
     protected final Page parent;
@@ -22,7 +22,7 @@ public abstract class Page {
 
     public abstract boolean walk(Transaction txn, ByteBuffer from, EntryListener listener);
 
-    public abstract Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value);
+    public abstract Object doAction(Transaction txn, ByteBuffer key, KeyOperation operation);
 
     public abstract ByteBuffer getKeyLbound();
 

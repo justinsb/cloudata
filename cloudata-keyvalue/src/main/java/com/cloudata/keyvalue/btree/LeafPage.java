@@ -8,7 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 import com.cloudata.util.Hex;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Shorts;
@@ -91,112 +91,53 @@ public class LeafPage extends Page {
             return pos;
         }
 
-        Object doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
-            Object ret = null;
-
+        Object doAction(ByteBuffer key, KeyOperation operation) {
             int position = firstGTE(key);
 
-            switch (action) {
-            case SET: {
-                boolean done = false;
-                Entry newEntry = new Entry(key, value);
-                if (uniqueKeys) {
-                    if (position < entries.size()) {
-                        ByteBuffer midKey = getKey(position);
-                        int comparison = ByteBuffers.compare(midKey, key);
-                        if (comparison == 0) {
-                            ByteBuffer oldValue = getValue(position);
+            ByteBuffer oldValue = null;
 
-                            entries.set(position, newEntry);
-
-                            totalValueSize += value.remaining() - oldValue.remaining();
-                            done = true;
-                        }
+            if (uniqueKeys) {
+                if (position < entries.size()) {
+                    ByteBuffer positionKey = getKey(position);
+                    int positionComparison = ByteBuffers.compare(positionKey, key);
+                    if (positionComparison == 0) {
+                        oldValue = getValue(position);
                     }
                 }
-
-                if (!done) {
-                    entries.add(position, newEntry);
-
-                    totalKeySize += key.remaining();
-                    totalValueSize += value.remaining();
-                }
-                break;
-            }
-
-            case INCREMENT: {
-                boolean done = false;
-
-                if (uniqueKeys) {
-                    if (position < entries.size()) {
-                        ByteBuffer midKey = getKey(position);
-                        int comparison = ByteBuffers.compare(midKey, key);
-                        if (comparison == 0) {
-                            ByteBuffer oldValue = getValue(position);
-                            long oldValueLong = ByteBuffers.parseLong(oldValue);
-
-                            oldValueLong++;
-
-                            ByteBuffer newValue = ByteBuffer.wrap(Long.toString(oldValueLong).getBytes());
-                            Entry newEntry = new Entry(key, newValue);
-
-                            entries.set(position, newEntry);
-
-                            totalValueSize += newValue.remaining() - oldValue.remaining();
-                            done = true;
-                            ret = newValue;
-                        }
-                    }
-
-                    if (!done) {
-                        ByteBuffer newValue = ByteBuffer.wrap(Long.toString(1).getBytes());
-                        Entry newEntry = new Entry(key, newValue);
-                        entries.add(position, newEntry);
-
-                        totalKeySize += key.remaining();
-                        totalValueSize += newValue.remaining();
-                        ret = newValue;
-                    }
-
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-
-                break;
-            }
-
-            case DELETE: {
-                if (uniqueKeys) {
-                    if (position < entries.size()) {
-                        ByteBuffer midKey = getKey(position);
-                        int comparison = ByteBuffers.compare(midKey, key);
-                        if (comparison == 0) {
-                            ByteBuffer oldValue = getValue(position);
-
-                            entries.remove(position);
-
-                            totalKeySize -= key.remaining();
-                            totalValueSize -= oldValue.remaining();
-                            ret = true;
-                            log.info("Deleted entry @{}", position);
-                        } else {
-                            log.info("Key not found in delete");
-                            ret = false;
-                        }
-                    }
-                } else {
-                    // TODO: Support specifying entry by key & value
-                    throw new UnsupportedOperationException();
-                }
-                break;
-
-            }
-
-            default:
+            } else {
                 throw new UnsupportedOperationException();
             }
 
-            return ret;
+            ByteBuffer newValue = operation.doAction(oldValue);
+
+            if (newValue == oldValue) {
+                // No change (either both null or no value change)
+            } else if (newValue == null && oldValue != null) {
+                // Delete entry
+                entries.remove(position);
+
+                totalKeySize -= key.remaining();
+                totalValueSize -= oldValue.remaining();
+                log.info("Deleted entry @{}", position);
+            } else if (newValue != null && oldValue == null) {
+                // Insert new entry
+                Entry newEntry = new Entry(key, newValue);
+                entries.add(position, newEntry);
+
+                totalKeySize += key.remaining();
+                totalValueSize += newValue.remaining();
+            } else {
+                // Update value
+                assert newValue != null;
+                assert oldValue != null;
+
+                Entry newEntry = new Entry(key, newValue);
+                entries.set(position, newEntry);
+
+                totalValueSize += newValue.remaining() - oldValue.remaining();
+            }
+
+            return newValue;
         }
 
         Mutable(LeafPage page) {
@@ -519,8 +460,8 @@ public class LeafPage extends Page {
     }
 
     @Override
-    public Object doAction(Transaction txn, KvAction action, ByteBuffer key, ByteBuffer value) {
-        return getMutable().doAction(action, key, value);
+    public Object doAction(Transaction txn, ByteBuffer key, KeyOperation operation) {
+        return getMutable().doAction(key, operation);
     }
 
     @Override

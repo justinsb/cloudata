@@ -17,6 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
+import com.cloudata.keyvalue.btree.operation.DeleteOperation;
+import com.cloudata.keyvalue.btree.operation.IncrementOperation;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
+import com.cloudata.keyvalue.btree.operation.SetOperation;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -83,8 +87,31 @@ public class KeyValueStateMachine implements StateMachine {
 
             KeyValueStore keyValueStore = getKeyValueStore(storeId);
 
-            Object ret = keyValueStore.doAction(entry.getAction(), key != null ? key.asReadOnlyByteBuffer() : null,
-                    value != null ? value.asReadOnlyByteBuffer() : null);
+            KeyOperation operation;
+
+            switch (entry.getAction()) {
+
+            case DELETE:
+                operation = new DeleteOperation();
+                break;
+
+            case INCREMENT: {
+                long delta = 1;
+                if (entry.hasIncrementBy()) {
+                    delta = entry.getIncrementBy();
+                }
+                operation = new IncrementOperation(delta);
+                break;
+            }
+
+            case SET:
+                operation = new SetOperation(value.asReadOnlyByteBuffer());
+                break;
+
+            default:
+                throw new UnsupportedOperationException();
+            }
+            Object ret = keyValueStore.doAction(key != null ? key.asReadOnlyByteBuffer() : null, operation);
 
             return ret;
         } catch (InvalidProtocolBufferException e) {

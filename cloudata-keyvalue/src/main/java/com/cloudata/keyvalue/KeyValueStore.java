@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.btree.Btree;
 import com.cloudata.keyvalue.btree.ByteBuffers;
 import com.cloudata.keyvalue.btree.EntryListener;
@@ -15,6 +14,7 @@ import com.cloudata.keyvalue.btree.MmapPageStore;
 import com.cloudata.keyvalue.btree.PageStore;
 import com.cloudata.keyvalue.btree.ReadOnlyTransaction;
 import com.cloudata.keyvalue.btree.WriteTransaction;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 
 public class KeyValueStore {
 
@@ -31,9 +31,9 @@ public class KeyValueStore {
         this.btree = new Btree(pageStore, uniqueKeys);
     }
 
-    public Object doAction(KvAction action, ByteBuffer key, ByteBuffer value) {
+    public Object doAction(ByteBuffer key, KeyOperation operation) {
         try (WriteTransaction txn = btree.beginReadWrite()) {
-            Object ret = txn.doAction(btree, action, key, value);
+            Object ret = txn.doAction(btree, key, operation);
             txn.commit();
             return ret;
         }

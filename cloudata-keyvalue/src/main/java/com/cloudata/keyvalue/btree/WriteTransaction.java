@@ -10,8 +10,8 @@ import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.btree.PageStore.PageRecord;
+import com.cloudata.keyvalue.btree.operation.KeyOperation;
 import com.cloudata.keyvalue.freemap.SpaceMapEntry;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -175,8 +175,8 @@ public class WriteTransaction extends Transaction {
         this.transactionId = transactionId;
     }
 
-    public Object doAction(Btree btree, KvAction action, ByteBuffer key, ByteBuffer value) {
-        return getRootPage(btree, true).doAction(this, action, key, value);
+    public Object doAction(Btree btree, ByteBuffer key, KeyOperation operation) {
+        return getRootPage(btree, true).doAction(this, key, operation);
     }
 
     int createdPageCount;

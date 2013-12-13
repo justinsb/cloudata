@@ -5,6 +5,7 @@ message KvEntry {
 	required KvAction action = 2;
 	optional bytes key = 3;
 	optional bytes value = 4;
+	optional int64 increment_by = 5;
 }
 
 enum KvAction {
