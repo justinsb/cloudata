@@ -1,28 +1,30 @@
 package com.cloudata.keyvalue.redis.response;
 
-import com.cloudata.keyvalue.redis.Codec;
-
 import io.netty.buffer.ByteBuf;
+
+import com.cloudata.keyvalue.redis.Codec;
 
 public class IntegerRedisResponse extends RedisResponse {
     public static final char MARKER = ':';
 
     private final long value;
 
-    private static final int cacheLow = -255;
-    private static final int cacheHigh = 255;
-    private static IntegerRedisResponse[] cache;
+    static class Cache {
+        private static final int cacheLow = -255;
+        private static final int cacheHigh = 255;
+        private static IntegerRedisResponse[] cache;
 
-    static {
-        cache = new IntegerRedisResponse[1 + cacheHigh - cacheLow];
-        for (int i = 0; i < cache.length; i++) {
-            cache[i + cacheLow] = new IntegerRedisResponse(i);
+        static {
+            cache = new IntegerRedisResponse[1 + cacheHigh - cacheLow];
+            for (int i = 0; i < cache.length; i++) {
+                cache[i] = new IntegerRedisResponse(i + cacheLow);
+            }
         }
     }
 
     public static IntegerRedisResponse valueOf(long v) {
-        if (v >= cacheLow && v <= cacheHigh) {
-            return cache[(int) (v - cacheLow)];
+        if (v >= Cache.cacheLow && v <= Cache.cacheHigh) {
+            return Cache.cache[(int) (v - Cache.cacheLow)];
         } else {
             return new IntegerRedisResponse(v);
         }

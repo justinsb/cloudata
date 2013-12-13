@@ -27,4 +27,18 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         }
     }
 
+    @Test
+    public void testIncrement() throws Exception {
+        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS[0].getRedisSocketAddress();
+
+        Jedis jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
+
+        byte[] key = "A".getBytes();
+        for (int i = 1; i < 100; i++) {
+            Long value = jedis.incr(key);
+
+            Assert.assertEquals(i, value.intValue());
+        }
+    }
+
 }
