@@ -65,13 +65,13 @@ public class ByteBuffers {
                 v = (v * 10) + (b - '0');
                 continue;
             } else if (b == '-') {
-                if (i == 0) {
+                if (i == buff.position()) {
                     negative = true;
                     continue;
                 }
             }
 
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Unexpected character in long: " + ((int) b));
         }
 
         if (negative) {
