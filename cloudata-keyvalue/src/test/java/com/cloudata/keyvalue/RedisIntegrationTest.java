@@ -42,6 +42,25 @@ public class RedisIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
+    public void testAppend() throws Exception {
+        byte[] key = UUID.randomUUID().toString().getBytes();
+
+        for (int i = 1; i < 100; i++) {
+            byte[] value = new byte[] { (byte) i };
+
+            Long newLength = jedis.append(key, value);
+
+            Assert.assertEquals(i, newLength.longValue());
+        }
+
+        byte[] finalValue = jedis.get(key);
+
+        for (int i = 1; i < 100; i++) {
+            Assert.assertEquals(i, finalValue[i - 1]);
+        }
+    }
+
+    @Test
     public void testSetAndDelete() throws Exception {
         List<byte[]> allKeys = Lists.newArrayList();
         for (int i = 1; i < 100; i++) {
