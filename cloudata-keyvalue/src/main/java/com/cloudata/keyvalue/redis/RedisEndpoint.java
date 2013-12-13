@@ -14,8 +14,6 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 import java.net.SocketAddress;
 
-;
-
 public class RedisEndpoint {
     DefaultEventExecutorGroup group;
 
@@ -60,13 +58,13 @@ public class RedisEndpoint {
 
         // Start the server.
         ChannelFuture f = b.bind().sync();
-
-        // Wait until the server socket is closed.
-        f.channel().closeFuture().sync();
-
+        // return f;
     }
 
     public void stop() {
         group.shutdownGracefully();
+
+        // Wait until the server socket is closed.
+        // f.channel().closeFuture().sync();
     }
 }

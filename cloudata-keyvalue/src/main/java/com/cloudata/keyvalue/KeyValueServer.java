@@ -121,4 +121,8 @@ public class KeyValueServer {
         }
     }
 
+    public SocketAddress getRedisSocketAddress() {
+        return redisSocketAddress;
+    }
+
 }
