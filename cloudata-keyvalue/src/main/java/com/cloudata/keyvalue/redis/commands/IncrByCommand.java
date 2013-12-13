@@ -18,11 +18,9 @@ public class IncrByCommand implements RedisCommand {
 
     @Override
     public RedisResponse execute(RedisServer server, RedisRequest command) throws RedisException {
-        byte[] delta = command.get(2);
+        long delta = command.getLong(2);
 
-        long deltaLong = ByteBuffers.parseLong(ByteBuffer.wrap(delta));
-
-        return execute(server, command, deltaLong);
+        return execute(server, command, delta);
     }
 
     protected IntegerRedisResponse execute(RedisServer server, RedisRequest command, long deltaLong) {

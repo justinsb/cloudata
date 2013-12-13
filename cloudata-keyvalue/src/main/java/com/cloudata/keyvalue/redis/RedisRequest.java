@@ -1,5 +1,9 @@
 package com.cloudata.keyvalue.redis;
 
+import java.nio.ByteBuffer;
+
+import com.cloudata.keyvalue.btree.ByteBuffers;
+
 public class RedisRequest {
     final byte[][] command;
     final boolean inline;
@@ -53,6 +57,14 @@ public class RedisRequest {
 
     public int getArgc() {
         return command.length;
+    }
+
+    public long getLong(int i) {
+        byte[] data = get(i);
+
+        long v = ByteBuffers.parseLong(ByteBuffer.wrap(data));
+
+        return v;
     }
 
 }
