@@ -20,11 +20,18 @@ public class IntegerRedisResponse extends RedisResponse {
                 cache[i] = new IntegerRedisResponse(i + cacheLow);
             }
         }
+
+        static IntegerRedisResponse get(long v) {
+            return Cache.cache[(int) (v - Cache.cacheLow)];
+        }
     }
+
+    public static final RedisResponse ZERO = Cache.get(0);
+    public static final RedisResponse ONE = Cache.get(1);
 
     public static IntegerRedisResponse valueOf(long v) {
         if (v >= Cache.cacheLow && v <= Cache.cacheHigh) {
-            return Cache.cache[(int) (v - Cache.cacheLow)];
+            return Cache.get(v);
         } else {
             return new IntegerRedisResponse(v);
         }
