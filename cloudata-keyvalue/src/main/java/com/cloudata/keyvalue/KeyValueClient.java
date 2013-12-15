@@ -1,7 +1,11 @@
 package com.cloudata.keyvalue;
 
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import javax.ws.rs.core.MediaType;
 
@@ -9,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.util.Hex;
+import com.google.common.base.Throwables;
+import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -128,8 +134,127 @@ public class KeyValueClient {
         }
     }
 
+    public KeyValueRecordset query(long storeId) throws IOException {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId)).get(ClientResponse.class);
+
+        try {
+            int status = response.getStatus();
+
+            switch (status) {
+            case 200:
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected status: " + status);
+            }
+
+            KeyValueRecordset records = new KeyValueRecordset(response);
+            response = null;
+            return records;
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+    }
+
+    static class KeyValueRecordset implements AutoCloseable, Iterable<KeyValueEntry> {
+        final ClientResponse response;
+
+        boolean read;
+
+        public KeyValueRecordset(ClientResponse response) {
+            this.response = response;
+        }
+
+        @Override
+        public void close() {
+            response.close();
+        }
+
+        @Override
+        public Iterator<KeyValueEntry> iterator() {
+            if (read) {
+                throw new IllegalStateException();
+            }
+            read = true;
+            InputStream is = response.getEntityInputStream();
+
+            final DataInputStream dis = new DataInputStream(is);
+
+            return new Iterator<KeyValueClient.KeyValueEntry>() {
+                KeyValueEntry next;
+                boolean done;
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public KeyValueEntry next() {
+                    ensureHaveNext();
+
+                    if (next != null) {
+                        KeyValueEntry ret = next;
+                        next = null;
+                        return ret;
+                    } else {
+                        throw new NoSuchElementException();
+                    }
+                }
+
+                @Override
+                public boolean hasNext() {
+                    ensureHaveNext();
+
+                    return next != null;
+                }
+
+                private void ensureHaveNext() {
+                    if (next == null) {
+                        if (!done) {
+                            try {
+                                next = read();
+                            } catch (IOException e) {
+                                throw Throwables.propagate(e);
+                            }
+                            if (next == null) {
+                                done = true;
+                            }
+                        }
+                    }
+                }
+
+                KeyValueEntry read() throws IOException {
+                    int keyLength = dis.readInt();
+                    if (keyLength == -1) {
+                        return null;
+                    }
+
+                    ByteString key = ByteString.readFrom(ByteStreams.limit(dis, keyLength));
+                    if (key.size() != keyLength) {
+                        throw new EOFException();
+                    }
+
+                    int valueLength = dis.readInt();
+                    ByteString value = ByteString.readFrom(ByteStreams.limit(dis, valueLength));
+                    if (value.size() != valueLength) {
+                        throw new EOFException();
+                    }
+
+                    return new KeyValueEntry(key, value);
+                }
+            };
+        }
+    }
+
     private String toUrlPath(long storeId, ByteString key) {
         return Long.toString(storeId) + "/" + Hex.toHex(key);
+    }
+
+    private String toUrlPath(long storeId) {
+        return Long.toString(storeId);
     }
 
     public void delete(long storeId, ByteString key) {

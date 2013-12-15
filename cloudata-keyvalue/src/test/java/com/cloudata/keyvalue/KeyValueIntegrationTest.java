@@ -1,9 +1,13 @@
 package com.cloudata.keyvalue;
 
+import java.util.ArrayList;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.cloudata.keyvalue.KeyValueClient.KeyValueEntry;
+import com.cloudata.keyvalue.KeyValueClient.KeyValueRecordset;
+import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 
 public class KeyValueIntegrationTest extends IntegrationTestBase {
@@ -18,18 +22,49 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         int n = 20;
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
             byte[] expected = buildValue(i);
             Assert.assertArrayEquals(expected, data);
+        }
+    }
+
+    @Test
+    public void testSetAndQuery() throws Exception {
+        String url = SERVERS[0].getHttpUrl();
+
+        long storeId = newLogId();
+
+        KeyValueClient client = new KeyValueClient(url);
+
+        int n = 20;
+
+        for (int i = 1; i <= n; i++) {
+            byte[] key = String.format("%04x", i).getBytes();
+            byte[] data = buildValue(i);
+            client.put(storeId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+        }
+
+        try (KeyValueRecordset rs = client.query(storeId)) {
+            ArrayList<KeyValueEntry> entries = Lists.newArrayList(rs);
+
+            Assert.assertEquals(n, entries.size());
+
+            for (int i = 1; i <= n; i++) {
+                byte[] expectedKey = String.format("%04x", i).getBytes();
+                byte[] expectedValue = buildValue(i);
+                KeyValueEntry entry = entries.get(i - 1);
+                Assert.assertArrayEquals(expectedKey, entry.getKey().toByteArray());
+                Assert.assertArrayEquals(expectedValue, entry.getValue().toByteArray());
+            }
         }
     }
 
@@ -43,7 +78,7 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         int n = 20;
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = "A".getBytes();
             KeyValueEntry entry = client.increment(logId, ByteString.copyFrom(key));
             Assert.assertNotNull(entry);
@@ -63,7 +98,7 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         int n = 20;
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
@@ -89,13 +124,13 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         int n = 30;
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i * 1000);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
@@ -115,13 +150,13 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         int n = 30;
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i * 10000);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
@@ -142,7 +177,7 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         byte[] key = "A".getBytes();
         byte[] data = buildValue(30000);
 
-        for (int i = 1; i < 10000; i++) {
+        for (int i = 1; i <= 10000; i++) {
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
     }
@@ -158,21 +193,21 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         int n = 20;
 
         // Set i = i
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
         // Set i = i * 2
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i * 2);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
         // Check i = i * 2
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
@@ -192,14 +227,14 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         int n = 20;
 
         // Set i = i
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             byte[] data = buildValue(i);
             client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
         // Delete even keys
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             if (i % 2 == 0) {
                 byte[] key = Integer.toString(i).getBytes();
                 client.delete(logId, ByteString.copyFrom(key));
@@ -207,7 +242,7 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         }
 
         // Check
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
             KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
             if (i % 2 == 0) {

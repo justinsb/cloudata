@@ -2,6 +2,8 @@ package com.cloudata.keyvalue.btree;
 
 import java.nio.ByteBuffer;
 
+import com.google.protobuf.ByteString;
+
 public class ByteBuffers {
 
     public static int compare(ByteBuffer l, ByteBuffer r) {
@@ -86,5 +88,12 @@ public class ByteBuffers {
         buff.put(b.duplicate());
         buff.flip();
         return buff;
+    }
+
+    public static ByteBuffer asReadOnlyBuffer(ByteString b) {
+        if (b == null) {
+            return null;
+        }
+        return b.asReadOnlyByteBuffer();
     }
 }

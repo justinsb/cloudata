@@ -21,6 +21,7 @@ import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
 import com.cloudata.keyvalue.btree.operation.KeyOperation;
 import com.cloudata.keyvalue.btree.operation.SetOperation;
+import com.cloudata.keyvalue.web.KeyValueQuery;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -159,7 +160,12 @@ public class KeyValueStateMachine implements StateMachine {
 
     public ByteBuffer get(long storeId, ByteBuffer key) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
-        return keyValueStore.get(key.asReadOnlyBuffer());
+        return keyValueStore.get(key);
+    }
+
+    public KeyValueQuery scan(long storeId) {
+        KeyValueStore keyValueStore = getKeyValueStore(storeId);
+        return keyValueStore.buildQuery();
     }
 
 }

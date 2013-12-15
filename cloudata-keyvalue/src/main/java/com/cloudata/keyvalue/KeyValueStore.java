@@ -15,6 +15,7 @@ import com.cloudata.keyvalue.btree.PageStore;
 import com.cloudata.keyvalue.btree.ReadOnlyTransaction;
 import com.cloudata.keyvalue.btree.WriteTransaction;
 import com.cloudata.keyvalue.btree.operation.KeyOperation;
+import com.cloudata.keyvalue.web.KeyValueQuery;
 
 public class KeyValueStore {
 
@@ -74,6 +75,10 @@ public class KeyValueStore {
 
             return value;
         }
+    }
+
+    public KeyValueQuery buildQuery() {
+        return new KeyValueQuery(btree);
     }
 
 }

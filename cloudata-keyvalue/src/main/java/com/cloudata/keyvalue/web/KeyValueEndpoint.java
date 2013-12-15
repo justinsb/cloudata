@@ -55,6 +55,14 @@ public class KeyValueEndpoint {
         return Response.ok(v).build();
     }
 
+    @GET
+    // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    public Response query() throws IOException {
+        KeyValueQuery query = stateMachine.scan(storeId);
+
+        return Response.ok(query).build();
+    }
+
     enum PostAction {
         SET, INCREMENT
     }

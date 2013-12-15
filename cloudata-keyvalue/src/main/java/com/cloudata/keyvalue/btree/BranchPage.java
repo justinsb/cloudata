@@ -133,7 +133,7 @@ public class BranchPage extends Page {
 
         public boolean walk(Transaction txn, ByteBuffer from, EntryListener listener) {
             int n = getEntryCount();
-            int pos = findPos(from);
+            int pos = from != null ? findPos(from) : 0;
             if (pos < 0) {
                 pos = 0;
             }
@@ -355,7 +355,7 @@ public class BranchPage extends Page {
         }
 
         int n = getEntryCount();
-        int pos = findPos(from);
+        int pos = from != null ? findPos(from) : 0;
         if (pos < 0) {
             pos = 0;
         }

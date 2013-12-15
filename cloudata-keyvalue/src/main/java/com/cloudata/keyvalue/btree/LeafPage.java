@@ -280,7 +280,7 @@ public class LeafPage extends Page {
 
         public boolean walk(Transaction txn, ByteBuffer from, EntryListener listener) {
             int n = getEntryCount();
-            int pos = firstGTE(from);
+            int pos = from != null ? firstGTE(from) : 0;
             while (pos < n) {
                 ByteBuffer key = getKey(pos);
                 ByteBuffer value = getValue(pos);
@@ -381,7 +381,7 @@ public class LeafPage extends Page {
         }
 
         int n = getEntryCount();
-        int pos = firstGTE(from);
+        int pos = from != null ? firstGTE(from) : 0;
         while (pos < n) {
             ByteBuffer key = getKey(pos);
             ByteBuffer value = getValue(pos);
