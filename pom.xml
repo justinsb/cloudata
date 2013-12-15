@@ -13,6 +13,7 @@
 		<module>cloudata-shared</module>
 		<module>cloudata-appendlog</module>
 		<module>cloudata-keyvalue</module>
+		<module>cloudata-git</module>
 	</modules>
 
 	<dependencyManagement>

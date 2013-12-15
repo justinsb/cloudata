@@ -1,0 +1,11 @@
+option java_package = "com.cloudata.git";
+
+message RefData {
+	optional string name = 1;
+	optional string target_name = 2;
+	optional bytes object_id = 3;
+}
+
+message RepositoryData {
+	optional bytes unique_id = 1;
+}
