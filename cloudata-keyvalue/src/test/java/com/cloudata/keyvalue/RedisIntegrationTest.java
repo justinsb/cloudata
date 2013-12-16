@@ -42,6 +42,40 @@ public class RedisIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
+    public void testPartitions() throws Exception {
+        int n = 100;
+        int partitions = 10;
+
+        for (int i = 0; i < n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] value = buildValue(i);
+
+            assertOk(jedis.select(i / 10));
+            jedis.set(key, value);
+        }
+
+        for (int j = 0; j < partitions; j++) {
+            for (int i = 0; i < n; i++) {
+                byte[] key = Integer.toString(i).getBytes();
+                byte[] value = buildValue(i);
+
+                assertOk(jedis.select(j));
+
+                byte[] found = jedis.get(key);
+                if ((i / partitions) == j) {
+                    Assert.assertArrayEquals(value, found);
+                } else {
+                    Assert.assertNull(found);
+                }
+            }
+        }
+    }
+
+    private void assertOk(String r) {
+        Assert.assertEquals("OK", r);
+    }
+
+    @Test
     public void testAppend() throws Exception {
         byte[] key = UUID.randomUUID().toString().getBytes();
 
