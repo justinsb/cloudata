@@ -94,7 +94,7 @@ public class KeyValueServer {
 
         File baseDir = new File(args[0]);
         int httpPort = (9990 + port);
-        int redisPort = 6379 + port - 1;
+        int redisPort = 6379 + port;
 
         SocketAddress redisSocketAddress = new InetSocketAddress(redisPort);
         final KeyValueServer server = new KeyValueServer(baseDir, local, members, httpPort, redisSocketAddress);

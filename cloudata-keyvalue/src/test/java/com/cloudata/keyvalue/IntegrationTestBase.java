@@ -33,7 +33,7 @@ public class IntegrationTestBase {
             int httpPort = 9990 + i;
 
             File baseDir = new File(TEMPDIR, "" + i);
-            SocketAddress redisAddress = new InetSocketAddress(6379 + i);
+            SocketAddress redisAddress = new InetSocketAddress(6379 + i + 1);
             SERVERS[i] = new KeyValueServer(baseDir, local, members, httpPort, redisAddress);
 
             SERVERS[i].start();
