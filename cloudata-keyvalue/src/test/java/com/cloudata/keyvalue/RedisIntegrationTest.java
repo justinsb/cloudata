@@ -87,6 +87,9 @@ public class RedisIntegrationTest extends IntegrationTestBase {
     public void testIncrement() throws Exception {
 
         byte[] key = "INCR".getBytes();
+
+        jedis.set(key, "0".getBytes());
+
         for (int i = 1; i < 100; i++) {
             Long value = jedis.incr(key);
 
@@ -100,6 +103,9 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         long counter = 0;
         Random r = new Random();
         byte[] key = "INCRBY".getBytes();
+
+        jedis.set(key, "0".getBytes());
+
         for (int i = 1; i < 100; i++) {
             long delta = r.nextInt();
 
@@ -115,6 +121,9 @@ public class RedisIntegrationTest extends IntegrationTestBase {
     public void testDecrement() throws Exception {
 
         byte[] key = "DECR".getBytes();
+
+        jedis.set(key, "0".getBytes());
+
         for (int i = 1; i < 100; i++) {
             Long value = jedis.decr(key);
 
@@ -128,6 +137,9 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         long counter = 0;
         Random r = new Random();
         byte[] key = "DECRBY".getBytes();
+
+        jedis.set(key, "0".getBytes());
+
         for (int i = 1; i < 100; i++) {
             long delta = r.nextInt();
 
