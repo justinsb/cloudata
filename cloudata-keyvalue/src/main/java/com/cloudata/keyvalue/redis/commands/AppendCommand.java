@@ -20,7 +20,7 @@ public class AppendCommand implements RedisCommand {
             return ErrorRedisReponse.NOT_IMPLEMENTED;
         }
 
-        ByteString key = command.getByteString(1);
+        ByteString key = session.mapToKey(command.getByteString(1));
         byte[] value = command.get(2);
 
         AppendOperation operation = new AppendOperation(ByteBuffer.wrap(value));

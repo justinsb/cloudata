@@ -16,7 +16,7 @@ public class DecrByCommand extends IncrByCommand {
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
         long delta = command.getLong(2);
         delta = -delta;
-        return execute(server, command, delta);
+        return execute(server, session, command, delta);
     }
 
 }

@@ -14,6 +14,6 @@ public class IncrCommand extends IncrByCommand {
 
     @Override
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
-        return execute(server, command, 1);
+        return execute(server, session, command, 1);
     }
 }

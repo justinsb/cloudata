@@ -11,15 +11,16 @@ import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.redis.RedisSession;
 import com.cloudata.keyvalue.redis.response.IntegerRedisResponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
+import com.google.protobuf.ByteString;
 
 public class ExistsCommand implements RedisCommand {
     private static final Logger log = LoggerFactory.getLogger(ExistsCommand.class);
 
     @Override
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
-        byte[] key = command.get(1);
+        ByteString key = session.mapToKey(command.getByteString(1));
 
-        ByteBuffer value = server.get(ByteBuffer.wrap(key));
+        ByteBuffer value = server.get(key);
 
         if (value == null) {
             return IntegerRedisResponse.ZERO;

@@ -22,12 +22,12 @@ public class IncrByCommand implements RedisCommand {
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
         long delta = command.getLong(2);
 
-        return execute(server, command, delta);
+        return execute(server, session, command, delta);
     }
 
-    protected IntegerRedisResponse execute(RedisServer server, RedisRequest command, long deltaLong)
-            throws RedisException {
-        ByteString key = command.getByteString(1);
+    protected IntegerRedisResponse execute(RedisServer server, RedisSession session, RedisRequest command,
+            long deltaLong) throws RedisException {
+        ByteString key = session.mapToKey(command.getByteString(1));
 
         IncrementOperation operation = new IncrementOperation(deltaLong);
         ByteBuffer value = (ByteBuffer) server.doAction(key, operation);

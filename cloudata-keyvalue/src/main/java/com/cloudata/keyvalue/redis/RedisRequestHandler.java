@@ -21,6 +21,7 @@ import com.cloudata.keyvalue.redis.commands.IncrCommand;
 import com.cloudata.keyvalue.redis.commands.PingCommand;
 import com.cloudata.keyvalue.redis.commands.QuitCommand;
 import com.cloudata.keyvalue.redis.commands.RedisCommand;
+import com.cloudata.keyvalue.redis.commands.SelectCommand;
 import com.cloudata.keyvalue.redis.commands.SetCommand;
 import com.cloudata.keyvalue.redis.response.ErrorRedisReponse;
 import com.cloudata.keyvalue.redis.response.InlineRedisResponse;
@@ -43,6 +44,8 @@ public class RedisRequestHandler extends SimpleChannelInboundHandler<RedisReques
         addMethod("echo", new EchoCommand());
         addMethod("ping", new PingCommand());
         addMethod("quit", new QuitCommand());
+
+        addMethod("select", new SelectCommand());
 
         addMethod("get", new GetCommand());
         addMethod("exists", new ExistsCommand());

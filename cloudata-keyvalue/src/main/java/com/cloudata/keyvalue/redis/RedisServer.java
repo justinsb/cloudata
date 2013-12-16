@@ -28,8 +28,8 @@ public class RedisServer {
         }
     }
 
-    public ByteBuffer get(ByteBuffer key) {
-        return stateMachine.get(storeId, key);
+    public ByteBuffer get(ByteString key) {
+        return stateMachine.get(storeId, key.asReadOnlyByteBuffer());
     }
 
 }

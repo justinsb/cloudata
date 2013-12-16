@@ -1,8 +1,8 @@
 package com.cloudata.keyvalue.redis.commands;
 
-import java.nio.ByteBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.btree.operation.SetOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;
@@ -10,22 +10,20 @@ import com.cloudata.keyvalue.redis.RedisSession;
 import com.cloudata.keyvalue.redis.response.ErrorRedisReponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
 import com.cloudata.keyvalue.redis.response.StatusRedisResponse;
-import com.google.protobuf.ByteString;
+import com.google.common.primitives.Ints;
 
-public class SetCommand implements RedisCommand {
+public class SelectCommand implements RedisCommand {
+    private static final Logger log = LoggerFactory.getLogger(SelectCommand.class);
+
     @Override
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
-        int argc = command.getArgc();
-        if (argc != 3) {
-            return ErrorRedisReponse.NOT_IMPLEMENTED;
+        long keyspaceId = command.getLong(1);
+
+        if (keyspaceId < 0 || keyspaceId >= Integer.MAX_VALUE) {
+            return new ErrorRedisReponse("invalid DB index");
         }
 
-        ByteString key = session.mapToKey(command.getByteString(1));
-        byte[] value = command.get(2);
-
-        SetOperation operation = new SetOperation(ByteBuffer.wrap(value));
-        server.doAction(key, operation);
-
+        session.setKeyspaceId(Ints.checkedCast(keyspaceId));
         return StatusRedisResponse.OK;
     }
 }
