@@ -113,13 +113,15 @@ public class RedisRequestHandler extends SimpleChannelInboundHandler<RedisReques
 
         log.debug("Executing command: {}", msg);
 
+        RedisSession session = RedisSession.get(server, ctx);
+
         RedisCommand command = methods.get(ByteString.copyFrom(name));
         RedisResponse reply;
         if (command == null) {
             reply = new ErrorRedisReponse("unknown command '" + new String(name, Charsets.US_ASCII) + "'");
         } else {
             try {
-                reply = command.execute(server, msg);
+                reply = command.execute(server, session, msg);
             } catch (Throwable t) {
                 log.warn("Error executing command", t);
                 reply = ErrorRedisReponse.INTERNAL_ERROR;

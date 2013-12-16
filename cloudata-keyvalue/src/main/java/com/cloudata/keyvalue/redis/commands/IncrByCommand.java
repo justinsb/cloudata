@@ -10,6 +10,7 @@ import com.cloudata.keyvalue.btree.operation.IncrementOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;
+import com.cloudata.keyvalue.redis.RedisSession;
 import com.cloudata.keyvalue.redis.response.IntegerRedisResponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
 import com.google.protobuf.ByteString;
@@ -18,7 +19,7 @@ public class IncrByCommand implements RedisCommand {
     private static final Logger log = LoggerFactory.getLogger(IncrByCommand.class);
 
     @Override
-    public RedisResponse execute(RedisServer server, RedisRequest command) throws RedisException {
+    public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
         long delta = command.getLong(2);
 
         return execute(server, command, delta);
