@@ -19,9 +19,9 @@ public class GetCommand implements RedisCommand {
 
     @Override
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
-        ByteString key = session.mapToKey(command.getByteString(1));
+        ByteString key = command.getByteString(1);
 
-        Value value = server.get(key);
+        Value value = server.get(session.getKeyspace(), key);
         if (value == null) {
             return BulkRedisResponse.NIL_REPLY;
         }

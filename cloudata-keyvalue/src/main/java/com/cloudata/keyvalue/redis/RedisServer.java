@@ -4,6 +4,7 @@ import org.robotninjas.barge.RaftException;
 
 import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.btree.operation.KeyOperation;
+import com.cloudata.keyvalue.btree.operation.Keyspace;
 import com.cloudata.keyvalue.btree.operation.Value;
 import com.google.protobuf.ByteString;
 
@@ -16,9 +17,9 @@ public class RedisServer {
         this.storeId = storeId;
     }
 
-    public <V> V doAction(ByteString key, KeyOperation<V> operation) throws RedisException {
+    public <V> V doAction(Keyspace keyspace, ByteString key, KeyOperation<V> operation) throws RedisException {
         try {
-            return stateMachine.doAction(storeId, key, operation);
+            return stateMachine.doAction(storeId, keyspace, key, operation);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RedisException("Interrupted during processing", e);
@@ -27,8 +28,8 @@ public class RedisServer {
         }
     }
 
-    public Value get(ByteString key) {
-        return stateMachine.get(storeId, key);
+    public Value get(Keyspace keyspace, ByteString key) {
+        return stateMachine.get(storeId, keyspace, key);
     }
 
 }

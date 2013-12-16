@@ -18,11 +18,11 @@ public class AppendCommand implements RedisCommand {
             return ErrorRedisReponse.NOT_IMPLEMENTED;
         }
 
-        ByteString key = session.mapToKey(command.getByteString(1));
+        ByteString key = command.getByteString(1);
         ByteString value = command.getByteString(2);
 
         AppendOperation operation = new AppendOperation(value);
-        Number ret = server.doAction(key, operation);
+        Number ret = server.doAction(session.getKeyspace(), key, operation);
 
         return IntegerRedisResponse.valueOf(ret.longValue());
     }

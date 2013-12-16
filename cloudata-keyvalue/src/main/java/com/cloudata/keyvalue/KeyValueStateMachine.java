@@ -20,6 +20,7 @@ import com.cloudata.keyvalue.btree.operation.AppendOperation;
 import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
 import com.cloudata.keyvalue.btree.operation.KeyOperation;
+import com.cloudata.keyvalue.btree.operation.Keyspace;
 import com.cloudata.keyvalue.btree.operation.SetOperation;
 import com.cloudata.keyvalue.btree.operation.Value;
 import com.cloudata.keyvalue.web.KeyValueQuery;
@@ -61,10 +62,10 @@ public class KeyValueStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public <V> V doAction(long storeId, ByteString key, KeyOperation<V> operation) throws InterruptedException,
-            RaftException {
+    public <V> V doAction(long storeId, Keyspace keyspace, ByteString key, KeyOperation<V> operation)
+            throws InterruptedException, RaftException {
         KvEntry.Builder entry = operation.serialize();
-        entry.setKey(key);
+        entry.setKey(keyspace.mapToKey(key));
         entry.setStoreId(storeId);
 
         log.debug("Proposing operation {}", entry.getAction());
@@ -159,9 +160,9 @@ public class KeyValueStateMachine implements StateMachine {
         }
     }
 
-    public Value get(long storeId, ByteString key) {
+    public Value get(long storeId, Keyspace keyspace, ByteString key) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
-        return keyValueStore.get(key.asReadOnlyByteBuffer());
+        return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
     public KeyValueQuery scan(long storeId) {

@@ -25,6 +25,7 @@ import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
+import com.cloudata.keyvalue.btree.operation.Keyspace;
 import com.cloudata.keyvalue.btree.operation.SetOperation;
 import com.cloudata.keyvalue.btree.operation.Value;
 import com.google.common.io.BaseEncoding;
@@ -46,7 +47,7 @@ public class KeyValueEndpoint {
     public Response get(@PathParam("key") String key) throws IOException {
         byte[] k = BaseEncoding.base16().decode(key);
 
-        Value v = stateMachine.get(storeId, ByteString.copyFrom(k));
+        Value v = stateMachine.get(storeId, getKeyspace(), ByteString.copyFrom(k));
 
         if (v == null) {
             return Response.status(Status.NOT_FOUND).build();
@@ -89,14 +90,14 @@ public class KeyValueEndpoint {
             switch (action) {
             case SET: {
                 SetOperation operation = new SetOperation(Value.fromRawBytes(v));
-                stateMachine.doAction(storeId, k, operation);
+                stateMachine.doAction(storeId, getKeyspace(), k, operation);
                 ret = null;
                 break;
             }
 
             case INCREMENT: {
                 IncrementOperation operation = new IncrementOperation(1);
-                Long newValue = stateMachine.doAction(storeId, k, operation);
+                Long newValue = stateMachine.doAction(storeId, getKeyspace(), k, operation);
                 ret = Value.fromLong(newValue).asBytes();
                 break;
             }
@@ -127,7 +128,7 @@ public class KeyValueEndpoint {
         try {
             byte[] k = BaseEncoding.base16().decode(key);
 
-            stateMachine.doAction(storeId, ByteString.copyFrom(k), new DeleteOperation());
+            stateMachine.doAction(storeId, getKeyspace(), ByteString.copyFrom(k), new DeleteOperation());
 
             return Response.noContent().build();
         } catch (InterruptedException e) {
@@ -143,6 +144,10 @@ public class KeyValueEndpoint {
         } catch (RaftException e) {
             return Response.serverError().build();
         }
+    }
+
+    private Keyspace getKeyspace() {
+        return Keyspace.ZERO;
     }
 
 }

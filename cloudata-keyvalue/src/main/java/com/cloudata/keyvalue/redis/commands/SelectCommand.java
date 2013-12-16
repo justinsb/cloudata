@@ -3,6 +3,7 @@ package com.cloudata.keyvalue.redis.commands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.btree.operation.Keyspace;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;
@@ -23,7 +24,7 @@ public class SelectCommand implements RedisCommand {
             return new ErrorRedisReponse("invalid DB index");
         }
 
-        session.setKeyspaceId(Ints.checkedCast(keyspaceId));
+        session.setKeyspace(Keyspace.build(Ints.checkedCast(keyspaceId)));
         return StatusRedisResponse.OK;
     }
 }

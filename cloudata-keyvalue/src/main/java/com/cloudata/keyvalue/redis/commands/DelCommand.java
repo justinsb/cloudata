@@ -16,10 +16,10 @@ public class DelCommand implements RedisCommand {
 
         // TODO: Put into one transaction
         for (int i = 1; i < command.getArgc(); i++) {
-            ByteString key = session.mapToKey(command.getByteString(i));
+            ByteString key = command.getByteString(i);
 
             DeleteOperation operation = new DeleteOperation();
-            Number deleted = (Number) server.doAction(key, operation);
+            Integer deleted = server.doAction(session.getKeyspace(), key, operation);
 
             count += deleted.intValue();
         }
