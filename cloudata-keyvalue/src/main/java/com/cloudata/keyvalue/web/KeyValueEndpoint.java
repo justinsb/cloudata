@@ -26,7 +26,7 @@ import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
 import com.cloudata.keyvalue.btree.operation.SetOperation;
-import com.cloudata.keyvalue.btree.operation.Values;
+import com.cloudata.keyvalue.btree.operation.Value;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
@@ -46,13 +46,13 @@ public class KeyValueEndpoint {
     public Response get(@PathParam("key") String key) throws IOException {
         byte[] k = BaseEncoding.base16().decode(key);
 
-        ByteBuffer v = stateMachine.get(storeId, ByteBuffer.wrap(k));
+        Value v = stateMachine.get(storeId, ByteString.copyFrom(k));
 
         if (v == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        ByteBuffer data = Values.asBytes(v);
+        ByteBuffer data = v.asBytes();
         return Response.ok(data).build();
     }
 
@@ -88,7 +88,7 @@ public class KeyValueEndpoint {
 
             switch (action) {
             case SET: {
-                SetOperation operation = new SetOperation(Values.fromRawBytes(v));
+                SetOperation operation = new SetOperation(Value.fromRawBytes(v));
                 stateMachine.doAction(storeId, k, operation);
                 ret = null;
                 break;
@@ -97,7 +97,7 @@ public class KeyValueEndpoint {
             case INCREMENT: {
                 IncrementOperation operation = new IncrementOperation(1);
                 Long newValue = stateMachine.doAction(storeId, k, operation);
-                ret = Values.asBytes(Values.fromLong(newValue));
+                ret = Value.fromLong(newValue).asBytes();
                 break;
             }
 

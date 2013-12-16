@@ -8,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.btree.Btree;
-import com.cloudata.keyvalue.btree.ByteBuffers;
 import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.MmapPageStore;
 import com.cloudata.keyvalue.btree.PageStore;
 import com.cloudata.keyvalue.btree.ReadOnlyTransaction;
 import com.cloudata.keyvalue.btree.WriteTransaction;
 import com.cloudata.keyvalue.btree.operation.KeyOperation;
+import com.cloudata.keyvalue.btree.operation.Value;
 import com.cloudata.keyvalue.web.KeyValueQuery;
 
 public class KeyValueStore {
@@ -32,24 +32,23 @@ public class KeyValueStore {
         this.btree = new Btree(pageStore, uniqueKeys);
     }
 
-    public Object doAction(ByteBuffer key, KeyOperation operation) {
+    public void doAction(ByteBuffer key, KeyOperation<?> operation) {
         try (WriteTransaction txn = btree.beginReadWrite()) {
-            Object ret = txn.doAction(btree, key, operation);
+            txn.doAction(btree, key, operation);
             txn.commit();
-            return ret;
         }
     }
 
     static class GetEntryListener implements EntryListener {
         final ByteBuffer findKey;
-        ByteBuffer foundValue;
+        Value foundValue;
 
         public GetEntryListener(ByteBuffer findKey) {
             this.findKey = findKey;
         }
 
         @Override
-        public boolean found(ByteBuffer key, ByteBuffer value) {
+        public boolean found(ByteBuffer key, Value value) {
             // log.debug("Found {}={}", ByteBuffers.toHex(key), ByteBuffers.toHex(value));
             if (key.equals(findKey)) {
                 foundValue = value;
@@ -59,17 +58,17 @@ public class KeyValueStore {
         }
     };
 
-    public ByteBuffer get(final ByteBuffer key) {
+    public Value get(final ByteBuffer key) {
         try (ReadOnlyTransaction txn = btree.beginReadOnly()) {
             GetEntryListener listener = new GetEntryListener(key);
             txn.walk(btree, key, listener);
 
-            ByteBuffer value = listener.foundValue;
+            Value value = listener.foundValue;
             // log.debug("Value for {}: {}", key, value);
 
             if (value != null) {
                 // Once the transaction goes away the values may be invalid
-                value = ByteBuffers.clone(value);
+                value = value.clone();
             }
             // log.debug("Value for {}: {}", key, value);
 

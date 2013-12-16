@@ -1,10 +1,9 @@
 package com.cloudata.keyvalue.redis.commands;
 
-import java.nio.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.btree.operation.Value;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;
@@ -20,7 +19,7 @@ public class ExistsCommand implements RedisCommand {
     public RedisResponse execute(RedisServer server, RedisSession session, RedisRequest command) throws RedisException {
         ByteString key = session.mapToKey(command.getByteString(1));
 
-        ByteBuffer value = server.get(key);
+        Value value = server.get(key);
 
         if (value == null) {
             return IntegerRedisResponse.ZERO;

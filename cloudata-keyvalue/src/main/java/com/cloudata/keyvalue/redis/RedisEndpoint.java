@@ -8,8 +8,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 
 import java.net.SocketAddress;
@@ -48,7 +46,7 @@ public class RedisEndpoint {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline p = ch.pipeline();
-                // p.addLast(new ByteLoggingHandler(LogLevel.INFO));
+                // p.addLast(new LoggingHandler(LogLevel.DEBUG));
                 p.addLast(new RedisRequestDecoder());
                 p.addLast(new RedisResponseEncoder());
                 p.addLast(group, commandHandler);

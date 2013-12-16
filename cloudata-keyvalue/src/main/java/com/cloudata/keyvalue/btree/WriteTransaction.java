@@ -175,8 +175,8 @@ public class WriteTransaction extends Transaction {
         this.transactionId = transactionId;
     }
 
-    public Object doAction(Btree btree, ByteBuffer key, KeyOperation operation) {
-        return getRootPage(btree, true).doAction(this, key, operation);
+    public <V> void doAction(Btree btree, ByteBuffer key, KeyOperation<V> operation) {
+        getRootPage(btree, true).doAction(this, key, operation);
     }
 
     int createdPageCount;

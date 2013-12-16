@@ -1,7 +1,5 @@
 package com.cloudata.keyvalue.btree.operation;
 
-import java.nio.ByteBuffer;
-
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.google.protobuf.ByteString;
@@ -16,14 +14,14 @@ public class AppendOperation extends KeyOperation<Integer> {
     }
 
     @Override
-    public ByteBuffer doAction(ByteBuffer oldValue) {
+    public Value doAction(Value oldValue) {
         if (oldValue == null) {
             this.newLength = appendValue.size();
-            return Values.fromRawBytes(appendValue);
+            return Value.fromRawBytes(appendValue);
         } else {
-            ByteBuffer appended = Values.concat(oldValue, appendValue);
+            Value appended = oldValue.concat(appendValue);
 
-            this.newLength = Values.sizeAsBytes(appended);
+            this.newLength = appended.sizeAsBytes();
             return appended;
         }
     }

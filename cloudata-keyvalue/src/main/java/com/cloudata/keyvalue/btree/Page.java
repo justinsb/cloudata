@@ -22,7 +22,7 @@ public abstract class Page {
 
     public abstract boolean walk(Transaction txn, ByteBuffer from, EntryListener listener);
 
-    public abstract Object doAction(Transaction txn, ByteBuffer key, KeyOperation operation);
+    public abstract <V> void doAction(Transaction txn, ByteBuffer key, KeyOperation<V> operation);
 
     public abstract ByteBuffer getKeyLbound();
 
@@ -54,4 +54,5 @@ public abstract class Page {
         dump(ps);
         return new String(baos.toByteArray());
     }
+
 }

@@ -1,7 +1,5 @@
 package com.cloudata.keyvalue.btree.operation;
 
-import java.nio.ByteBuffer;
-
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 
@@ -10,7 +8,7 @@ public class DeleteOperation extends KeyOperation<Integer> {
     private int deleteCount;
 
     @Override
-    public ByteBuffer doAction(ByteBuffer oldValue) {
+    public Value doAction(Value oldValue) {
         if (oldValue != null) {
             deleteCount++;
         }

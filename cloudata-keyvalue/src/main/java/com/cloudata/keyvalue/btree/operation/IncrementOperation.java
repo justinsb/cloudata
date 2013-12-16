@@ -1,7 +1,5 @@
 package com.cloudata.keyvalue.btree.operation;
 
-import java.nio.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,16 +18,16 @@ public class IncrementOperation extends KeyOperation<Long> {
     }
 
     @Override
-    public ByteBuffer doAction(ByteBuffer oldValue) {
+    public Value doAction(Value oldValue) {
         long oldValueLong = 0;
 
         if (oldValue != null) {
-            oldValueLong = Values.asLong(oldValue);
+            oldValueLong = oldValue.asLong();
         }
 
         long newValueLong = oldValueLong + delta;
 
-        ByteBuffer newValue = Values.fromLong(newValueLong);
+        Value newValue = Value.fromLong(newValueLong);
 
         log.debug("Increment: {} -> {}", oldValueLong, newValueLong);
 
