@@ -1,11 +1,8 @@
 package com.cloudata.keyvalue.redis.commands;
 
-import java.nio.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.btree.ByteBuffers;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
@@ -30,9 +27,7 @@ public class IncrByCommand implements RedisCommand {
         ByteString key = session.mapToKey(command.getByteString(1));
 
         IncrementOperation operation = new IncrementOperation(deltaLong);
-        ByteBuffer value = (ByteBuffer) server.doAction(key, operation);
-
-        long v = ByteBuffers.parseLong(value);
+        Long v = server.doAction(key, operation);
         return new IntegerRedisResponse(v);
     }
 }

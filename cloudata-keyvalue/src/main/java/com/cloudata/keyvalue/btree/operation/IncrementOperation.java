@@ -2,14 +2,18 @@ package com.cloudata.keyvalue.btree.operation;
 
 import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
-import com.cloudata.keyvalue.btree.ByteBuffers;
 
-public class IncrementOperation extends KeyOperation<ByteBuffer> {
+public class IncrementOperation extends KeyOperation<Long> {
+
+    private static final Logger log = LoggerFactory.getLogger(IncrementOperation.class);
 
     final long delta;
-    private ByteBuffer newValue;
+    private Long result;
 
     public IncrementOperation(long delta) {
         this.delta = delta;
@@ -20,16 +24,18 @@ public class IncrementOperation extends KeyOperation<ByteBuffer> {
         long oldValueLong = 0;
 
         if (oldValue != null) {
-            oldValueLong = ByteBuffers.parseLong(oldValue);
+            oldValueLong = Values.asLong(oldValue);
         }
 
         long newValueLong = oldValueLong + delta;
 
-        ByteBuffer newValue = ByteBuffer.wrap(Long.toString(newValueLong).getBytes());
+        ByteBuffer newValue = Values.fromLong(newValueLong);
 
-        this.newValue = newValue.duplicate();
+        log.debug("Increment: {} -> {}", oldValueLong, newValueLong);
 
-        // this.newValueLong = newValueLong;
+        // this.newValue = newValue.duplicate();
+
+        this.result = newValueLong;
 
         return newValue;
     }
@@ -43,8 +49,8 @@ public class IncrementOperation extends KeyOperation<ByteBuffer> {
     }
 
     @Override
-    public ByteBuffer getResult() {
-        return newValue;
+    public Long getResult() {
+        return result;
     }
 
 }

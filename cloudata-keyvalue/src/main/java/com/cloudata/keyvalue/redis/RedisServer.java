@@ -17,7 +17,7 @@ public class RedisServer {
         this.storeId = storeId;
     }
 
-    public Object doAction(ByteString key, KeyOperation<?> operation) throws RedisException {
+    public <V> V doAction(ByteString key, KeyOperation<V> operation) throws RedisException {
         try {
             return stateMachine.doAction(storeId, key, operation);
         } catch (InterruptedException e) {

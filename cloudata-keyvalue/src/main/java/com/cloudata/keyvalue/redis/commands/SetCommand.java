@@ -1,8 +1,7 @@
 package com.cloudata.keyvalue.redis.commands;
 
-import java.nio.ByteBuffer;
-
 import com.cloudata.keyvalue.btree.operation.SetOperation;
+import com.cloudata.keyvalue.btree.operation.Values;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;
@@ -21,9 +20,9 @@ public class SetCommand implements RedisCommand {
         }
 
         ByteString key = session.mapToKey(command.getByteString(1));
-        byte[] value = command.get(2);
+        ByteString value = command.getByteString(2);
 
-        SetOperation operation = new SetOperation(ByteBuffer.wrap(value));
+        SetOperation operation = new SetOperation(Values.fromRawBytes(value));
         server.doAction(key, operation);
 
         return StatusRedisResponse.OK;

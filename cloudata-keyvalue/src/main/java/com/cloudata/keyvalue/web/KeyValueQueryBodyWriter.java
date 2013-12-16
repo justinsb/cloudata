@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.btree.EntryListener;
+import com.cloudata.keyvalue.btree.operation.Values;
 import com.google.common.base.Throwables;
 
 @Provider
@@ -53,8 +54,11 @@ public final class KeyValueQueryBodyWriter implements MessageBodyWriter<KeyValue
                 try {
                     dos.writeInt(key.remaining());
                     copy(key, dos, buffer);
-                    dos.writeInt(value.remaining());
-                    copy(value, dos, buffer);
+
+                    ByteBuffer valueData = Values.asBytes(value);
+                    dos.writeInt(valueData.remaining());
+                    copy(valueData, dos, buffer);
+
                     return true;
                 } catch (IOException e) {
                     log.warn("Error writing output", e);

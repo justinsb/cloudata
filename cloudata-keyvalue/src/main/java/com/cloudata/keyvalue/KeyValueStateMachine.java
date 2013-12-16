@@ -60,7 +60,7 @@ public class KeyValueStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public Object doAction(long storeId, ByteString key, KeyOperation operation) throws InterruptedException,
+    public <V> V doAction(long storeId, ByteString key, KeyOperation<V> operation) throws InterruptedException,
             RaftException {
         KvEntry.Builder entry = operation.serialize();
         entry.setKey(key);
@@ -68,7 +68,7 @@ public class KeyValueStateMachine implements StateMachine {
 
         log.debug("Proposing operation {}", entry.getAction());
 
-        return raft.commit(entry.build().toByteArray());
+        return (V) raft.commit(entry.build().toByteArray());
     }
 
     @Override
@@ -91,7 +91,7 @@ public class KeyValueStateMachine implements StateMachine {
             switch (entry.getAction()) {
 
             case APPEND:
-                operation = new AppendOperation(value.asReadOnlyByteBuffer());
+                operation = new AppendOperation(value);
                 break;
 
             case DELETE:

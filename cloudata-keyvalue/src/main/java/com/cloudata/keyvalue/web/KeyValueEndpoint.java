@@ -25,8 +25,8 @@ import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.btree.operation.DeleteOperation;
 import com.cloudata.keyvalue.btree.operation.IncrementOperation;
-import com.cloudata.keyvalue.btree.operation.KeyOperation;
 import com.cloudata.keyvalue.btree.operation.SetOperation;
+import com.cloudata.keyvalue.btree.operation.Values;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
@@ -52,7 +52,8 @@ public class KeyValueEndpoint {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        return Response.ok(v).build();
+        ByteBuffer data = Values.asBytes(v);
+        return Response.ok(data).build();
     }
 
     @GET
@@ -73,7 +74,7 @@ public class KeyValueEndpoint {
     public Response post(@PathParam("key") String key, @QueryParam("action") String actionString, InputStream value)
             throws IOException {
         try {
-            byte[] k = BaseEncoding.base16().decode(key);
+            ByteString k = ByteString.copyFrom(BaseEncoding.base16().decode(key));
             byte[] v = ByteStreams.toByteArray(value);
 
             KvAction action = KvAction.SET;
@@ -83,23 +84,26 @@ public class KeyValueEndpoint {
                 action = KvAction.valueOf(actionString);
             }
 
-            Object ret = null;
+            Object ret;
 
-            KeyOperation operation;
             switch (action) {
-            case SET:
-                operation = new SetOperation(ByteBuffer.wrap(v));
+            case SET: {
+                SetOperation operation = new SetOperation(Values.fromRawBytes(v));
+                stateMachine.doAction(storeId, k, operation);
+                ret = null;
                 break;
+            }
 
-            case INCREMENT:
-                operation = new IncrementOperation(1);
+            case INCREMENT: {
+                IncrementOperation operation = new IncrementOperation(1);
+                Long newValue = stateMachine.doAction(storeId, k, operation);
+                ret = Values.asBytes(Values.fromLong(newValue));
                 break;
+            }
 
             default:
                 throw new IllegalArgumentException();
             }
-
-            ret = stateMachine.doAction(storeId, ByteString.copyFrom(k), operation);
 
             return Response.ok(ret).build();
         } catch (InterruptedException e) {

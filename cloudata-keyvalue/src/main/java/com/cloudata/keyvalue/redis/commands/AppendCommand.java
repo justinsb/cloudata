@@ -1,7 +1,5 @@
 package com.cloudata.keyvalue.redis.commands;
 
-import java.nio.ByteBuffer;
-
 import com.cloudata.keyvalue.btree.operation.AppendOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
@@ -21,10 +19,10 @@ public class AppendCommand implements RedisCommand {
         }
 
         ByteString key = session.mapToKey(command.getByteString(1));
-        byte[] value = command.get(2);
+        ByteString value = command.getByteString(2);
 
-        AppendOperation operation = new AppendOperation(ByteBuffer.wrap(value));
-        Number ret = (Number) server.doAction(key, operation);
+        AppendOperation operation = new AppendOperation(value);
+        Number ret = server.doAction(key, operation);
 
         return IntegerRedisResponse.valueOf(ret.longValue());
     }
