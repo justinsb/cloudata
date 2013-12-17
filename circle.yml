@@ -7,5 +7,5 @@ checkout:
 ## Customize dependencies commands
 dependencies:
   pre:
-    - cd barge; mvn install
+    - cd barge; mvn install -Dmaven.test.skip=true
     - cd cloudata-shared; mvn install
