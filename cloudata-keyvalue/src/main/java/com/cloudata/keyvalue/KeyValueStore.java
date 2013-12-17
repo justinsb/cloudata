@@ -7,15 +7,15 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.btree.Btree;
-import com.cloudata.keyvalue.btree.EntryListener;
-import com.cloudata.keyvalue.btree.MmapPageStore;
-import com.cloudata.keyvalue.btree.PageStore;
-import com.cloudata.keyvalue.btree.ReadOnlyTransaction;
-import com.cloudata.keyvalue.btree.WriteTransaction;
-import com.cloudata.keyvalue.btree.operation.KeyOperation;
-import com.cloudata.keyvalue.btree.operation.Value;
-import com.cloudata.keyvalue.web.KeyValueQuery;
+import com.cloudata.btree.Btree;
+import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.EntryListener;
+import com.cloudata.btree.MmapPageStore;
+import com.cloudata.btree.PageStore;
+import com.cloudata.btree.ReadOnlyTransaction;
+import com.cloudata.btree.WriteTransaction;
+import com.cloudata.keyvalue.operation.KeyOperation;
+import com.cloudata.values.Value;
 
 public class KeyValueStore {
 
@@ -76,8 +76,8 @@ public class KeyValueStore {
         }
     }
 
-    public KeyValueQuery buildQuery() {
-        return new KeyValueQuery(btree);
+    public BtreeQuery buildQuery() {
+        return new BtreeQuery(btree);
     }
 
 }

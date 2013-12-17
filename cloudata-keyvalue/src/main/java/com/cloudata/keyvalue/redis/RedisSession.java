@@ -4,7 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
-import com.cloudata.keyvalue.btree.operation.Keyspace;
+import com.cloudata.btree.Keyspace;
 
 public class RedisSession {
 

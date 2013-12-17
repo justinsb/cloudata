@@ -3,7 +3,7 @@ package com.cloudata.keyvalue.redis.commands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.keyvalue.btree.operation.IncrementOperation;
+import com.cloudata.keyvalue.operation.IncrementOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;

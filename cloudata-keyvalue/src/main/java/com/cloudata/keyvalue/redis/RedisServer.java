@@ -2,10 +2,10 @@ package com.cloudata.keyvalue.redis;
 
 import org.robotninjas.barge.RaftException;
 
+import com.cloudata.btree.Keyspace;
 import com.cloudata.keyvalue.KeyValueStateMachine;
-import com.cloudata.keyvalue.btree.operation.KeyOperation;
-import com.cloudata.keyvalue.btree.operation.Keyspace;
-import com.cloudata.keyvalue.btree.operation.Value;
+import com.cloudata.keyvalue.operation.KeyOperation;
+import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
 public class RedisServer {

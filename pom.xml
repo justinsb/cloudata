@@ -11,8 +11,10 @@
 
 	<modules>
 		<module>cloudata-shared</module>
+		<module>cloudata-server-shared</module>
 		<module>cloudata-appendlog</module>
 		<module>cloudata-keyvalue</module>
+		<module>cloudata-structured</module>
 		<module>cloudata-git</module>
 	</modules>
 

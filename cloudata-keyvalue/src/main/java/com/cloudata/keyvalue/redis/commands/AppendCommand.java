@@ -1,6 +1,6 @@
 package com.cloudata.keyvalue.redis.commands;
 
-import com.cloudata.keyvalue.btree.operation.AppendOperation;
+import com.cloudata.keyvalue.operation.AppendOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
 import com.cloudata.keyvalue.redis.RedisServer;

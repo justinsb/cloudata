@@ -2,7 +2,7 @@ package com.cloudata.keyvalue.redis;
 
 import java.nio.ByteBuffer;
 
-import com.cloudata.keyvalue.btree.ByteBuffers;
+import com.cloudata.btree.ByteBuffers;
 import com.google.protobuf.ByteString;
 
 public class RedisRequest {

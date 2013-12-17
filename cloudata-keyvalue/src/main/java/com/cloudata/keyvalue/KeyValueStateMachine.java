@@ -15,15 +15,15 @@ import org.robotninjas.barge.StateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.Keyspace;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
-import com.cloudata.keyvalue.btree.operation.AppendOperation;
-import com.cloudata.keyvalue.btree.operation.DeleteOperation;
-import com.cloudata.keyvalue.btree.operation.IncrementOperation;
-import com.cloudata.keyvalue.btree.operation.KeyOperation;
-import com.cloudata.keyvalue.btree.operation.Keyspace;
-import com.cloudata.keyvalue.btree.operation.SetOperation;
-import com.cloudata.keyvalue.btree.operation.Value;
-import com.cloudata.keyvalue.web.KeyValueQuery;
+import com.cloudata.keyvalue.operation.AppendOperation;
+import com.cloudata.keyvalue.operation.DeleteOperation;
+import com.cloudata.keyvalue.operation.IncrementOperation;
+import com.cloudata.keyvalue.operation.KeyOperation;
+import com.cloudata.keyvalue.operation.SetOperation;
+import com.cloudata.values.Value;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -165,7 +165,7 @@ public class KeyValueStateMachine implements StateMachine {
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
-    public KeyValueQuery scan(long storeId) {
+    public BtreeQuery scan(long storeId) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
         return keyValueStore.buildQuery();
     }

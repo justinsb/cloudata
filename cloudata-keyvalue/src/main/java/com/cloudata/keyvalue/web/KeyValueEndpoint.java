@@ -23,13 +23,14 @@ import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
 
+import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.Keyspace;
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.operation.DeleteOperation;
+import com.cloudata.keyvalue.operation.IncrementOperation;
+import com.cloudata.keyvalue.operation.SetOperation;
 import com.cloudata.keyvalue.KeyValueStateMachine;
-import com.cloudata.keyvalue.btree.operation.DeleteOperation;
-import com.cloudata.keyvalue.btree.operation.IncrementOperation;
-import com.cloudata.keyvalue.btree.operation.Keyspace;
-import com.cloudata.keyvalue.btree.operation.SetOperation;
-import com.cloudata.keyvalue.btree.operation.Value;
+import com.cloudata.values.Value;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
@@ -62,18 +63,9 @@ public class KeyValueEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response query() throws IOException {
-        KeyValueQuery query = stateMachine.scan(storeId);
+        BtreeQuery query = stateMachine.scan(storeId);
 
         query.setFormat(MediaType.APPLICATION_OCTET_STREAM_TYPE);
-        return Response.ok(query).build();
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response queryJson() throws IOException {
-        KeyValueQuery query = stateMachine.scan(storeId);
-
-        query.setFormat(MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(query).build();
     }
 
@@ -101,8 +93,7 @@ public class KeyValueEndpoint {
 
             switch (action) {
             case SET: {
-                Value value = Value.fromJsonBytes(v);
-                // Value value = Value.fromRawBytes(v);
+                Value value = Value.fromRawBytes(v);
                 SetOperation operation = new SetOperation(value);
                 stateMachine.doAction(storeId, getKeyspace(), k, operation);
                 ret = null;

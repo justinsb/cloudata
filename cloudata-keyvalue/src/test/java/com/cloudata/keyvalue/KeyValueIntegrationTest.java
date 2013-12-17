@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.cloudata.btree.Keyspace;
 import com.cloudata.keyvalue.KeyValueClient.KeyValueEntry;
 import com.cloudata.keyvalue.KeyValueClient.KeyValueRecordset;
-import com.cloudata.keyvalue.btree.operation.Keyspace;
 import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 
