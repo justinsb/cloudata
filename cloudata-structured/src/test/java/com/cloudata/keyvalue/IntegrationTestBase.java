@@ -45,7 +45,9 @@ public class IntegrationTestBase {
     @AfterClass
     public static void stopServers() {
         for (int i = 0; i < SERVERS.length; i++) {
-            SERVERS[i].stop();
+            if (SERVERS[i] != null) {
+                SERVERS[i].stop();
+            }
         }
 
         TestUtils.rmdir(TEMPDIR);
