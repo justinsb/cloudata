@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue;
 
+import static com.cloudata.TestUtils.buildBytes;
+
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;

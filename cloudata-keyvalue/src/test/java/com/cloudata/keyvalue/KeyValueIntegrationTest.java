@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue;
 
+import static com.cloudata.TestUtils.buildBytes;
+
 import java.util.ArrayList;
 
 import org.junit.Assert;
@@ -163,23 +165,6 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
             byte[] data = entry.getValue().toByteArray();
             byte[] expected = buildBytes(i * 10000);
             Assert.assertArrayEquals(expected, data);
-        }
-    }
-
-    @Test
-    public void testSpaceReclamation() throws Exception {
-        // We set values that are too big for a short
-        String url = SERVERS[0].getHttpUrl();
-
-        long logId = newLogId();
-
-        KeyValueClient client = new KeyValueClient(url);
-
-        byte[] key = "A".getBytes();
-        byte[] data = buildBytes(30000);
-
-        for (int i = 1; i <= 10000; i++) {
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
     }
 

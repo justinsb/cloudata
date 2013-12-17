@@ -7,6 +7,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.robotninjas.barge.Replica;
 
+import com.cloudata.TestUtils;
 import com.cloudata.structured.StructuredServer;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
@@ -47,33 +48,13 @@ public class IntegrationTestBase {
             SERVERS[i].stop();
         }
 
-        rmdir(TEMPDIR);
-    }
-
-    private static void rmdir(File dir) {
-        for (File f : dir.listFiles()) {
-            if (f.isFile()) {
-                f.delete();
-            } else {
-                rmdir(f);
-            }
-        }
-
-        dir.delete();
+        TestUtils.rmdir(TEMPDIR);
     }
 
     static long nextLogId = 1;
 
     protected long newLogId() {
         return nextLogId++;
-    }
-
-    protected static byte[] buildBytes(int length) {
-        byte[] data = new byte[length];
-        for (int j = 0; j < length; j++) {
-            data[j] = (byte) (j % 0xff);
-        }
-        return data;
     }
 
 }

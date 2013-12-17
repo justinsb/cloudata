@@ -156,23 +156,6 @@ public class JsonIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    public void testSpaceReclamation() throws Exception {
-        // We set values that are too big for a short
-        String url = SERVERS[0].getHttpUrl();
-
-        long logId = newLogId();
-
-        StructuredClient client = new StructuredClient(url);
-
-        byte[] key = "A".getBytes();
-        JsonObject data = buildJson(30000);
-
-        for (int i = 1; i <= 10000; i++) {
-            client.put(logId, ByteString.copyFrom(key), data);
-        }
-    }
-
-    @Test
     public void testReplaceValue() throws Exception {
         String url = SERVERS[0].getHttpUrl();
 

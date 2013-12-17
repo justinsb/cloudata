@@ -5,7 +5,7 @@ import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
-public class AppendOperation extends KeyOperation<Integer> {
+public class AppendOperation implements KeyOperation<Integer> {
 
     final ByteString appendValue;
     private int newLength;

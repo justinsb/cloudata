@@ -4,7 +4,7 @@ import com.cloudata.structured.StructuredProto.LogAction;
 import com.cloudata.structured.StructuredProto.LogEntry;
 import com.cloudata.values.Value;
 
-public class DeleteOperation extends StructuredOperation<Integer> {
+public class DeleteOperation implements StructuredOperation<Integer> {
 
     private int deleteCount;
 

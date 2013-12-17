@@ -5,17 +5,10 @@ import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
-public class SetOperation extends KeyOperation<Void> {
-
-    final Value newValue;
+public class SetOperation extends com.cloudata.btree.operation.SetOperation implements KeyOperation<Void> {
 
     public SetOperation(Value newValue) {
-        this.newValue = newValue;
-    }
-
-    @Override
-    public Value doAction(Value oldValue) {
-        return newValue;
+        super(newValue);
     }
 
     @Override
@@ -26,8 +19,4 @@ public class SetOperation extends KeyOperation<Void> {
         return b;
     }
 
-    @Override
-    public Void getResult() {
-        return null;
-    }
 }

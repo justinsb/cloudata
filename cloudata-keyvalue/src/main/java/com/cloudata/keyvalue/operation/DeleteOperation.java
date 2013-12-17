@@ -4,7 +4,7 @@ import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.values.Value;
 
-public class DeleteOperation extends KeyOperation<Integer> {
+public class DeleteOperation implements KeyOperation<Integer> {
 
     private int deleteCount;
 

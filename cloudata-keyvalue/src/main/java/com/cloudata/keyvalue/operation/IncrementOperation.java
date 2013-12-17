@@ -7,7 +7,7 @@ import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.values.Value;
 
-public class IncrementOperation extends KeyOperation<Long> {
+public class IncrementOperation implements KeyOperation<Long> {
 
     private static final Logger log = LoggerFactory.getLogger(IncrementOperation.class);
 
