@@ -1,4 +1,4 @@
-package com.cloudata.keyvalue;
+package com.cloudata.structured;
 
 import java.util.ArrayList;
 
