@@ -45,10 +45,12 @@ public class IntegrationTestBase {
     }
 
     @AfterClass
-    public static void stopServers() {
+    public static void stopServers() throws InterruptedException {
         for (int i = 0; i < SERVERS.length; i++) {
             SERVERS[i].stop();
         }
+
+        Thread.sleep(5000);
 
         TestUtils.rmdir(TEMPDIR);
     }

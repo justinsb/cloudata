@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.BtreeQuery;
-import com.cloudata.btree.EntryListener;
 import com.cloudata.btree.MmapPageStore;
 import com.cloudata.btree.PageStore;
 import com.cloudata.btree.ReadOnlyTransaction;
@@ -39,40 +38,9 @@ public class StructuredStore {
         }
     }
 
-    static class GetEntryListener implements EntryListener {
-        final ByteBuffer findKey;
-        Value foundValue;
-
-        public GetEntryListener(ByteBuffer findKey) {
-            this.findKey = findKey;
-        }
-
-        @Override
-        public boolean found(ByteBuffer key, Value value) {
-            // log.debug("Found {}={}", ByteBuffers.toHex(key), ByteBuffers.toHex(value));
-            if (key.equals(findKey)) {
-                foundValue = value;
-            }
-            // No more
-            return false;
-        }
-    };
-
     public Value get(final ByteBuffer key) {
         try (ReadOnlyTransaction txn = btree.beginReadOnly()) {
-            GetEntryListener listener = new GetEntryListener(key);
-            txn.walk(btree, key, listener);
-
-            Value value = listener.foundValue;
-            // log.debug("Value for {}: {}", key, value);
-
-            if (value != null) {
-                // Once the transaction goes away the values may be invalid
-                value = value.clone();
-            }
-            // log.debug("Value for {}: {}", key, value);
-
-            return value;
+            return txn.get(btree, key);
         }
     }
 

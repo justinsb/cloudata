@@ -36,4 +36,5 @@ public class ReadOnlyTransaction extends Transaction {
     public long getSnapshotTransactionId() {
         return snapshotTransactionId;
     }
+
 }
