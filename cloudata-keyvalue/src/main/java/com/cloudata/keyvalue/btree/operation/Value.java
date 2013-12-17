@@ -3,16 +3,19 @@ package com.cloudata.keyvalue.btree.operation;
 import java.nio.ByteBuffer;
 
 import com.cloudata.keyvalue.btree.ByteBuffers;
+import com.cloudata.keyvalue.values.JsonValue;
 import com.google.protobuf.ByteString;
 
 public abstract class Value implements Cloneable {
     public static final byte FORMAT_RAW = 0;
     public static final byte FORMAT_INT64 = 1;
+    public static final byte FORMAT_JSON = 2;
 
     static final ByteString PREFIX_RAW = ByteString.copyFrom(new byte[] { FORMAT_RAW });
-    static final ByteString PREFIX_INT64 = ByteString.copyFrom(new byte[] { FORMAT_INT64 });
+    // static final ByteString PREFIX_INT64 = ByteString.copyFrom(new byte[] { FORMAT_INT64 });
+    static final ByteString PREFIX_JSON = ByteString.copyFrom(new byte[] { FORMAT_JSON });
 
-    final ByteBuffer buffer;
+    protected final ByteBuffer buffer;
 
     public Value(ByteBuffer buffer) {
         this.buffer = buffer;
@@ -48,6 +51,11 @@ public abstract class Value implements Cloneable {
             return new Int64Value(ByteBuffers.clone(buffer));
         }
 
+        @Override
+        public ByteBuffer asJsonString() {
+            throw new UnsupportedOperationException();
+        }
+
     }
 
     static class RawBytesValue extends Value {
@@ -80,6 +88,11 @@ public abstract class Value implements Cloneable {
             return v;
         }
 
+        @Override
+        public ByteBuffer asJsonString() {
+            throw new UnsupportedOperationException();
+        }
+
     }
 
     public static Value fromRawBytes(byte[] data) {
@@ -88,6 +101,14 @@ public abstract class Value implements Cloneable {
 
     public static Value fromRawBytes(ByteString b) {
         return new RawBytesValue(PREFIX_RAW.concat(b).asReadOnlyByteBuffer());
+    }
+
+    public static Value fromJsonBytes(byte[] data) {
+        return fromJsonBytes(ByteString.copyFrom(data));
+    }
+
+    public static Value fromJsonBytes(ByteString b) {
+        return new JsonValue(PREFIX_JSON.concat(b).asReadOnlyByteBuffer());
     }
 
     public Value concat(ByteString appendValue) {
@@ -117,6 +138,8 @@ public abstract class Value implements Cloneable {
 
     public abstract long asLong();
 
+    public abstract ByteBuffer asJsonString();
+
     public abstract int sizeAsBytes();
 
     public static Value deserialize(ByteBuffer buffer) {
@@ -125,6 +148,10 @@ public abstract class Value implements Cloneable {
         switch (type) {
         case FORMAT_RAW: {
             return new RawBytesValue(buffer);
+        }
+
+        case FORMAT_JSON: {
+            return new JsonValue(buffer);
         }
 
         case FORMAT_INT64: {
@@ -139,5 +166,4 @@ public abstract class Value implements Cloneable {
     public ByteBuffer serialize() {
         return buffer.duplicate();
     }
-
 }

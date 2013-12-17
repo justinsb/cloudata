@@ -2,6 +2,8 @@ package com.cloudata.keyvalue.web;
 
 import java.nio.ByteBuffer;
 
+import javax.ws.rs.core.MediaType;
+
 import com.cloudata.keyvalue.btree.Btree;
 import com.cloudata.keyvalue.btree.EntryListener;
 import com.cloudata.keyvalue.btree.ReadOnlyTransaction;
@@ -10,6 +12,7 @@ public class KeyValueQuery {
 
     private final Btree btree;
     private final ByteBuffer start;
+    private MediaType format;
 
     public KeyValueQuery(Btree btree) {
         this.btree = btree;
@@ -50,6 +53,14 @@ public class KeyValueQuery {
             txn.close();
         }
 
+    }
+
+    public void setFormat(MediaType format) {
+        this.format = format;
+    }
+
+    public MediaType getFormat() {
+        return format;
     }
 
 }

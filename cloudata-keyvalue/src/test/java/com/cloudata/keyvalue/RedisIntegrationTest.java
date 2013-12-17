@@ -32,7 +32,7 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         for (int i = 1; i < 100; i++) {
             byte[] key = Integer.toString(i).getBytes();
 
-            byte[] value = buildValue(i);
+            byte[] value = buildBytes(i);
 
             jedis.set(key, value);
             byte[] actual = jedis.get(key);
@@ -48,7 +48,7 @@ public class RedisIntegrationTest extends IntegrationTestBase {
 
         for (int i = 0; i < n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] value = buildValue(i);
+            byte[] value = buildBytes(i);
 
             assertOk(jedis.select(i / 10));
             jedis.set(key, value);
@@ -57,7 +57,7 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         for (int j = 0; j < partitions; j++) {
             for (int i = 0; i < n; i++) {
                 byte[] key = Integer.toString(i).getBytes();
-                byte[] value = buildValue(i);
+                byte[] value = buildBytes(i);
 
                 assertOk(jedis.select(j));
 
@@ -100,7 +100,7 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         for (int i = 1; i < 100; i++) {
             byte[] key = Integer.toString(i).getBytes();
 
-            byte[] value = buildValue(i);
+            byte[] value = buildBytes(i);
 
             jedis.set(key, value);
 

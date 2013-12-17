@@ -12,7 +12,9 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -58,10 +60,20 @@ public class KeyValueEndpoint {
     }
 
     @GET
-    // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response query() throws IOException {
         KeyValueQuery query = stateMachine.scan(storeId);
 
+        query.setFormat(MediaType.APPLICATION_OCTET_STREAM_TYPE);
+        return Response.ok(query).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response queryJson() throws IOException {
+        KeyValueQuery query = stateMachine.scan(storeId);
+
+        query.setFormat(MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(query).build();
     }
 
@@ -72,11 +84,11 @@ public class KeyValueEndpoint {
     @POST
     @Path("{key}")
     // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    public Response post(@PathParam("key") String key, @QueryParam("action") String actionString, InputStream value)
-            throws IOException {
+    public Response post(@PathParam("key") String key, @QueryParam("action") String actionString,
+            InputStream valueStream) throws IOException {
         try {
             ByteString k = ByteString.copyFrom(BaseEncoding.base16().decode(key));
-            byte[] v = ByteStreams.toByteArray(value);
+            byte[] v = ByteStreams.toByteArray(valueStream);
 
             KvAction action = KvAction.SET;
 
@@ -89,7 +101,9 @@ public class KeyValueEndpoint {
 
             switch (action) {
             case SET: {
-                SetOperation operation = new SetOperation(Value.fromRawBytes(v));
+                Value value = Value.fromJsonBytes(v);
+                // Value value = Value.fromRawBytes(v);
+                SetOperation operation = new SetOperation(value);
                 stateMachine.doAction(storeId, getKeyspace(), k, operation);
                 ret = null;
                 break;

@@ -3,15 +3,25 @@ package com.cloudata.keyvalue;
 import java.util.ArrayList;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.cloudata.keyvalue.KeyValueClient.KeyValueEntry;
-import com.cloudata.keyvalue.KeyValueClient.KeyValueRecordset;
+import com.cloudata.keyvalue.KeyValueClient.KeyValueJsonEntry;
+import com.cloudata.keyvalue.KeyValueClient.KeyValueJsonRecordset;
 import com.cloudata.keyvalue.btree.operation.Keyspace;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 
-public class KeyValueIntegrationTest extends IntegrationTestBase {
+public class JsonIntegrationTest extends IntegrationTestBase {
+
+    protected static JsonObject buildJson(int n) {
+        JsonObject o = new JsonObject();
+        o.addProperty("key" + n, "value" + n);
+        return o;
+    }
 
     @Test
     public void testSetAndGet() throws Exception {
@@ -25,16 +35,16 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i);
+            client.put(logId, ByteString.copyFrom(key), data);
         }
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
-            byte[] data = entry.getValue().toByteArray();
-            byte[] expected = buildBytes(i);
-            Assert.assertArrayEquals(expected, data);
+            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
+            JsonElement data = entry.getValue();
+            JsonObject expected = buildJson(i);
+            Assert.assertEquals(expected, data);
         }
     }
 
@@ -50,26 +60,27 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         for (int i = 1; i <= n; i++) {
             byte[] key = String.format("%04x", i).getBytes();
-            byte[] data = buildBytes(i);
-            client.put(storeId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i);
+            client.put(storeId, ByteString.copyFrom(key), data);
         }
 
-        try (KeyValueRecordset rs = client.query(storeId)) {
-            ArrayList<KeyValueEntry> entries = Lists.newArrayList(rs);
+        try (KeyValueJsonRecordset rs = client.queryJson(storeId)) {
+            ArrayList<KeyValueJsonEntry> entries = Lists.newArrayList(rs);
 
             Assert.assertEquals(n, entries.size());
 
             for (int i = 1; i <= n; i++) {
                 ByteString expectedKey = Keyspace.ZERO.mapToKey(String.format("%04x", i).getBytes());
-                byte[] expectedValue = buildBytes(i);
-                KeyValueEntry entry = entries.get(i - 1);
+                JsonObject expectedValue = buildJson(i);
+                KeyValueJsonEntry entry = entries.get(i - 1);
                 Assert.assertEquals(expectedKey, entry.getKey());
-                Assert.assertArrayEquals(expectedValue, entry.getValue().toByteArray());
+                Assert.assertEquals(expectedValue, entry.getValue());
             }
         }
     }
 
     @Test
+    @Ignore
     public void testIncrement() throws Exception {
         String url = SERVERS[0].getHttpUrl();
 
@@ -85,7 +96,7 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
             Assert.assertNotNull(entry);
             byte[] actual = entry.getValue().toByteArray();
             byte[] expected = Integer.toString(i).getBytes();
-            Assert.assertArrayEquals(expected, actual);
+            Assert.assertEquals(expected, actual);
         }
     }
 
@@ -101,15 +112,15 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i);
+            client.put(logId, ByteString.copyFrom(key), data);
 
-            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
+            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
             Assert.assertNotNull(entry);
 
-            byte[] actual = entry.getValue().toByteArray();
-            byte[] expected = buildBytes(i);
-            Assert.assertArrayEquals(expected, actual);
+            JsonElement actual = entry.getValue();
+            JsonObject expected = buildJson(i);
+            Assert.assertEquals(expected, actual);
         }
     }
 
@@ -127,16 +138,16 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i * 1000);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i * 1000);
+            client.put(logId, ByteString.copyFrom(key), data);
         }
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
-            byte[] data = entry.getValue().toByteArray();
-            byte[] expected = buildBytes(i * 1000);
-            Assert.assertArrayEquals(expected, data);
+            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
+            JsonElement data = entry.getValue();
+            JsonObject expected = buildJson(i * 1000);
+            Assert.assertEquals(expected, data);
         }
     }
 
@@ -153,16 +164,16 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i * 10000);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i * 10000);
+            client.put(logId, ByteString.copyFrom(key), data);
         }
 
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
-            byte[] data = entry.getValue().toByteArray();
-            byte[] expected = buildBytes(i * 10000);
-            Assert.assertArrayEquals(expected, data);
+            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
+            JsonElement data = entry.getValue();
+            JsonObject expected = buildJson(i * 10000);
+            Assert.assertEquals(expected, data);
         }
     }
 
@@ -176,10 +187,10 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         KeyValueClient client = new KeyValueClient(url);
 
         byte[] key = "A".getBytes();
-        byte[] data = buildBytes(30000);
+        JsonObject data = buildJson(30000);
 
         for (int i = 1; i <= 10000; i++) {
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            client.put(logId, ByteString.copyFrom(key), data);
         }
     }
 
@@ -196,24 +207,24 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         // Set i = i
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i);
+            client.put(logId, ByteString.copyFrom(key), data);
         }
 
         // Set i = i * 2
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i * 2);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i * 2);
+            client.put(logId, ByteString.copyFrom(key), data);
         }
 
         // Check i = i * 2
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
-            byte[] data = entry.getValue().toByteArray();
-            byte[] expected = buildBytes(i * 2);
-            Assert.assertArrayEquals(expected, data);
+            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
+            JsonElement data = entry.getValue();
+            JsonObject expected = buildJson(i * 2);
+            Assert.assertEquals(expected, data);
         }
     }
 
@@ -230,8 +241,8 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         // Set i = i
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            byte[] data = buildBytes(i);
-            client.put(logId, ByteString.copyFrom(key), ByteString.copyFrom(data));
+            JsonObject data = buildJson(i);
+            client.put(logId, ByteString.copyFrom(key), data);
         }
 
         // Delete even keys
@@ -245,14 +256,14 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
         // Check
         for (int i = 1; i <= n; i++) {
             byte[] key = Integer.toString(i).getBytes();
-            KeyValueEntry entry = client.read(logId, ByteString.copyFrom(key));
+            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
             if (i % 2 == 0) {
                 Assert.assertNull(entry);
             } else {
                 Assert.assertNotNull(entry);
-                byte[] data = entry.getValue().toByteArray();
-                byte[] expected = buildBytes(i);
-                Assert.assertArrayEquals(expected, data);
+                JsonElement data = entry.getValue();
+                JsonObject expected = buildJson(i);
+                Assert.assertEquals(expected, data);
             }
         }
     }

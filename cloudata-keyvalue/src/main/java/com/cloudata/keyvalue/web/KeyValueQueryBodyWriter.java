@@ -48,25 +48,47 @@ public final class KeyValueQueryBodyWriter implements MessageBodyWriter<KeyValue
 
         final byte[] buffer = new byte[8192];
 
-        EntryListener entryListener = new EntryListener() {
-            @Override
-            public boolean found(ByteBuffer key, Value value) {
-                try {
-                    dos.writeInt(key.remaining());
-                    copy(key, dos, buffer);
+        EntryListener entryListener;
+        if (query.getFormat().equals(MediaType.APPLICATION_JSON_TYPE)) {
+            entryListener = new EntryListener() {
+                @Override
+                public boolean found(ByteBuffer key, Value value) {
+                    try {
+                        dos.writeInt(key.remaining());
+                        copy(key, dos, buffer);
 
-                    ByteBuffer valueData = value.asBytes();
-                    dos.writeInt(valueData.remaining());
-                    copy(valueData, dos, buffer);
+                        ByteBuffer json = value.asJsonString();
 
-                    return true;
-                } catch (IOException e) {
-                    log.warn("Error writing output", e);
-                    throw Throwables.propagate(e);
+                        dos.writeInt(json.remaining());
+                        copy(json, dos, buffer);
+
+                        return true;
+                    } catch (IOException e) {
+                        log.warn("Error writing output", e);
+                        throw Throwables.propagate(e);
+                    }
                 }
-            }
-        };
+            };
+        } else {
+            entryListener = new EntryListener() {
+                @Override
+                public boolean found(ByteBuffer key, Value value) {
+                    try {
+                        dos.writeInt(key.remaining());
+                        copy(key, dos, buffer);
 
+                        ByteBuffer valueData = value.asBytes();
+                        dos.writeInt(valueData.remaining());
+                        copy(valueData, dos, buffer);
+
+                        return true;
+                    } catch (IOException e) {
+                        log.warn("Error writing output", e);
+                        throw Throwables.propagate(e);
+                    }
+                }
+            };
+        }
         try (KeyValueQuery.KeyValueResultset cursor = query.execute()) {
             cursor.walk(entryListener);
         }

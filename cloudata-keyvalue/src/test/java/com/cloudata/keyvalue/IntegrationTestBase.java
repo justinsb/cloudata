@@ -70,7 +70,7 @@ public class IntegrationTestBase {
         return nextLogId++;
     }
 
-    protected static byte[] buildValue(int length) {
+    protected static byte[] buildBytes(int length) {
         byte[] data = new byte[length];
         for (int j = 0; j < length; j++) {
             data[j] = (byte) (j % 0xff);
