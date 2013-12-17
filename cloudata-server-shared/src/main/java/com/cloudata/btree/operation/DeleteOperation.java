@@ -1,9 +1,8 @@
 package com.cloudata.btree.operation;
 
-import com.cloudata.btree.BtreeOperation;
 import com.cloudata.values.Value;
 
-public class DeleteOperation implements BtreeOperation<Integer> {
+public class DeleteOperation implements RowOperation<Integer> {
 
     private int deleteCount;
 

@@ -9,9 +9,11 @@ public class BtreeQuery {
     private final Btree btree;
     private final ByteBuffer start;
     private MediaType format;
+    private final Keyspace keyspace;
 
-    public BtreeQuery(Btree btree) {
+    public BtreeQuery(Btree btree, Keyspace keyspace) {
         this.btree = btree;
+        this.keyspace = keyspace;
         this.start = null;
     }
 
@@ -41,6 +43,9 @@ public class BtreeQuery {
         }
 
         public void walk(EntryListener entryListener) {
+            if (keyspace != null) {
+                entryListener = new KeyspaceFilter(keyspace, entryListener);
+            }
             txn.walk(btree, start, entryListener);
         }
 

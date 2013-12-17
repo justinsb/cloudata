@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.Keyspace;
 import com.cloudata.btree.MmapPageStore;
 import com.cloudata.btree.PageStore;
 import com.cloudata.btree.ReadOnlyTransaction;
@@ -44,8 +45,8 @@ public class KeyValueStore {
         }
     }
 
-    public BtreeQuery buildQuery() {
-        return new BtreeQuery(btree);
+    public BtreeQuery buildQuery(Keyspace keyspace) {
+        return new BtreeQuery(btree, keyspace);
     }
 
 }

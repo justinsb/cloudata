@@ -26,10 +26,10 @@ import org.robotninjas.barge.Replica;
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.operation.DeleteOperation;
 import com.cloudata.keyvalue.operation.IncrementOperation;
 import com.cloudata.keyvalue.operation.SetOperation;
-import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.values.Value;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
@@ -63,7 +63,7 @@ public class KeyValueEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response query() throws IOException {
-        BtreeQuery query = stateMachine.scan(storeId);
+        BtreeQuery query = stateMachine.scan(storeId, getKeyspace());
 
         query.setFormat(MediaType.APPLICATION_OCTET_STREAM_TYPE);
         return Response.ok(query).build();

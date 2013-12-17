@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.cloudata.btree.Keyspace;
-import com.cloudata.structured.StructuredClient;
 import com.cloudata.structured.StructuredClient.KeyValueJsonEntry;
 import com.cloudata.structured.StructuredClient.KeyValueJsonRecordset;
 import com.google.common.collect.Lists;
@@ -18,7 +17,9 @@ public class JsonIntegrationTest extends IntegrationTestBase {
 
     protected static JsonObject buildJson(int n) {
         JsonObject o = new JsonObject();
-        o.addProperty("key" + n, "value" + n);
+        for (int i = 0; i < n; i++) {
+            o.addProperty("key" + i, "value" + i);
+        }
         return o;
     }
 
@@ -102,58 +103,31 @@ public class JsonIntegrationTest extends IntegrationTestBase {
         }
     }
 
-    @Test
-    public void testPageSplit() throws Exception {
-        // We set values that are too big for one page (32KB currently),
-        // but aren't individually bigger than a page
-        String url = SERVERS[0].getHttpUrl();
-
-        long logId = newLogId();
-
-        StructuredClient client = new StructuredClient(url);
-
-        int n = 30;
-
-        for (int i = 1; i <= n; i++) {
-            byte[] key = Integer.toString(i).getBytes();
-            JsonObject data = buildJson(i * 1000);
-            client.put(logId, ByteString.copyFrom(key), data);
-        }
-
-        for (int i = 1; i <= n; i++) {
-            byte[] key = Integer.toString(i).getBytes();
-            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
-            JsonElement data = entry.getValue();
-            JsonObject expected = buildJson(i * 1000);
-            Assert.assertEquals(expected, data);
-        }
-    }
-
-    @Test
-    public void testHugeValues() throws Exception {
-        // We set values that are too big for a short
-        String url = SERVERS[0].getHttpUrl();
-
-        long logId = newLogId();
-
-        StructuredClient client = new StructuredClient(url);
-
-        int n = 30;
-
-        for (int i = 1; i <= n; i++) {
-            byte[] key = Integer.toString(i).getBytes();
-            JsonObject data = buildJson(i * 10000);
-            client.put(logId, ByteString.copyFrom(key), data);
-        }
-
-        for (int i = 1; i <= n; i++) {
-            byte[] key = Integer.toString(i).getBytes();
-            KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
-            JsonElement data = entry.getValue();
-            JsonObject expected = buildJson(i * 10000);
-            Assert.assertEquals(expected, data);
-        }
-    }
+    // @Test
+    // public void testDynamicKeys() throws Exception {
+    // // We set values that are too big for a short
+    // String url = SERVERS[0].getHttpUrl();
+    //
+    // long logId = newLogId();
+    //
+    // StructuredClient client = new StructuredClient(url);
+    //
+    // int n = 30;
+    //
+    // for (int i = 1; i <= n; i++) {
+    // byte[] key = Integer.toString(i).getBytes();
+    // JsonObject data = buildJson(i * 10000);
+    // client.put(logId, ByteString.copyFrom(key), data);
+    // }
+    //
+    // for (int i = 1; i <= n; i++) {
+    // byte[] key = Integer.toString(i).getBytes();
+    // KeyValueJsonEntry entry = client.readJson(logId, ByteString.copyFrom(key));
+    // JsonElement data = entry.getValue();
+    // JsonObject expected = buildJson(i * 10000);
+    // Assert.assertEquals(expected, data);
+    // }
+    // }
 
     @Test
     public void testReplaceValue() throws Exception {

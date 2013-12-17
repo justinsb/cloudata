@@ -3,6 +3,8 @@ package com.cloudata.values;
 import java.nio.ByteBuffer;
 
 import com.cloudata.btree.ByteBuffers;
+import com.cloudata.util.Hex;
+import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 
 public abstract class Value implements Cloneable {
@@ -92,6 +94,11 @@ public abstract class Value implements Cloneable {
             throw new UnsupportedOperationException();
         }
 
+        @Override
+        public String toString() {
+            return "RawBytesValue [" + Hex.forDebug(asBytes()) + "]";
+        }
+
     }
 
     public static Value fromRawBytes(byte[] data) {
@@ -164,5 +171,9 @@ public abstract class Value implements Cloneable {
 
     public ByteBuffer serialize() {
         return buffer.duplicate();
+    }
+
+    public JsonObject asJsonObject() {
+        throw new UnsupportedOperationException();
     }
 }

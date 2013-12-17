@@ -165,9 +165,9 @@ public class KeyValueStateMachine implements StateMachine {
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
-    public BtreeQuery scan(long storeId) {
+    public BtreeQuery scan(long storeId, Keyspace keyspace) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
-        return keyValueStore.buildQuery();
+        return keyValueStore.buildQuery(keyspace);
     }
 
 }

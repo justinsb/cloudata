@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.util.Hex;
 import com.cloudata.values.Value;
 import com.google.common.collect.Lists;
@@ -91,7 +92,7 @@ public class LeafPage extends Page {
             return pos;
         }
 
-        <V> void doAction(ByteBuffer key, BtreeOperation<V> operation) {
+        <V> void doAction(ByteBuffer key, RowOperation<V> operation) {
             int position = firstGTE(key);
 
             Value oldValue = null;
@@ -340,6 +341,12 @@ public class LeafPage extends Page {
             this.key = key;
             this.value = value;
         }
+
+        @Override
+        public String toString() {
+            return "Entry [key=" + Hex.forDebug(key) + ", value=" + Hex.forDebug(value) + "]";
+        }
+
     }
 
     private int firstGTE(ByteBuffer find) {
@@ -466,7 +473,7 @@ public class LeafPage extends Page {
     }
 
     @Override
-    public <V> void doAction(Transaction txn, ByteBuffer key, BtreeOperation<V> operation) {
+    public <V> void doAction(Transaction txn, ByteBuffer key, RowOperation<V> operation) {
         getMutable().doAction(key, operation);
     }
 

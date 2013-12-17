@@ -26,7 +26,7 @@ import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
 import com.cloudata.structured.StructuredStateMachine;
 import com.cloudata.structured.operation.DeleteOperation;
-import com.cloudata.structured.operation.SetOperation;
+import com.cloudata.structured.operation.StructuredSetOperation;
 import com.cloudata.values.Value;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
@@ -60,7 +60,7 @@ public class StructuredStorageEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryJson() throws IOException {
-        BtreeQuery query = stateMachine.scan(storeId);
+        BtreeQuery query = stateMachine.scan(storeId, getKeyspace());
 
         query.setFormat(MediaType.APPLICATION_JSON_TYPE);
         return Response.ok(query).build();
@@ -81,7 +81,7 @@ public class StructuredStorageEndpoint {
             Object ret;
 
             Value value = Value.fromJsonBytes(v);
-            SetOperation operation = new SetOperation(value);
+            StructuredSetOperation operation = new StructuredSetOperation(null, value);
             stateMachine.doAction(storeId, getKeyspace(), k, operation);
             ret = null;
 

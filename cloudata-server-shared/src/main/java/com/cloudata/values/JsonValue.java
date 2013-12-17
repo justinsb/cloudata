@@ -8,6 +8,7 @@ import com.cloudata.btree.ByteBuffers;
 import com.cloudata.util.ByteBufferInputStream;
 import com.google.common.base.Charsets;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class JsonValue extends Value {
@@ -34,25 +35,27 @@ public class JsonValue extends Value {
 
     @Override
     public long asLong() {
-        JsonElement json = asJson();
-        if (json.isJsonPrimitive()) {
-            try {
-                return json.getAsLong();
-            } catch (Exception e) {
-                // Can't get as long
-                throw new IllegalArgumentException();
-            }
-        } else {
-            throw new IllegalArgumentException();
-        }
+        // JsonElement json = JsonObject();
+        // if (json.isJsonPrimitive()) {
+        // try {
+        // return json.getAsLong();
+        // } catch (Exception e) {
+        // // Can't get as long
+        // throw new IllegalArgumentException();
+        // }
+        // } else {
+        // throw new IllegalArgumentException();
+        // }
+        throw new IllegalArgumentException();
     }
 
-    private JsonElement asJson() {
+    @Override
+    public JsonObject asJsonObject() {
         // TODO: Cache
         ByteBufferInputStream is = new ByteBufferInputStream(asBytes());
         Reader reader = new InputStreamReader(is, Charsets.UTF_8);
         JsonElement json = new JsonParser().parse(reader);
-        return json;
+        return (JsonObject) json;
     }
 
     @Override

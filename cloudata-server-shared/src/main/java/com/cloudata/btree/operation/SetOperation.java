@@ -1,9 +1,8 @@
 package com.cloudata.btree.operation;
 
-import com.cloudata.btree.BtreeOperation;
 import com.cloudata.values.Value;
 
-public class SetOperation implements BtreeOperation<Void> {
+public class SetOperation implements RowOperation<Void> {
 
     protected final Value newValue;
 

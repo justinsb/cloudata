@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.PageStore.PageRecord;
+import com.cloudata.btree.operation.BtreeOperation;
+import com.cloudata.btree.operation.ComplexOperation;
+import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -175,7 +178,13 @@ public class WriteTransaction extends Transaction {
     }
 
     public <V> void doAction(Btree btree, ByteBuffer key, BtreeOperation<V> operation) {
-        getRootPage(btree, true).doAction(this, key, operation);
+        if (operation instanceof RowOperation) {
+            getRootPage(btree, true).doAction(this, key, (RowOperation<V>) operation);
+        } else if (operation instanceof ComplexOperation) {
+            ((ComplexOperation) operation).doAction(btree, this, key);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     int createdPageCount;

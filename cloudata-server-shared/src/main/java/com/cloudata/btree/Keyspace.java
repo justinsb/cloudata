@@ -1,19 +1,28 @@
 package com.cloudata.btree;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudata.util.Hex;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.CodedOutputStream;
 
 public class Keyspace {
-    public static final Keyspace ZERO = new Keyspace(0);
+
+    private static final Logger log = LoggerFactory.getLogger(Keyspace.class);
+
+    public static final Keyspace ZERO = Keyspace.user(0);
+    private static final int SYSTEM_START = 65536;
 
     final int keyspaceId;
     final ByteString keyspaceIdPrefix;
 
-    public Keyspace(int keyspaceId) {
+    private Keyspace(int keyspaceId) {
         Preconditions.checkArgument(keyspaceId >= 0);
         this.keyspaceId = keyspaceId;
 
@@ -44,11 +53,38 @@ public class Keyspace {
         return keyspaceIdPrefix.concat(key);
     }
 
-    public static Keyspace build(int keyspaceId) {
+    public static Keyspace user(int keyspaceId) {
+        if (keyspaceId > SYSTEM_START) {
+            throw new IllegalArgumentException();
+        }
         return new Keyspace(keyspaceId);
     }
 
     public ByteString mapToKey(byte[] key) {
         return mapToKey(ByteString.copyFrom(key));
+    }
+
+    public static Keyspace system(int i) {
+        return new Keyspace(SYSTEM_START + i);
+    }
+
+    public boolean contains(ByteBuffer buffer) {
+        if (buffer.remaining() < keyspaceIdPrefix.size()) {
+            return false;
+        }
+        for (int i = 0; i < keyspaceIdPrefix.size(); i++) {
+            if (buffer.get(buffer.position() + i) != keyspaceIdPrefix.byteAt(i)) {
+                log.debug("Mismatch: {} vs {}", Hex.forDebug(buffer), Hex.forDebug(keyspaceIdPrefix));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public ByteBuffer getSuffix(ByteBuffer buffer) {
+        assert contains(buffer);
+        ByteBuffer dup = buffer.duplicate();
+        dup.position(dup.position() + keyspaceIdPrefix.size());
+        return dup;
     }
 }

@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import com.cloudata.btree.operation.RowOperation;
+
 public abstract class Page {
     protected final Page parent;
     protected final ByteBuffer buffer;
@@ -20,7 +22,7 @@ public abstract class Page {
 
     public abstract boolean walk(Transaction txn, ByteBuffer from, EntryListener listener);
 
-    public abstract <V> void doAction(Transaction txn, ByteBuffer key, BtreeOperation<V> operation);
+    public abstract <V> void doAction(Transaction txn, ByteBuffer key, RowOperation<V> operation);
 
     public abstract ByteBuffer getKeyLbound();
 

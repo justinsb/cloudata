@@ -9,6 +9,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.util.Hex;
 
 public class BranchPage extends Page {
@@ -45,7 +46,8 @@ public class BranchPage extends Page {
 
                     ByteBuffer midKey = getKey(mid);
                     int comparison = ByteBuffers.compare(midKey, find);
-                    log.info("comparison: @{} {} vs {}: {}", mid, Hex.forDebug(midKey), Hex.forDebug(find), comparison);
+                    // log.info("comparison: @{} {} vs {}: {}", mid, Hex.forDebug(midKey), Hex.forDebug(find),
+                    // comparison);
 
                     if (comparison < 0) {
                         min = mid + 1;
@@ -316,7 +318,7 @@ public class BranchPage extends Page {
 
                 ByteBuffer midKey = getKey(mid);
                 int comparison = ByteBuffers.compare(midKey, find);
-                log.info("comparison: @{} {} vs {}: {}", mid, Hex.forDebug(midKey), Hex.forDebug(find), comparison);
+                // log.info("comparison: @{} {} vs {}: {}", mid, Hex.forDebug(midKey), Hex.forDebug(find), comparison);
 
                 if (comparison < 0) {
                     min = mid + 1;
@@ -411,7 +413,7 @@ public class BranchPage extends Page {
     }
 
     @Override
-    public <V> void doAction(Transaction txn, ByteBuffer key, BtreeOperation<V> operation) {
+    public <V> void doAction(Transaction txn, ByteBuffer key, RowOperation<V> operation) {
         int pos = findPos(key);
         if (pos < 0) {
             pos = 0;

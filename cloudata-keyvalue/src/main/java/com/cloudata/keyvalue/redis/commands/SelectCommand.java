@@ -24,7 +24,7 @@ public class SelectCommand implements RedisCommand {
             return new ErrorRedisReponse("invalid DB index");
         }
 
-        session.setKeyspace(Keyspace.build(Ints.checkedCast(keyspaceId)));
+        session.setKeyspace(Keyspace.user(Ints.checkedCast(keyspaceId)));
         return StatusRedisResponse.OK;
     }
 }

@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.collect.Lists;
 
@@ -181,7 +182,7 @@ public class TransactionPage extends Page {
     }
 
     @Override
-    public <V> void doAction(Transaction txn, ByteBuffer key, BtreeOperation<V> operation) {
+    public <V> void doAction(Transaction txn, ByteBuffer key, RowOperation<V> operation) {
         throw new UnsupportedOperationException();
     }
 

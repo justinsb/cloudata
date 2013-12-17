@@ -19,8 +19,8 @@ import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
 import com.cloudata.structured.StructuredProto.LogEntry;
 import com.cloudata.structured.operation.DeleteOperation;
-import com.cloudata.structured.operation.SetOperation;
 import com.cloudata.structured.operation.StructuredOperation;
+import com.cloudata.structured.operation.StructuredSetOperation;
 import com.cloudata.values.Value;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
@@ -89,13 +89,13 @@ public class StructuredStateMachine implements StateMachine {
             StructuredOperation<?> operation;
 
             switch (entry.getAction()) {
-
             case DELETE:
                 operation = new DeleteOperation();
                 break;
 
             case SET:
-                operation = new SetOperation(Value.deserialize(entry.getValue().asReadOnlyByteBuffer()));
+                operation = new StructuredSetOperation(keyValueStore, Value.deserialize(entry.getValue()
+                        .asReadOnlyByteBuffer()));
                 break;
 
             default:
@@ -105,7 +105,6 @@ public class StructuredStateMachine implements StateMachine {
             keyValueStore.doAction(key != null ? key.asReadOnlyByteBuffer() : null, operation);
 
             Object ret = operation.getResult();
-
             return ret;
         } catch (InvalidProtocolBufferException e) {
             log.error("Error deserializing operation", e);
@@ -150,9 +149,9 @@ public class StructuredStateMachine implements StateMachine {
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
-    public BtreeQuery scan(long storeId) {
+    public BtreeQuery scan(long storeId, Keyspace keyspace) {
         StructuredStore keyValueStore = getKeyValueStore(storeId);
-        return keyValueStore.buildQuery();
+        return keyValueStore.buildQuery(keyspace);
     }
 
 }

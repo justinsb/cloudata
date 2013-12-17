@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import com.cloudata.btree.BtreeOperation;
 import com.cloudata.btree.EntryListener;
 import com.cloudata.btree.Page;
 import com.cloudata.btree.PageStore;
@@ -12,6 +11,7 @@ import com.cloudata.btree.PageStore.PageRecord;
 import com.cloudata.btree.Transaction;
 import com.cloudata.btree.TransactionPage;
 import com.cloudata.btree.WriteTransaction;
+import com.cloudata.btree.operation.RowOperation;
 
 public class FreeSpaceMap {
 
@@ -138,7 +138,7 @@ public class FreeSpaceMap {
         }
 
         @Override
-        public <V> void doAction(Transaction txn, ByteBuffer key, BtreeOperation<V> operation) {
+        public <V> void doAction(Transaction txn, ByteBuffer key, RowOperation<V> operation) {
             throw new IllegalStateException();
         }
 
