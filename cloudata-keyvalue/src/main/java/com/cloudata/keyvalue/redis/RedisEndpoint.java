@@ -67,7 +67,6 @@ public class RedisEndpoint {
     public void stop() throws InterruptedException {
         group.shutdownGracefully();
 
-        // Wait until the server socket is closed.
-        serverChannel.closeFuture().sync();
+        serverChannel.close().sync();
     }
 }

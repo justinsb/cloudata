@@ -12,6 +12,7 @@ import org.robotninjas.barge.Replica;
 import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -112,6 +113,16 @@ public class KeyValueServer {
         if (selector != null) {
             selector.stopEndpoint();
             selector = null;
+        }
+
+        if (redisEndpoint != null) {
+            try {
+                redisEndpoint.stop();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw Throwables.propagate(e);
+            }
+            redisEndpoint = null;
         }
 
         if (raft != null) {
