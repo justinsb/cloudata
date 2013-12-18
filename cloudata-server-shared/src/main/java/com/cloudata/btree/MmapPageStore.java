@@ -33,6 +33,8 @@ public class MmapPageStore extends PageStore {
 
     private static final int MASTERPAGE_SLOTS = 8;
 
+    private static final boolean DUMP_PAGES = false;
+
     private MmapPageStore(MappedByteBuffer buffer, boolean uniqueKeys) {
         this.buffer = buffer;
         this.uniqueKeys = uniqueKeys;
@@ -156,11 +158,15 @@ public class MmapPageStore extends PageStore {
             throw new IllegalStateException();
         }
 
-        log.info("Fetched page {}: {}", pageNumber, page);
+        if (log.isDebugEnabled()) {
+            log.debug("Fetched page {}: {}", pageNumber, page);
+        }
 
-        synchronized (System.out) {
-            page.dump(System.out);
-            System.out.flush();
+        if (DUMP_PAGES) {
+            synchronized (System.out) {
+                page.dump(System.out);
+                System.out.flush();
+            }
         }
 
         return new PageRecord(page, space);

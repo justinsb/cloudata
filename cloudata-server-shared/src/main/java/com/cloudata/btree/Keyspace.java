@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.util.Hex;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.protobuf.ByteString;
@@ -74,7 +73,7 @@ public class Keyspace {
         }
         for (int i = 0; i < keyspaceIdPrefix.size(); i++) {
             if (buffer.get(buffer.position() + i) != keyspaceIdPrefix.byteAt(i)) {
-                log.debug("Mismatch: {} vs {}", Hex.forDebug(buffer), Hex.forDebug(keyspaceIdPrefix));
+                // log.debug("Mismatch: {} vs {}", Hex.forDebug(buffer), Hex.forDebug(keyspaceIdPrefix));
                 return false;
             }
         }

@@ -34,7 +34,7 @@ public class PageHeader {
         slice.position(offset + HEADER_SIZE);
         slice.limit(offset + HEADER_SIZE + length);
 
-        log.info("Buffer: {} - {}", offset + HEADER_SIZE, offset + HEADER_SIZE + length);
+        // log.info("Buffer: {} - {}", offset + HEADER_SIZE, offset + HEADER_SIZE + length);
         return slice.slice().asReadOnlyBuffer();
     }
 
