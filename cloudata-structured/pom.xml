@@ -14,6 +14,18 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.facebook.presto</groupId>
+			<artifactId>presto-parser</artifactId>
+			<version>0.55-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.facebook.presto</groupId>
+			<artifactId>presto-main</artifactId>
+			<version>0.55-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.cloudata</groupId>
 			<artifactId>cloudata-server-shared</artifactId>
 			<version>${project.version}</version>
