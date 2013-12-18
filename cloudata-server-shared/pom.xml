@@ -9,10 +9,24 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
+	<properties>
+		<jetty.version>9.1.0.v20131115</jetty.version>
+	</properties>
+
 	<artifactId>cloudata-server-shared</artifactId>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-server</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>${jetty.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.cloudata</groupId>
 			<artifactId>cloudata-shared</artifactId>

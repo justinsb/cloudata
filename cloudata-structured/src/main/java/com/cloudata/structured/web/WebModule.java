@@ -9,9 +9,11 @@ public class WebModule extends ServletModule {
     @Override
     protected void configureServlets() {
         bind(StructuredStorageEndpoint.class);
+        bind(SqlEndpoint.class);
 
         bind(ByteBufferProvider.class);
         bind(BtreeQueryBodyWriter.class);
+        bind(SqlStatementBodyWriter.class);
 
         serve("/*").with(GuiceContainer.class);
     }

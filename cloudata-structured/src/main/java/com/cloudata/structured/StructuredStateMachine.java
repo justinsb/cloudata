@@ -34,11 +34,11 @@ public class StructuredStateMachine implements StateMachine {
 
     private RaftService raft;
     private File baseDir;
-    final LoadingCache<Long, StructuredStore> keyValueStoreCache;
+    final LoadingCache<Long, StructuredStore> storeCache;
 
     public StructuredStateMachine() {
-        KeyValueStoreCacheLoader loader = new KeyValueStoreCacheLoader();
-        this.keyValueStoreCache = CacheBuilder.newBuilder().recordStats().build(loader);
+        StoreCacheLoader loader = new StoreCacheLoader();
+        this.storeCache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
 
     public void init(RaftService raft, File stateDir) {
@@ -84,7 +84,7 @@ public class StructuredStateMachine implements StateMachine {
             ByteString key = entry.getKey();
             ByteString value = entry.getValue();
 
-            StructuredStore keyValueStore = getKeyValueStore(storeId);
+            StructuredStore keyValueStore = getStructuredStore(storeId);
 
             StructuredOperation<?> operation;
 
@@ -115,16 +115,16 @@ public class StructuredStateMachine implements StateMachine {
         }
     }
 
-    private StructuredStore getKeyValueStore(long id) {
+    public StructuredStore getStructuredStore(long id) {
         try {
-            return keyValueStoreCache.get(id);
+            return storeCache.get(id);
         } catch (ExecutionException e) {
             throw Throwables.propagate(e);
         }
     }
 
     @Immutable
-    final class KeyValueStoreCacheLoader extends CacheLoader<Long, StructuredStore> {
+    final class StoreCacheLoader extends CacheLoader<Long, StructuredStore> {
 
         @Override
         public StructuredStore load(@Nonnull Long id) throws Exception {
@@ -145,12 +145,12 @@ public class StructuredStateMachine implements StateMachine {
     }
 
     public Value get(long storeId, Keyspace keyspace, ByteString key) {
-        StructuredStore keyValueStore = getKeyValueStore(storeId);
+        StructuredStore keyValueStore = getStructuredStore(storeId);
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
     public BtreeQuery scan(long storeId, Keyspace keyspace) {
-        StructuredStore keyValueStore = getKeyValueStore(storeId);
+        StructuredStore keyValueStore = getStructuredStore(storeId);
         return keyValueStore.buildQuery(keyspace);
     }
 

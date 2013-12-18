@@ -8,7 +8,6 @@ import org.junit.BeforeClass;
 import org.robotninjas.barge.Replica;
 
 import com.cloudata.TestUtils;
-import com.cloudata.structured.StructuredServer;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 
@@ -43,7 +42,7 @@ public class IntegrationTestBase {
     }
 
     @AfterClass
-    public static void stopServers() {
+    public static void stopServers() throws Exception {
         for (int i = 0; i < SERVERS.length; i++) {
             if (SERVERS[i] != null) {
                 SERVERS[i].stop();

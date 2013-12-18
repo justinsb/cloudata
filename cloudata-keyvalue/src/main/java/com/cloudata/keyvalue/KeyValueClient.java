@@ -158,12 +158,16 @@ public class KeyValueClient {
     }
 
     static class KeyValueRecordset extends StreamingRecordsetBase<KeyValueEntry> {
+        private final DataInputStream dis;
+
         public KeyValueRecordset(ClientResponse response) {
             super(response);
+            InputStream is = response.getEntityInputStream();
+            this.dis = new DataInputStream(is);
         }
 
         @Override
-        protected KeyValueEntry read(DataInputStream dis) throws IOException {
+        protected KeyValueEntry read() throws IOException {
             int keyLength = dis.readInt();
             if (keyLength == -1) {
                 return null;

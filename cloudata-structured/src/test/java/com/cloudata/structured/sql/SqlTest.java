@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.cloudata.structured.StructuredStore;
 import com.cloudata.structured.sql.provider.CloudataConnectorMetadata;
 import com.cloudata.structured.sql.provider.CloudataSplitManager;
 import com.cloudata.structured.sql.simple.SimpleNode;
@@ -105,7 +106,7 @@ public class SqlTest {
         int initialHashPartitions = 1;
         ShardManager shardManager = new MockShardManager();
         StorageManager storageManager = new MockStorageManager();
-        PeriodicImportManager periodicImportManager = new MockPeriodicImportManager();
+        PeriodicImportManager periodicImportManager = new StubPeriodicImportManager();
 
         URI selfUri = nodeManager.getCurrentNode().getHttpUri();
         SqlQueryExecution queryExecution = new SqlQueryExecution(queryId, query, buildSession(), selfUri, statement,
@@ -349,14 +350,14 @@ public class SqlTest {
 
         MetadataManager metadata = buildMetadata();
         StorageManager storageManager = new MockStorageManager();
-        PeriodicImportManager periodicImportManager = new MockPeriodicImportManager();
+        PeriodicImportManager periodicImportManager = new StubPeriodicImportManager();
 
         SplitManager splitManager = buildSplitManager(nodeManager);
         List<PlanOptimizer> planOptimizers = buildPlanOptimizers(metadata, splitManager);
 
         for (int i = 0; i < 1; i++) {
             // String sql = "SELECT key1 as k1, key2 || 'hello' as k2, 'world' as k3 FROM table1";
-            String sql = "SELECT * FROM table1 JOIN table1 t2 ON table1.key1=t2.key1";
+            String sql = "SELECT * FROM table1 JOIN table1 t2 ON table1.column1=t2.column2";
 
             Statement statement = SqlParser.createStatement(sql);
 
@@ -412,19 +413,28 @@ public class SqlTest {
 
     @Test
     public void testEngine() {
-        MetadataManager metadata = buildMetadata();
-        StorageManager storageManager = new MockStorageManager();
-        PeriodicImportManager periodicImportManager = new MockPeriodicImportManager();
+        // MetadataManager metadata = buildMetadata();
+        // StorageManager storageManager = new MockStorageManager();
+        // PeriodicImportManager periodicImportManager = new StubPeriodicImportManager();
 
-        NodeManager nodeManager = new InMemoryNodeManager();
+        // SplitManager splitManager = buildSplitManager(nodeManager);
+        // List<PlanOptimizer> planOptimizers = buildPlanOptimizers(metadata, splitManager);
 
-        SplitManager splitManager = buildSplitManager(nodeManager);
-        List<PlanOptimizer> planOptimizers = buildPlanOptimizers(metadata, splitManager);
+        ExecutorService executor = Executors.newCachedThreadPool();
+        StructuredStore store = null;
+        SqlEngine engine = new SqlEngine(store, executor);
 
-        SqlSession session = new SqlSession();
-        SqlEngine engine = new SqlEngine(metadata, planOptimizers, periodicImportManager, storageManager);
+        // String catalog = "cloudata";
+        // engine.createConnection(catalog, CloudataConnectorFactory.PROVIDER_ID, Maps.<String, String> newHashMap());
+        // engine.addGlobalConnector(connectorId, connector);
+        // metadata.addConnectorMetadata(connectorId, catalog, new CloudataConnectorMetadata(connectorId));
+        //
+        // Connector connector = new CloudataConnector(connectorId);
+        // engine.addGlobalConnector(connectorId, connector);
 
-        String sql = "SELECT key1 as k1 FROM table1";
+        SqlSession session = engine.createSession();
+
+        String sql = "SELECT column1 as k1 FROM table1";
 
         SqlStatement statement = engine.parse(session, sql);
         Assert.assertTrue(statement.isSimple());

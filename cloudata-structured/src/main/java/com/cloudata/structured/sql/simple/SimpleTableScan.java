@@ -4,14 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.facebook.presto.metadata.TableMetadata;
-import com.facebook.presto.spi.RecordCursor;
-import com.facebook.presto.spi.RecordSet;
 import com.facebook.presto.sql.planner.Symbol;
 
 public class SimpleTableScan extends SimpleNode {
-    RecordSet recordset;
-
-    RecordCursor cursor;
 
     public List<String> columnNames;
     public List<SimpleExpression> expressions;
@@ -38,4 +33,5 @@ public class SimpleTableScan extends SimpleNode {
     public <C, R> R accept(SimpleNodeVisitor<C, R> visitor, C context) {
         return visitor.visitTableScan(this, context);
     }
+
 }

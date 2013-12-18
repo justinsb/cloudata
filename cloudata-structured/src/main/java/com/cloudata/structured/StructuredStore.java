@@ -120,4 +120,8 @@ public class StructuredStore {
         return data;
     }
 
+    public Btree getBtree() {
+        return btree;
+    }
+
 }

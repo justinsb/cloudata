@@ -2,7 +2,6 @@ package com.cloudata.structured.sql;
 
 import com.cloudata.structured.sql.simple.ConvertToSimplePlanVisitor;
 import com.cloudata.structured.sql.simple.SimpleNode;
-import com.facebook.presto.metadata.Metadata;
 import com.facebook.presto.sql.planner.Plan;
 import com.google.common.base.Optional;
 
@@ -12,10 +11,10 @@ public class SqlStatement {
     private final Plan plan;
 
     Optional<SimpleNode> simple;
-    private final Metadata metadata;
+    final SqlSession session;
 
-    public SqlStatement(Metadata metadata, String sql, Plan plan) {
-        this.metadata = metadata;
+    SqlStatement(SqlSession session, String sql, Plan plan) {
+        this.session = session;
         this.sql = sql;
         this.plan = plan;
     }
@@ -26,12 +25,16 @@ public class SqlStatement {
 
     public SimpleNode getSimple() {
         if (simple == null) {
-            ConvertToSimplePlanVisitor visitor = new ConvertToSimplePlanVisitor(metadata);
+            ConvertToSimplePlanVisitor visitor = new ConvertToSimplePlanVisitor(session.getMetadata());
             SimpleNode accept = plan.getRoot().accept(visitor, null);
             // plan.getRoot().accept(visitor, 0);
             simple = Optional.fromNullable(accept);
         }
         return simple.orNull();
+    }
+
+    public void execute(RowsetListener listener) {
+        session.execute(this, listener);
     }
 
     // class SimplePlan {

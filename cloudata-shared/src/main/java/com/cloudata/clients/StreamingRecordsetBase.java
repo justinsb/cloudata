@@ -1,8 +1,6 @@
 package com.cloudata.clients;
 
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -29,9 +27,6 @@ public abstract class StreamingRecordsetBase<V> implements AutoCloseable, Iterab
             throw new IllegalStateException();
         }
         read = true;
-        InputStream is = response.getEntityInputStream();
-
-        final DataInputStream dis = new DataInputStream(is);
 
         return new Iterator<V>() {
             V next;
@@ -66,7 +61,7 @@ public abstract class StreamingRecordsetBase<V> implements AutoCloseable, Iterab
                 if (next == null) {
                     if (!done) {
                         try {
-                            next = read(dis);
+                            next = read();
                         } catch (IOException e) {
                             throw Throwables.propagate(e);
                         }
@@ -81,5 +76,5 @@ public abstract class StreamingRecordsetBase<V> implements AutoCloseable, Iterab
 
     }
 
-    protected abstract V read(DataInputStream dis) throws IOException;
+    protected abstract V read() throws IOException;
 }
