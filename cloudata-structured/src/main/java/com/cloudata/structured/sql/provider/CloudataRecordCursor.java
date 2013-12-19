@@ -163,7 +163,9 @@ public class CloudataRecordCursor implements RecordCursor {
                     JsonObject json = value.asJsonObject();
                     return listener.found(key, json);
                 } else {
-                    // TODO: Bail out
+                    if (keyspace.keyIsAfter(key)) {
+                        return false;
+                    }
                     return true;
                 }
             }

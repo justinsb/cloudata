@@ -80,10 +80,28 @@ public class Keyspace {
         return true;
     }
 
+    public boolean keyIsAfter(ByteBuffer key) {
+        for (int i = 0; i < keyspaceIdPrefix.size(); i++) {
+            byte keyByte = key.get(key.position() + i);
+            byte prefixByte = keyspaceIdPrefix.byteAt(i);
+            if (keyByte != prefixByte) {
+                int compare = ByteBuffers.compareUnsigned(keyByte, prefixByte);
+                if (compare >= 0) {
+                    assert compare != 0;
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public ByteBuffer getSuffix(ByteBuffer buffer) {
         assert contains(buffer);
         ByteBuffer dup = buffer.duplicate();
         dup.position(dup.position() + keyspaceIdPrefix.size());
         return dup;
     }
+
 }

@@ -14,7 +14,7 @@ public class ByteBuffers {
 
         int end = lPos + n;
         while (lPos < end) {
-            int comparison = compare(l.get(lPos), r.get(rPos));
+            int comparison = compareUnsigned(l.get(lPos), r.get(rPos));
             if (comparison != 0) {
                 return comparison;
             }
@@ -33,7 +33,7 @@ public class ByteBuffers {
 
         int end = lPos + n;
         while (lPos < end) {
-            int comparison = compare(l.get(lPos), r.get(rPos));
+            int comparison = compareUnsigned(l.get(lPos), r.get(rPos));
             if (comparison != 0) {
                 return comparison;
             }
@@ -49,7 +49,7 @@ public class ByteBuffers {
         }
     }
 
-    private final static int compare(byte l, byte r) {
+    public final static int compareUnsigned(byte l, byte r) {
         // Compare as unsigned
         int il = l & 0xff;
         int ir = r & 0xff;

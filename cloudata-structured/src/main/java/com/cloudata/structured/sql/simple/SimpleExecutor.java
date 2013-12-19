@@ -16,6 +16,7 @@ import com.facebook.presto.spi.RecordSet;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.gson.JsonObject;
+import com.google.protobuf.ByteString;
 
 public class SimpleExecutor {
 
@@ -74,8 +75,10 @@ public class SimpleExecutor {
         try {
             listener.beginRows();
 
-            ByteBuffer start = null;
-            cursor.walk(Keyspace.ZERO, start, new WalkListener() {
+            Keyspace keyspace = Keyspace.ZERO;
+
+            ByteString start = keyspace.mapToKey(ByteString.EMPTY);
+            cursor.walk(Keyspace.ZERO, start.asReadOnlyByteBuffer(), new WalkListener() {
 
                 @Override
                 public boolean found(ByteBuffer key, JsonObject json) {
