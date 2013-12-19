@@ -1,6 +1,5 @@
 package com.cloudata.structured.web;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
@@ -45,10 +44,7 @@ public final class SqlStatementBodyWriter implements MessageBodyWriter<SqlStatem
     public void writeTo(SqlStatement statement, Class<?> type, Type genericType, Annotation[] annotations,
             MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
-        assert entityStream instanceof BufferedOutputStream;
-
-        // final DataOutputStream dos = new DataOutputStream(entityStream);
-
+        // CodedOutputStream includes a write buffer, so we don't need another one
         final CodedOutputStream os = CodedOutputStream.newInstance(entityStream);
 
         RowsetListener listener = new RowsetListener() {
