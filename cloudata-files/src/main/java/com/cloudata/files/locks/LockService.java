@@ -6,4 +6,6 @@ public interface LockService {
 
     boolean unlock(String key, String lockToken);
 
+    CloudLockToken findLock(String key, String lockToken);
+
 }

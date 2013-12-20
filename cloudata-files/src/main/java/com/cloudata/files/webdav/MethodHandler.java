@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
+import java.net.URI;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -71,6 +72,7 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
         String ifHeader = request.getHeader("If");
         if (!Strings.isNullOrEmpty(ifHeader)) {
             if (!checkIfHeader(ifHeader)) {
+                log.info("If precondition was false: {}", ifHeader);
                 throw new WebdavResponseException(HttpResponseStatus.PRECONDITION_FAILED);
             }
         }
@@ -105,51 +107,49 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
     }
 
     private boolean checkIfHeader(String ifHeader) {
-        throw new UnsupportedOperationException();
+        // See: http://www.webdav.org/specs/rfc2518.html#HEADER_If
+        String subjectUrl = null;
 
-        // (<opaquelocktoken:6de84ba6-7063-477b-9ca6-a246ce69ed8b>)
+        for (String token : Splitter.on(" ").omitEmptyStrings().trimResults().split(ifHeader)) {
+            if (token.startsWith("<")) {
+                // URL
+                if (!token.endsWith(">")) {
+                    throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
+                }
 
-        //
-        // // See: http://www.webdav.org/specs/rfc2518.html#HEADER_If
-        // log.warn("If-Header parsing is totally stubbed out");
-        //
-        // String url = null;
-        //
-        // for (String token : Splitter.on(" ").omitEmptyStrings().trimResults().split(ifHeader)) {
-        // if (token.startsWith("<")) {
-        // // URL
-        // if (!token.endsWith(">")) {
-        // throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
-        // }
-        //
-        // url = token.substring(1, token.length() - 1);
-        // } else if (token.startsWith("(")) {
-        // if (token.startsWith("(<")) {
-        // if (!token.endsWith(">)")) {
-        // throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
-        // }
-        //
-        // String lockToken = token.substring(2, token.length() - 2);
-        //
-        // if (Strings.isNullOrEmpty(url)) {
-        // throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
-        // }
-        //
-        // URI uri = URI.create(url);
-        // String path = uri.getPath();
-        //
-        // if (webdav.lockService.findLock(path, lockToken) == null) {
-        // return false;
-        // }
-        // } else {
-        // throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
-        // }
-        // } else {
-        // throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
-        // }
-        // }
-        // // <https://127.0.0.1:8443/d1/d> (<opaquelocktoken:31dafad5-2cbb-49c0-946f-c3124aca0922>)
-        // return true;
+                subjectUrl = token.substring(1, token.length() - 1);
+            } else if (token.startsWith("(")) {
+                if (token.startsWith("(<")) {
+                    if (!token.endsWith(">)")) {
+                        throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
+                    }
+
+                    String lockToken = token.substring(2, token.length() - 2);
+
+                    if (lockToken.startsWith(LockHandler.LOCK_PREFIX)) {
+                        lockToken = lockToken.substring(LockHandler.LOCK_PREFIX.length());
+                    }
+
+                    URI subjectUri;
+                    if (Strings.isNullOrEmpty(subjectUrl)) {
+                        subjectUri = URI.create(getRequest().getUri());
+                    } else {
+                        subjectUri = URI.create(subjectUrl);
+                    }
+                    String path = subjectUri.getPath();
+
+                    if (getLockService().findLock(path, lockToken) == null) {
+                        return false;
+                    }
+                } else {
+                    throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
+                }
+            } else {
+                throw new IllegalArgumentException("Could not parse ifHeader: " + ifHeader);
+            }
+        }
+        // <https://127.0.0.1:8443/d1/d> (<opaquelocktoken:31dafad5-2cbb-49c0-946f-c3124aca0922>)
+        return true;
     }
 
     protected HttpResponse buildResponseHeader(HttpResponseStatus status) {

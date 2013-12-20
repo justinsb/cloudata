@@ -42,7 +42,7 @@ public class InMemoryLockService implements LockService {
             return false;
         }
 
-        synchronized InMemoryLockToken find(String lockToken) {
+        synchronized InMemoryLockToken findLock(String lockToken) {
             for (int i = 0; i < locks.size(); i++) {
                 InMemoryLockToken lock = locks.get(i);
                 if (lockToken.equals(lock.getTokenId())) {
@@ -147,48 +147,8 @@ public class InMemoryLockService implements LockService {
         return getLockable(key).unlock(lockToken);
     }
 
-    // @Override
-    // public InMemoryLockToken lock(String uri) {
-    // LockSet lockset;
-    // synchronized (locks) {
-    // lockset = locks.get(uri);
-    //
-    // if (lockset == null) {
-    // lockset = new LockSet();
-    // locks.put(uri, lockset);
-    // }
-    // }
-    //
-    // return lockset.lock();
-    // }
-    //
-    // @Override
-    // public InMemoryLock unlock(String uri, String lockToken) {
-    // // TODO: Use findLock
-    //
-    // LockSet lockset;
-    // synchronized (locks) {
-    // lockset = locks.get(uri);
-    // }
-    //
-    // if (lockset == null) {
-    // return null;
-    // }
-    //
-    // return lockset.unlock(lockToken);
-    // }
-    //
-    // @Override
-    // public InMemoryLock findLock(String uri, String lockToken) {
-    // LockSet lockset;
-    // synchronized (locks) {
-    // lockset = locks.get(uri);
-    // }
-    //
-    // if (lockset == null) {
-    // return null;
-    // }
-    //
-    // return lockset.find(lockToken);
-    // }
+    @Override
+    public CloudLockToken findLock(String key, String lockToken) {
+        return getLockable(key).findLock(lockToken);
+    }
 }
