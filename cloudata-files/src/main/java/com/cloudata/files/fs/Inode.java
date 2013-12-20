@@ -10,7 +10,7 @@ import com.google.protobuf.ByteString;
 public class Inode {
 
     static final int S_IFMT = 0170000;
-    static final int S_IFDIR = 0040000;
+    public static final int S_IFDIR = 0040000;
 
     final long id;
     final InodeData data;

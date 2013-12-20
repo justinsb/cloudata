@@ -5,7 +5,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -241,7 +240,7 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
 
         String path = request.getUri();
 
-        if (request.getMethod().name().equals("MKCOL") || request.getMethod() == HttpMethod.PUT) {
+        if (shouldResolveParent()) {
             path = Urls.getParentPath(path);
             if (Strings.isNullOrEmpty(path)) {
                 return Futures.immediateFuture(null);
@@ -283,6 +282,10 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
                 return getFsClient().resolve(volume, credentials, pathTokens);
             }
         });
+    }
+
+    protected boolean shouldResolveParent() {
+        return false;
     }
 
     private ListeningExecutorService getExecutor() {

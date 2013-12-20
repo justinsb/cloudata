@@ -89,7 +89,7 @@ public class WebdavRequestHandler implements Closeable {
         } else if (request.getMethod().name().equals("PROPFIND")) {
             handler = new PropfindHandler(this);
         } else if (request.getMethod().name().equals("MKCOL")) {
-            throw new UnsupportedOperationException();
+            handler = new MkdirHandler(this);
         } else if (request.getMethod() == HttpMethod.PUT) {
             handler = new PutHandler(this);
         } else if (request.getMethod() == HttpMethod.DELETE) {

@@ -200,10 +200,17 @@ public class FsClient {
 
         inode.setLength(length);
 
-        createNewFile(parentPath, name, inode, overwrite);
+        createNewEntry(parentPath, name, inode, overwrite);
     }
 
-    private void createNewFile(FsPath parent, ByteString name, InodeData.Builder inode, boolean overwrite)
+    public void createNewFolder(FsPath parentPath, ByteString name, InodeData.Builder inode, boolean overwrite)
+            throws IOException, FsException {
+        Preconditions.checkState(inode.getChunkCount() == 0);
+
+        createNewEntry(parentPath, name, inode, overwrite);
+    }
+
+    private void createNewEntry(FsPath parent, ByteString name, InodeData.Builder inode, boolean overwrite)
             throws IOException, FsException {
         // TODO: We really should do this in a transaction; we can lose inodes if we crash...
 

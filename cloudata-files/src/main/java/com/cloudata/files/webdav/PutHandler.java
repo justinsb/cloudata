@@ -18,8 +18,13 @@ public class PutHandler extends MethodHandler {
     }
 
     @Override
-    public HttpObject doAction(FsPath fsPath) throws Exception {
-        if (!fsPath.isFolder()) {
+    protected boolean shouldResolveParent() {
+        return true;
+    }
+
+    @Override
+    public HttpObject doAction(FsPath parentPath) throws Exception {
+        if (!parentPath.isFolder()) {
             throw new WebdavResponseException(HttpResponseStatus.CONFLICT);
         }
 
@@ -47,7 +52,7 @@ public class PutHandler extends MethodHandler {
             SimpleChunkAccumulator simpleContent = (SimpleChunkAccumulator) content;
 
             ByteSource source = simpleContent.getByteSource();
-            getFsClient().createNewFile(fsPath, ByteString.copyFromUtf8(newName), inode, source, overwrite);
+            getFsClient().createNewFile(parentPath, ByteString.copyFromUtf8(newName), inode, source, overwrite);
         } else {
             throw new IllegalStateException();
         }
