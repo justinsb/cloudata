@@ -38,43 +38,53 @@ public class SliceByteInput implements ChunkedInput<ByteBuf> {
     @Override
     public ByteBuf readChunk(ChannelHandlerContext ctx) throws Exception {
         while (true) {
-            ByteBuf buffer = inner.readChunk(ctx);
+            ByteBuf buffer = null;
+            boolean release = true;
 
-            if (buffer == null) {
-                return null;
-            }
+            try {
+                buffer = inner.readChunk(ctx);
 
-            // log.info("SliceByteInput position=" + position);
-
-            if (from != null) {
-                if (position < from) {
-                    int skip = (int) Math.min(from - position, buffer.readableBytes());
-                    if (skip > 0) {
-                        buffer.skipBytes(skip);
-                        position += skip;
-                    }
-                }
-            }
-
-            int consumed = buffer.readableBytes();
-
-            if (to != null) {
-                long n = to - position;
-                long limitWriterIndex = buffer.readerIndex() + n;
-
-                if (limitWriterIndex < buffer.writerIndex()) {
-                    buffer.writerIndex((int) limitWriterIndex);
-                }
-
-                if (position > to && !buffer.isReadable()) {
+                if (buffer == null) {
                     return null;
                 }
-            }
 
-            position += consumed;
+                // log.info("SliceByteInput position=" + position);
 
-            if (buffer.isReadable()) {
-                return buffer;
+                if (from != null) {
+                    if (position < from) {
+                        int skip = (int) Math.min(from - position, buffer.readableBytes());
+                        if (skip > 0) {
+                            buffer.skipBytes(skip);
+                            position += skip;
+                        }
+                    }
+                }
+
+                int consumed = buffer.readableBytes();
+
+                if (to != null) {
+                    long n = to - position;
+                    long limitWriterIndex = buffer.readerIndex() + n;
+
+                    if (limitWriterIndex < buffer.writerIndex()) {
+                        buffer.writerIndex((int) limitWriterIndex);
+                    }
+
+                    if (position > to && !buffer.isReadable()) {
+                        return null;
+                    }
+                }
+
+                position += consumed;
+
+                if (buffer.isReadable()) {
+                    release = false;
+                    return buffer;
+                }
+            } finally {
+                if (release && buffer != null) {
+                    buffer.release();
+                }
             }
         }
     }
