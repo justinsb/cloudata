@@ -1,10 +1,12 @@
 package com.cloudata.clients.keyvalue;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,9 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
+import com.cloudata.pool.Pool;
+import com.cloudata.pool.Pooled;
+import com.cloudata.pool.SimplePool;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -24,10 +29,36 @@ public class RedisKeyValueStore implements KeyValueStore {
 
     private static final Logger log = LoggerFactory.getLogger(RedisKeyValueStore.class);
 
-    final Jedis client;
+    final Pool<RedisClient> clientPool;
 
-    public RedisKeyValueStore(InetSocketAddress address) {
-        this.client = new Jedis(address.getAddress().getHostAddress(), address.getPort());
+    /**
+     * Jedis doesn't implements Closaeable :-(
+     */
+    class RedisClient implements Closeable {
+        final Jedis jedis;
+
+        public RedisClient(Jedis jedis) {
+            this.jedis = jedis;
+        }
+
+        public Jedis getClient() {
+            return jedis;
+        }
+
+        @Override
+        public void close() throws IOException {
+            jedis.quit();
+        }
+    }
+
+    public RedisKeyValueStore(final InetSocketAddress address) {
+        this.clientPool = new SimplePool<RedisClient>(new Callable<RedisClient>() {
+            @Override
+            public RedisClient call() throws Exception {
+                Jedis jedis = new Jedis(address.getAddress().getHostAddress(), address.getPort());
+                return new RedisClient(jedis);
+            }
+        });
     }
 
     @Override
@@ -36,14 +67,18 @@ public class RedisKeyValueStore implements KeyValueStore {
         prefix.copyTo(pattern, 0);
         pattern[prefix.size()] = '*';
 
-        return Iterables.transform(client.keys(pattern), new Function<byte[], ByteString>() {
+        try (Pooled<RedisClient> lease = clientPool.borrow()) {
+            Jedis client = lease.get().getClient();
 
-            @Override
-            public ByteString apply(byte[] input) {
-                return ByteString.copyFrom(input);
-            }
+            return Iterables.transform(client.keys(pattern), new Function<byte[], ByteString>() {
 
-        }).iterator();
+                @Override
+                public ByteString apply(byte[] input) {
+                    return ByteString.copyFrom(input);
+                }
+
+            }).iterator();
+        }
     }
 
     @Override
@@ -72,36 +107,41 @@ public class RedisKeyValueStore implements KeyValueStore {
 
     @Override
     public ByteString read(ByteString key) throws IOException {
-        byte[] value = client.get(key.toByteArray());
-        if (value == null) {
-            return null;
+        try (Pooled<RedisClient> lease = clientPool.borrow()) {
+            Jedis client = lease.get().getClient();
+
+            byte[] value = client.get(key.toByteArray());
+            if (value == null) {
+                return null;
+            }
+            return ByteString.copyFrom(value);
         }
-        return ByteString.copyFrom(value);
     }
 
     @Override
     public boolean delete(ByteString key, Modifier... modifiers) throws IOException {
-        byte[] keyBytes = key.toByteArray();
-        if (modifiers == null || modifiers.length == 0) {
-            long deleted = client.del(keyBytes);
-            return deleted == 1;
-        }
+        try (Pooled<RedisClient> lease = clientPool.borrow()) {
+            Jedis client = lease.get().getClient();
 
-        Object ifVersion = null;
-        for (Modifier modifier : modifiers) {
-            if (modifier instanceof IfVersion) {
-                Preconditions.checkArgument(ifVersion == null);
-                ifVersion = ((IfVersion) modifier).version;
-                Preconditions.checkArgument(ifVersion != null);
-            } else {
-                Preconditions.checkArgument(false);
+            byte[] keyBytes = key.toByteArray();
+            if (modifiers == null || modifiers.length == 0) {
+                long deleted = client.del(keyBytes);
+                return deleted == 1;
             }
-        }
 
-        Preconditions.checkState(ifVersion != null);
+            Object ifVersion = null;
+            for (Modifier modifier : modifiers) {
+                if (modifier instanceof IfVersion) {
+                    Preconditions.checkArgument(ifVersion == null);
+                    ifVersion = ((IfVersion) modifier).version;
+                    Preconditions.checkArgument(ifVersion != null);
+                } else {
+                    Preconditions.checkArgument(false);
+                }
+            }
 
-        // TODO: Pool of clients??
-        synchronized (client) {
+            Preconditions.checkState(ifVersion != null);
+
             try (Atomic atomic = Atomic.start(client)) {
                 client.watch(keyBytes);
 
@@ -177,46 +217,47 @@ public class RedisKeyValueStore implements KeyValueStore {
 
     @Override
     public boolean put(ByteString key, ByteString value, Modifier... modifiers) throws IOException {
-        byte[] keyBytes = key.toByteArray();
-        byte[] valueBytes = value.toByteArray();
+        try (Pooled<RedisClient> lease = clientPool.borrow()) {
+            Jedis client = lease.get().getClient();
 
-        if (modifiers == null || modifiers.length == 0) {
-            throwIfNotOk(client.set(keyBytes, valueBytes));
-            return true;
-        }
+            byte[] keyBytes = key.toByteArray();
+            byte[] valueBytes = value.toByteArray();
 
-        Object ifVersion = null;
-        boolean ifNotExists = false;
-
-        for (Modifier modifier : modifiers) {
-            if (modifier instanceof IfVersion) {
-                Preconditions.checkArgument(ifVersion == null);
-                ifVersion = ((IfVersion) modifier).version;
-                Preconditions.checkArgument(ifVersion != null);
-            } else if (modifier instanceof IfNotExists) {
-                Preconditions.checkArgument(ifNotExists == false);
-                ifNotExists = true;
-            } else {
-                Preconditions.checkArgument(false);
-            }
-        }
-
-        if (ifNotExists) {
-            Preconditions.checkState(ifVersion == null);
-            long setnx = client.setnx(keyBytes, valueBytes);
-            if (setnx == 1) {
+            if (modifiers == null || modifiers.length == 0) {
+                throwIfNotOk(client.set(keyBytes, valueBytes));
                 return true;
-            } else if (setnx == 0) {
-                return false;
-            } else {
-                throw new IOException("Expected 0 or 1");
             }
-        }
 
-        Preconditions.checkState(ifVersion != null);
+            Object ifVersion = null;
+            boolean ifNotExists = false;
 
-        // TODO: Pool of clients??
-        synchronized (client) {
+            for (Modifier modifier : modifiers) {
+                if (modifier instanceof IfVersion) {
+                    Preconditions.checkArgument(ifVersion == null);
+                    ifVersion = ((IfVersion) modifier).version;
+                    Preconditions.checkArgument(ifVersion != null);
+                } else if (modifier instanceof IfNotExists) {
+                    Preconditions.checkArgument(ifNotExists == false);
+                    ifNotExists = true;
+                } else {
+                    Preconditions.checkArgument(false);
+                }
+            }
+
+            if (ifNotExists) {
+                Preconditions.checkState(ifVersion == null);
+                long setnx = client.setnx(keyBytes, valueBytes);
+                if (setnx == 1) {
+                    return true;
+                } else if (setnx == 0) {
+                    return false;
+                } else {
+                    throw new IOException("Expected 0 or 1");
+                }
+            }
+
+            Preconditions.checkState(ifVersion != null);
+
             try (Atomic atomic = Atomic.start(client)) {
                 client.watch(keyBytes);
 
@@ -241,7 +282,6 @@ public class RedisKeyValueStore implements KeyValueStore {
                 return true;
             }
         }
-
     }
 
     private void throwIfNotOk(String ret) throws IOException {
