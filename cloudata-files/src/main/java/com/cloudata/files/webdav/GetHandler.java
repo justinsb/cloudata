@@ -48,7 +48,6 @@ public class GetHandler extends MethodHandler {
         // TODO: Handle ETAG??
 
         // If-Modified-Since Validation
-
         String ifModifiedSince = request.getHeader(HttpHeaders.Names.IF_MODIFIED_SINCE);
         if (!Strings.isNullOrEmpty(ifModifiedSince)) {
             Date ifModifiedSinceDate;
@@ -63,7 +62,7 @@ public class GetHandler extends MethodHandler {
             long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
             long fileLastModifiedSeconds = fsPath.getModified() / 1000;
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                // throw new WebdavResponseException(HttpResponseStatus.NOT_MODIFIED);
+                throw new WebdavResponseException(HttpResponseStatus.NOT_MODIFIED);
             }
         }
 

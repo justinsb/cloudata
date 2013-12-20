@@ -251,6 +251,7 @@ public class FsClient {
             ByteString dirEntryValue = ByteStrings.encode(created.getInode());
             Modifier[] modifiers;
             if (overwrite) {
+                // TODO: Should we record any existing key in the deleted section?
                 modifiers = new Modifier[] {};
             } else {
                 modifiers = new Modifier[] { IfNotExists.INSTANCE };
@@ -342,5 +343,24 @@ public class FsClient {
 
             return store.delete(key);
         }
+    }
+
+    public void move(FsPath fsPath, FsPath newParentFsPath, ByteString newName) throws IOException {
+        long id = fsPath.getId();
+
+        ByteString oldKey = buildDirEntryKey(fsPath);
+        ByteString newKey = buildDirEntryKey(newParentFsPath, newName);
+
+        // Create the new dir entry, delete the old one
+        {
+            ByteString dirEntryValue = ByteStrings.encode(id);
+            Modifier[] modifiers = new Modifier[] { IfNotExists.INSTANCE };
+
+            if (!store.put(newKey, dirEntryValue, modifiers)) {
+                throw new FsFileAlreadyExistsException();
+            }
+        }
+
+        store.delete(oldKey);
     }
 }

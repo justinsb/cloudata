@@ -94,10 +94,10 @@ public class WebdavRequestHandler implements Closeable {
             handler = new PutHandler(this);
         } else if (request.getMethod() == HttpMethod.DELETE) {
             handler = new DeleteHandler(this);
-        } else if (request.getMethod().name().equals("PROPPATCH")) {
-            throw new UnsupportedOperationException();
+        } else if (request.getMethod().name().equals("MOVE")) {
+            handler = new MoveHandler(this);
         } else {
-            log.warn("Method not allowed: " + request.getMethod());
+            log.warn("Method not allowed: {}", request);
 
             throw new WebdavResponseException(HttpResponseStatus.METHOD_NOT_ALLOWED);
         }

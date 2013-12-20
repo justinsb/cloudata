@@ -28,4 +28,31 @@ public class FsVolume {
     public ByteString getPrefix() {
         return prefix;
     }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (key ^ (key >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        FsVolume other = (FsVolume) obj;
+        if (key != other.key) {
+            return false;
+        }
+        return true;
+    }
+
 }

@@ -14,7 +14,6 @@ import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.net.URI;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,7 +36,6 @@ import com.cloudata.files.webdav.model.XmlSerializable;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -255,28 +253,7 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
                 String host = "";
                 String path = resolvePath;
 
-                List<String> pathTokens;
-
-                if (path.equals("") || path.equals("/")) {
-                    pathTokens = Collections.emptyList();
-                } else {
-                    if (path.contains("//")) {
-                        path = path.replace("//", "/");
-                    }
-
-                    if (path.startsWith("/")) {
-                        path = path.substring(1);
-                    }
-
-                    if (path.endsWith("/")) {
-                        path = path.substring(0, path.length() - 1);
-                    }
-
-                    pathTokens = Lists.newArrayList();
-                    for (String token : Splitter.on('/').split(path)) {
-                        pathTokens.add(Urls.decodeComponent(token));
-                    }
-                }
+                List<String> pathTokens = Urls.pathToTokens(path);
 
                 FsVolume volume = FsVolume.fromHost(host);
                 return getFsClient().resolve(volume, credentials, pathTokens);
