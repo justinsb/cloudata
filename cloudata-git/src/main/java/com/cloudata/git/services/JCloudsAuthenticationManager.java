@@ -9,6 +9,7 @@ import org.jclouds.providers.ProviderMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.auth.AuthenticationManager;
 import com.cloudata.git.jgit.CloudGitRepositoryStore;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;

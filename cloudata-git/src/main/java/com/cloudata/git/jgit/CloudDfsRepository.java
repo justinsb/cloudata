@@ -9,7 +9,7 @@ import org.eclipse.jgit.internal.storage.dfs.DfsRepository;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryBuilder;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 
-import com.cloudata.git.keyvalue.KeyValuePath;
+import com.cloudata.clients.keyvalue.KeyValuePath;
 import com.cloudata.objectstore.ObjectStorePath;
 
 public class CloudDfsRepository extends DfsRepository {

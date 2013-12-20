@@ -5,11 +5,11 @@ import java.net.InetSocketAddress;
 import org.jclouds.providers.ProviderMetadata;
 import org.jclouds.providers.Providers;
 
+import com.cloudata.auth.AuthenticationManager;
+import com.cloudata.clients.keyvalue.KeyValuePath;
+import com.cloudata.clients.keyvalue.KeyValueStore;
+import com.cloudata.clients.keyvalue.RedisKeyValueStore;
 import com.cloudata.git.jgit.CloudGitRepositoryStore;
-import com.cloudata.git.keyvalue.KeyValuePath;
-import com.cloudata.git.keyvalue.KeyValueStore;
-import com.cloudata.git.keyvalue.RedisKeyValueStore;
-import com.cloudata.git.services.AuthenticationManager;
 import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.git.services.JCloudsAuthenticationManager;
 import com.google.inject.AbstractModule;

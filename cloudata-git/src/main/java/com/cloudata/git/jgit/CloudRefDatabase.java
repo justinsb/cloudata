@@ -1,6 +1,7 @@
 package com.cloudata.git.jgit;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.eclipse.jgit.internal.storage.dfs.DfsRefDatabase;
 import org.eclipse.jgit.lib.ObjectId;
@@ -12,11 +13,12 @@ import org.eclipse.jgit.lib.Ref.Storage;
 import org.eclipse.jgit.lib.SymbolicRef;
 import org.eclipse.jgit.util.RefList;
 
+import com.cloudata.clients.keyvalue.IfNotExists;
+import com.cloudata.clients.keyvalue.IfVersion;
+import com.cloudata.clients.keyvalue.KeyValueEntry;
+import com.cloudata.clients.keyvalue.KeyValuePath;
+import com.cloudata.clients.keyvalue.KeyValueStore;
 import com.cloudata.git.GitModel.RefData;
-import com.cloudata.git.keyvalue.IfNotExists;
-import com.cloudata.git.keyvalue.IfVersion;
-import com.cloudata.git.keyvalue.KeyValuePath;
-import com.cloudata.git.keyvalue.KeyValueStore;
 import com.google.protobuf.ByteString;
 
 public class CloudRefDatabase extends DfsRefDatabase {
@@ -35,8 +37,10 @@ public class CloudRefDatabase extends DfsRefDatabase {
         RefList.Builder<Ref> sym = new RefList.Builder<Ref>();
 
         try {
-            for (ByteString childKey : store.listKeysWithPrefix(prefix)) {
-                ByteString value = store.read(childKey);
+            Iterator<KeyValueEntry> entriesWithPrefix = store.listEntriesWithPrefix(prefix);
+            while (entriesWithPrefix.hasNext()) {
+                KeyValueEntry entry = entriesWithPrefix.next();
+                ByteString value = entry.getValue();
                 if (value == null) {
                     // Key deleted concurrently
                     continue;

@@ -3,8 +3,8 @@ package com.cloudata.git.web;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.cloudata.auth.ProjectBasicAuthFilter;
 import com.google.gerrit.httpd.GitOverHttpServlet;
-import com.google.gerrit.httpd.ProjectBasicAuthFilter;
 import com.google.inject.servlet.ServletModule;
 
 public class WebModule extends ServletModule {

@@ -16,6 +16,7 @@
 		<module>cloudata-keyvalue</module>
 		<module>cloudata-structured</module>
 		<module>cloudata-git</module>
+		<module>cloudata-files</module>
 	</modules>
 
 	<dependencyManagement>
@@ -30,6 +31,12 @@
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
 				<version>4.11</version>
+			</dependency>
+
+			<dependency>
+				<groupId>redis.clients</groupId>
+				<artifactId>jedis</artifactId>
+				<version>2.2.1</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -2,9 +2,10 @@ package com.cloudata.git.model;
 
 import java.io.IOException;
 
+import com.cloudata.auth.AuthenticatedUser;
 import com.cloudata.objectstore.ObjectStorePath;
 
-public abstract class GitUser {
+public abstract class GitUser implements AuthenticatedUser {
 
     public abstract String getId();
 

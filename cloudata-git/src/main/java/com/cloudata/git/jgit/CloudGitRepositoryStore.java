@@ -27,8 +27,8 @@ import org.eclipse.jgit.lib.RepositoryCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.clients.keyvalue.KeyValuePath;
 import com.cloudata.git.GitModel.RepositoryData;
-import com.cloudata.git.keyvalue.KeyValuePath;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 import com.cloudata.git.services.GitRepositoryStore;

@@ -1,0 +1,23 @@
+option java_package = "com.cloudata.files";
+
+message ChunkData {
+	optional uint64 length = 1;
+	optional bytes hash = 2;
+}
+
+message InodeData {
+	optional uint64 length = 1;
+	optional uint64 inode = 2;
+
+	optional uint32 uid = 3;
+	optional uint32 gid = 4;
+
+	optional uint32 mode= 5;
+	optional uint32 nlink = 6;
+
+	optional uint64 accessTime = 7;
+	optional uint64 createTime = 8;
+	optional uint64 modifiedTime = 9;
+	
+	repeated ChunkData chunk = 10;
+}
