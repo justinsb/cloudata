@@ -10,8 +10,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.slf4j.Logger;
@@ -23,6 +21,7 @@ import com.cloudata.files.fs.FsCredentials;
 import com.cloudata.files.fs.PlaintextPasswordCredentials;
 import com.cloudata.files.webdav.chunks.ChunkAccumulator;
 import com.cloudata.files.webdav.chunks.SimpleChunkAccumulator;
+import com.cloudata.files.webdav.model.XmlHelper;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.io.BaseEncoding;
@@ -68,7 +67,7 @@ public class WebdavRequest implements Closeable {
 
             Document document = null;
             try {
-                document = parseXmlDocument(is, namespaceAware);
+                document = XmlHelper.parseXmlDocument(is, namespaceAware);
             } catch (ParserConfigurationException e) {
                 throw new IOException("Error parsing request", e);
             } catch (SAXException e) {
@@ -77,24 +76,6 @@ public class WebdavRequest implements Closeable {
 
             return document;
         }
-    }
-
-    public static Document parseXmlDocument(InputStream is, boolean namespaceAware)
-            throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilder docBuilder = buildDocumentBuilder(namespaceAware);
-        Document doc = docBuilder.parse(is);
-
-        // normalize text representation
-        doc.getDocumentElement().normalize();
-
-        return doc;
-    }
-
-    private static DocumentBuilder buildDocumentBuilder(boolean namespaceAware) throws ParserConfigurationException {
-        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-        docBuilderFactory.setNamespaceAware(namespaceAware);
-        DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
-        return docBuilder;
     }
 
     public static final int DEPTH_INFINITY = -1;

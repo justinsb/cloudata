@@ -30,6 +30,7 @@ import com.cloudata.files.fs.FsClient;
 import com.cloudata.files.fs.FsCredentials;
 import com.cloudata.files.fs.FsPath;
 import com.cloudata.files.fs.FsVolume;
+import com.cloudata.files.locks.LockService;
 import com.cloudata.files.webdav.chunks.ChunkAccumulator;
 import com.cloudata.files.webdav.model.WebdavXmlWriter;
 import com.cloudata.files.webdav.model.XmlSerializable;
@@ -95,12 +96,19 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
 
     protected abstract HttpObject doAction(FsPath fsPath) throws Exception;
 
+    protected LockService getLockService() {
+        return this.requestHandler.webdav.lockService;
+    }
+
     protected ListenableFuture<HttpObject> doActionAsync(FsPath fsPath) throws Exception {
         return Futures.immediateFuture(doAction(fsPath));
     }
 
     private boolean checkIfHeader(String ifHeader) {
         throw new UnsupportedOperationException();
+
+        // (<opaquelocktoken:6de84ba6-7063-477b-9ca6-a246ce69ed8b>)
+
         //
         // // See: http://www.webdav.org/specs/rfc2518.html#HEADER_If
         // log.warn("If-Header parsing is totally stubbed out");

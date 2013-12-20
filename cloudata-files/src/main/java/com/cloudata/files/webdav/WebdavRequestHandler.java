@@ -76,15 +76,13 @@ public class WebdavRequestHandler implements Closeable {
     public ListenableFuture<HttpObject> processRequest() throws Exception {
         this.started = System.currentTimeMillis();
 
-        if (request.getMethod().name().equals("LOCK")) {
-            throw new UnsupportedOperationException();
-        } else if (request.getMethod().name().equals("UNLOCK")) {
-            throw new UnsupportedOperationException();
-        }
-
         MethodHandler handler;
 
-        if (request.getMethod() == HttpMethod.OPTIONS) {
+        if (request.getMethod().name().equals("LOCK")) {
+            handler = new LockHandler(this);
+        } else if (request.getMethod().name().equals("UNLOCK")) {
+            handler = new UnlockHandler(this);
+        } else if (request.getMethod() == HttpMethod.OPTIONS) {
             handler = new OptionsHandler(this);
         } else if (request.getMethod() == HttpMethod.GET || request.getMethod() == HttpMethod.HEAD) {
             handler = new GetHandler(this);
