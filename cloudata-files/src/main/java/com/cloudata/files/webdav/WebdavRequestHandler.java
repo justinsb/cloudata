@@ -93,7 +93,7 @@ public class WebdavRequestHandler implements Closeable {
         } else if (request.getMethod() == HttpMethod.PUT) {
             handler = new PutHandler(this);
         } else if (request.getMethod() == HttpMethod.DELETE) {
-            throw new UnsupportedOperationException();
+            handler = new DeleteHandler(this);
         } else if (request.getMethod().name().equals("PROPPATCH")) {
             throw new UnsupportedOperationException();
         } else {

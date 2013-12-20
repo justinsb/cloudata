@@ -5,6 +5,11 @@ message ChunkData {
 	optional bytes hash = 2;
 }
 
+message DeletedData {
+	optional uint64 inode = 1;
+	repeated bytes path = 2;
+}
+
 message InodeData {
 	optional uint64 length = 1;
 	optional uint64 inode = 2;

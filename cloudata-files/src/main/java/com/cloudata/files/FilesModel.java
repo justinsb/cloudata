@@ -488,6 +488,552 @@ public final class FilesModel {
     // @@protoc_insertion_point(class_scope:ChunkData)
   }
 
+  public interface DeletedDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional uint64 inode = 1;
+    /**
+     * <code>optional uint64 inode = 1;</code>
+     */
+    boolean hasInode();
+    /**
+     * <code>optional uint64 inode = 1;</code>
+     */
+    long getInode();
+
+    // repeated bytes path = 2;
+    /**
+     * <code>repeated bytes path = 2;</code>
+     */
+    java.util.List<com.google.protobuf.ByteString> getPathList();
+    /**
+     * <code>repeated bytes path = 2;</code>
+     */
+    int getPathCount();
+    /**
+     * <code>repeated bytes path = 2;</code>
+     */
+    com.google.protobuf.ByteString getPath(int index);
+  }
+  /**
+   * Protobuf type {@code DeletedData}
+   */
+  public static final class DeletedData extends
+      com.google.protobuf.GeneratedMessage
+      implements DeletedDataOrBuilder {
+    // Use DeletedData.newBuilder() to construct.
+    private DeletedData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private DeletedData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final DeletedData defaultInstance;
+    public static DeletedData getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public DeletedData getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DeletedData(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              inode_ = input.readUInt64();
+              break;
+            }
+            case 18: {
+              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+                path_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
+                mutable_bitField0_ |= 0x00000002;
+              }
+              path_.add(input.readBytes());
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+          path_ = java.util.Collections.unmodifiableList(path_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudata.files.FilesModel.internal_static_DeletedData_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudata.files.FilesModel.internal_static_DeletedData_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudata.files.FilesModel.DeletedData.class, com.cloudata.files.FilesModel.DeletedData.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<DeletedData> PARSER =
+        new com.google.protobuf.AbstractParser<DeletedData>() {
+      public DeletedData parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DeletedData(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DeletedData> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional uint64 inode = 1;
+    public static final int INODE_FIELD_NUMBER = 1;
+    private long inode_;
+    /**
+     * <code>optional uint64 inode = 1;</code>
+     */
+    public boolean hasInode() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint64 inode = 1;</code>
+     */
+    public long getInode() {
+      return inode_;
+    }
+
+    // repeated bytes path = 2;
+    public static final int PATH_FIELD_NUMBER = 2;
+    private java.util.List<com.google.protobuf.ByteString> path_;
+    /**
+     * <code>repeated bytes path = 2;</code>
+     */
+    public java.util.List<com.google.protobuf.ByteString>
+        getPathList() {
+      return path_;
+    }
+    /**
+     * <code>repeated bytes path = 2;</code>
+     */
+    public int getPathCount() {
+      return path_.size();
+    }
+    /**
+     * <code>repeated bytes path = 2;</code>
+     */
+    public com.google.protobuf.ByteString getPath(int index) {
+      return path_.get(index);
+    }
+
+    private void initFields() {
+      inode_ = 0L;
+      path_ = java.util.Collections.emptyList();
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt64(1, inode_);
+      }
+      for (int i = 0; i < path_.size(); i++) {
+        output.writeBytes(2, path_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(1, inode_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < path_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeBytesSizeNoTag(path_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getPathList().size();
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.files.FilesModel.DeletedData parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.cloudata.files.FilesModel.DeletedData prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code DeletedData}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.files.FilesModel.DeletedDataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudata.files.FilesModel.internal_static_DeletedData_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudata.files.FilesModel.internal_static_DeletedData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudata.files.FilesModel.DeletedData.class, com.cloudata.files.FilesModel.DeletedData.Builder.class);
+      }
+
+      // Construct using com.cloudata.files.FilesModel.DeletedData.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        inode_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        path_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudata.files.FilesModel.internal_static_DeletedData_descriptor;
+      }
+
+      public com.cloudata.files.FilesModel.DeletedData getDefaultInstanceForType() {
+        return com.cloudata.files.FilesModel.DeletedData.getDefaultInstance();
+      }
+
+      public com.cloudata.files.FilesModel.DeletedData build() {
+        com.cloudata.files.FilesModel.DeletedData result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.cloudata.files.FilesModel.DeletedData buildPartial() {
+        com.cloudata.files.FilesModel.DeletedData result = new com.cloudata.files.FilesModel.DeletedData(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.inode_ = inode_;
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          path_ = java.util.Collections.unmodifiableList(path_);
+          bitField0_ = (bitField0_ & ~0x00000002);
+        }
+        result.path_ = path_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudata.files.FilesModel.DeletedData) {
+          return mergeFrom((com.cloudata.files.FilesModel.DeletedData)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudata.files.FilesModel.DeletedData other) {
+        if (other == com.cloudata.files.FilesModel.DeletedData.getDefaultInstance()) return this;
+        if (other.hasInode()) {
+          setInode(other.getInode());
+        }
+        if (!other.path_.isEmpty()) {
+          if (path_.isEmpty()) {
+            path_ = other.path_;
+            bitField0_ = (bitField0_ & ~0x00000002);
+          } else {
+            ensurePathIsMutable();
+            path_.addAll(other.path_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudata.files.FilesModel.DeletedData parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudata.files.FilesModel.DeletedData) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional uint64 inode = 1;
+      private long inode_ ;
+      /**
+       * <code>optional uint64 inode = 1;</code>
+       */
+      public boolean hasInode() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint64 inode = 1;</code>
+       */
+      public long getInode() {
+        return inode_;
+      }
+      /**
+       * <code>optional uint64 inode = 1;</code>
+       */
+      public Builder setInode(long value) {
+        bitField0_ |= 0x00000001;
+        inode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 inode = 1;</code>
+       */
+      public Builder clearInode() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        inode_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // repeated bytes path = 2;
+      private java.util.List<com.google.protobuf.ByteString> path_ = java.util.Collections.emptyList();
+      private void ensurePathIsMutable() {
+        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+          path_ = new java.util.ArrayList<com.google.protobuf.ByteString>(path_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public java.util.List<com.google.protobuf.ByteString>
+          getPathList() {
+        return java.util.Collections.unmodifiableList(path_);
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public int getPathCount() {
+        return path_.size();
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public com.google.protobuf.ByteString getPath(int index) {
+        return path_.get(index);
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public Builder setPath(
+          int index, com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensurePathIsMutable();
+        path_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public Builder addPath(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensurePathIsMutable();
+        path_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public Builder addAllPath(
+          java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
+        ensurePathIsMutable();
+        super.addAll(values, path_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated bytes path = 2;</code>
+       */
+      public Builder clearPath() {
+        path_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000002);
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:DeletedData)
+    }
+
+    static {
+      defaultInstance = new DeletedData(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:DeletedData)
+  }
+
   public interface InodeDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -1900,6 +2446,11 @@ public final class FilesModel {
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_ChunkData_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_DeletedData_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_DeletedData_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_InodeData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -1914,13 +2465,14 @@ public final class FilesModel {
   static {
     java.lang.String[] descriptorData = {
       "\n\037src/main/proto/FilesModel.proto\")\n\tChu" +
-      "nkData\022\016\n\006length\030\001 \001(\004\022\014\n\004hash\030\002 \001(\014\"\272\001\n" +
-      "\tInodeData\022\016\n\006length\030\001 \001(\004\022\r\n\005inode\030\002 \001(" +
-      "\004\022\013\n\003uid\030\003 \001(\r\022\013\n\003gid\030\004 \001(\r\022\014\n\004mode\030\005 \001(" +
-      "\r\022\r\n\005nlink\030\006 \001(\r\022\022\n\naccessTime\030\007 \001(\004\022\022\n\n" +
-      "createTime\030\010 \001(\004\022\024\n\014modifiedTime\030\t \001(\004\022\031" +
-      "\n\005chunk\030\n \003(\0132\n.ChunkDataB\024\n\022com.cloudat" +
-      "a.files"
+      "nkData\022\016\n\006length\030\001 \001(\004\022\014\n\004hash\030\002 \001(\014\"*\n\013" +
+      "DeletedData\022\r\n\005inode\030\001 \001(\004\022\014\n\004path\030\002 \003(\014" +
+      "\"\272\001\n\tInodeData\022\016\n\006length\030\001 \001(\004\022\r\n\005inode\030" +
+      "\002 \001(\004\022\013\n\003uid\030\003 \001(\r\022\013\n\003gid\030\004 \001(\r\022\014\n\004mode\030" +
+      "\005 \001(\r\022\r\n\005nlink\030\006 \001(\r\022\022\n\naccessTime\030\007 \001(\004" +
+      "\022\022\n\ncreateTime\030\010 \001(\004\022\024\n\014modifiedTime\030\t \001" +
+      "(\004\022\031\n\005chunk\030\n \003(\0132\n.ChunkDataB\024\n\022com.clo" +
+      "udata.files"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1933,8 +2485,14 @@ public final class FilesModel {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_ChunkData_descriptor,
               new java.lang.String[] { "Length", "Hash", });
-          internal_static_InodeData_descriptor =
+          internal_static_DeletedData_descriptor =
             getDescriptor().getMessageTypes().get(1);
+          internal_static_DeletedData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_DeletedData_descriptor,
+              new java.lang.String[] { "Inode", "Path", });
+          internal_static_InodeData_descriptor =
+            getDescriptor().getMessageTypes().get(2);
           internal_static_InodeData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_InodeData_descriptor,

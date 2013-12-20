@@ -34,7 +34,7 @@ public class MkdirHandler extends MethodHandler {
         }
 
         String path = request.getUri();
-        String name = Urls.getLastPathComponent(path);
+        String name = Urls.getLastPathComponent(path, true);
 
         InodeData.Builder inode = InodeData.newBuilder();
 

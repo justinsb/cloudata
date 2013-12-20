@@ -129,15 +129,15 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
                         lockToken = lockToken.substring(LockHandler.LOCK_PREFIX.length());
                     }
 
-                    URI subjectUri;
-                    if (Strings.isNullOrEmpty(subjectUrl)) {
-                        subjectUri = URI.create(getRequest().getUri());
-                    } else {
-                        subjectUri = URI.create(subjectUrl);
-                    }
-                    String path = subjectUri.getPath();
+                    String lockSubject;
 
-                    if (getLockService().findLock(path, lockToken) == null) {
+                    if (Strings.isNullOrEmpty(subjectUrl)) {
+                        lockSubject = buildLockSubject(getRequest());
+                    } else {
+                        lockSubject = buildLockSubject(subjectUrl);
+                    }
+
+                    if (getLockService().findLock(lockSubject, lockToken) == null) {
                         return false;
                     }
                 } else {
@@ -274,7 +274,7 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
 
                     pathTokens = Lists.newArrayList();
                     for (String token : Splitter.on('/').split(path)) {
-                        pathTokens.add(token);
+                        pathTokens.add(Urls.decodeComponent(token));
                     }
                 }
 
@@ -290,5 +290,15 @@ public abstract class MethodHandler implements Callable<ListenableFuture<HttpObj
 
     private ListeningExecutorService getExecutor() {
         return requestHandler.getExecutor();
+    }
+
+    protected String buildLockSubject(WebdavRequest request) {
+        String uri = request.getUri();
+        return buildLockSubject(uri);
+    }
+
+    protected String buildLockSubject(String uriString) {
+        URI uri = URI.create(uriString);
+        return uri.getPath();
     }
 }

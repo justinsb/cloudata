@@ -13,12 +13,17 @@ import io.netty.handler.stream.ChunkedInput;
 import java.text.ParseException;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudata.files.fs.FsFile;
 import com.cloudata.files.fs.FsPath;
 import com.google.common.base.Strings;
 import com.google.common.io.Closeables;
 
 public class GetHandler extends MethodHandler {
+    private static final Logger log = LoggerFactory.getLogger(GetHandler.class);
+
     public GetHandler(WebdavRequestHandler requestHandler) {
         super(requestHandler);
     }
@@ -37,6 +42,7 @@ public class GetHandler extends MethodHandler {
 
     @Override
     public HttpObject doAction(FsPath fsPath) throws Exception {
+        log.debug("GET {}", fsPath);
         WebdavRequest request = getRequest();
 
         // TODO: Handle ETAG??
@@ -57,7 +63,7 @@ public class GetHandler extends MethodHandler {
             long ifModifiedSinceDateSeconds = ifModifiedSinceDate.getTime() / 1000;
             long fileLastModifiedSeconds = fsPath.getModified() / 1000;
             if (ifModifiedSinceDateSeconds == fileLastModifiedSeconds) {
-                throw new WebdavResponseException(HttpResponseStatus.NOT_MODIFIED);
+                // throw new WebdavResponseException(HttpResponseStatus.NOT_MODIFIED);
             }
         }
 
@@ -107,6 +113,7 @@ public class GetHandler extends MethodHandler {
         int httpCacheSeconds = 0;
         setDateAndCacheHeaders(fsPath, response, httpCacheSeconds);
 
+        log.debug("Sending response to GET: {} {}", fsPath.getHref(), response);
         write(response);
         if (content != null) {
             while (!content.isEndOfInput()) {

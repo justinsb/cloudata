@@ -37,8 +37,9 @@ public class UnlockHandler extends MethodHandler {
         if (lockToken.endsWith(">")) {
             lockToken = lockToken.substring(0, lockToken.length() - 1);
         }
+        String lockSubject = buildLockSubject(request);
 
-        boolean unlocked = lockService.unlock(request.getUri(), lockToken);
+        boolean unlocked = lockService.unlock(lockSubject, lockToken);
         if (!unlocked) {
             throw new IllegalArgumentException("Lock not found");
         }

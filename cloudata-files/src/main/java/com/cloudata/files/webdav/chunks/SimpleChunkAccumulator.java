@@ -44,7 +44,7 @@ public class SimpleChunkAccumulator implements ChunkAccumulator {
             }
         } else {
             content.readBytes(os, length);
-            totalSize += content.readableBytes();
+            totalSize += length;
         }
     }
 
@@ -110,14 +110,22 @@ public class SimpleChunkAccumulator implements ChunkAccumulator {
 
     public ByteSource getByteSource() throws IOException {
         if (buffers != null) {
+            assert file == null;
+
             List<ByteSource> byteSources = Lists.newArrayList();
             for (ByteBuf buf : buffers) {
                 byteSources.add(new ByteBufByteSource(buf));
             }
             return ByteSource.concat(byteSources);
         } else if (file != null) {
+            assert buffers == null;
+
             if (os != null) {
                 os.flush();
+            }
+
+            if (file.length() != totalSize) {
+                throw new IllegalStateException();
             }
 
             return Files.asByteSource(file);

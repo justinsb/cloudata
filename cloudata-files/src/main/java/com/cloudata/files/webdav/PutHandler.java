@@ -4,6 +4,9 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpObject;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudata.files.FilesModel.InodeData;
 import com.cloudata.files.fs.FsPath;
 import com.cloudata.files.webdav.chunks.ChunkAccumulator;
@@ -12,6 +15,8 @@ import com.google.common.io.ByteSource;
 import com.google.protobuf.ByteString;
 
 public class PutHandler extends MethodHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(PutHandler.class);
 
     public PutHandler(WebdavRequestHandler requestHandler) {
         super(requestHandler);
@@ -29,7 +34,9 @@ public class PutHandler extends MethodHandler {
         }
 
         String path = getUri();
-        String newName = Urls.getLastPathComponent(path);
+        String newName = Urls.getLastPathComponent(path, true);
+
+        log.debug("PUT {} {}", parentPath, newName);
 
         // TODO: Always overwrite??
         boolean overwrite = true;

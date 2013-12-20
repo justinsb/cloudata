@@ -21,7 +21,7 @@ public class FsVolume {
         bucket = bucket.replace(":8080", "");
         bucket = bucket.replace("127.0.0.1", "local");
 
-        long key = 1;
+        long key = 2;
         return new FsVolume(key);
     }
 

@@ -39,7 +39,9 @@ public class LockHandler extends MethodHandler {
 
         log.debug("LockRequest: " + lockRequest);
 
-        CloudLockToken lockToken = lockService.tryLock(request.getUri());
+        String lockSubject = buildLockSubject(request);
+
+        CloudLockToken lockToken = lockService.tryLock(lockSubject);
         if (lockToken == null) {
             throw new WebdavResponseException(HttpResponseStatus.LOCKED);
         }

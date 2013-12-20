@@ -17,6 +17,7 @@ import com.cloudata.clients.keyvalue.KeyValueStore;
 import com.cloudata.clients.keyvalue.Modifier;
 import com.cloudata.files.FilesModel.ChunkData;
 import com.cloudata.files.FilesModel.ChunkData.Builder;
+import com.cloudata.files.FilesModel.DeletedData;
 import com.cloudata.files.FilesModel.InodeData;
 import com.cloudata.files.blobs.BlobCache.CacheFileHandle;
 import com.cloudata.files.blobs.BlobStore;
@@ -34,6 +35,7 @@ public class FsClient {
 
     private static final ByteString DIR_CHILDREN = ByteString.copyFrom(new byte[] { 'D' });
     private static final ByteString INODES = ByteString.copyFrom(new byte[] { 'I' });
+    private static final ByteString DELETED_INODES = ByteString.copyFrom(new byte[] { 'X' });
 
     private static final ByteString CHUNK_PREFIX = ByteString.copyFrom(new byte[] { 'C' });
 
@@ -97,6 +99,13 @@ public class FsClient {
     private ByteString buildDirEntryKey(FsPath parent, ByteString name) {
         ByteString volumePrefix = parent.getVolume().getPrefix();
         ByteString key = volumePrefix.concat(DIR_CHILDREN).concat(ByteStrings.encode(parent.getId())).concat(name);
+        return key;
+    }
+
+    private ByteString buildDirEntryKey(FsPath path) {
+        ByteString volumePrefix = path.getVolume().getPrefix();
+        ByteString key = volumePrefix.concat(DIR_CHILDREN).concat(ByteStrings.encode(path.getParent().getId()))
+                .concat(path.getNameBytes());
         return key;
     }
 
@@ -226,6 +235,8 @@ public class FsClient {
 
             inodeKey = buildInodeKey(parent.getVolume(), id);
             if (store.put(inodeKey, created.toByteString(), IfNotExists.INSTANCE)) {
+                log.debug("Wrote inode entry: {} = {}", id, created);
+
                 break;
             } else {
                 inode = InodeData.newBuilder(created);
@@ -301,4 +312,35 @@ public class FsClient {
         return blobStore.find(key);
     }
 
+    public boolean delete(FsPath fsPath) throws IOException {
+        // Store a deletion record
+        // Allows for more efficient GC, and for undelete
+        // TODO: Support GC
+
+        long id = fsPath.getId();
+        DeletedData.Builder b = DeletedData.newBuilder();
+        b.setInode(id);
+        for (FsPath entry : fsPath.getPathComponentList()) {
+            b.addPath(entry.getNameBytes());
+        }
+        ByteString deletedValue = b.build().toByteString();
+
+        ByteString volumePrefix = fsPath.getVolume().getPrefix();
+
+        while (true) {
+            ByteString key = volumePrefix.concat(DELETED_INODES).concat(ByteStrings.encode(id))
+                    .concat(ByteStrings.encode(System.currentTimeMillis()));
+
+            if (store.put(key, deletedValue, IfNotExists.INSTANCE)) {
+                break;
+            }
+        }
+
+        // Unlink the entry from the name tree
+        {
+            ByteString key = buildDirEntryKey(fsPath);
+
+            return store.delete(key);
+        }
+    }
 }
