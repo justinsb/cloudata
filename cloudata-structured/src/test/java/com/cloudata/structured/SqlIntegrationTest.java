@@ -37,29 +37,32 @@ public class SqlIntegrationTest extends IntegrationTestBase {
             client.put(storeId, ByteString.copyFrom(key), data);
         }
 
-        String sql = "SELECT column1, column2, column3 FROM table1";
-        try (RowRecordset rs = client.queryJson(storeId, sql)) {
-            ArrayList<RowEntry> entries = Lists.newArrayList(rs);
+        int reps = 1;
+        for (int rep = 1; rep <= reps; rep++) {
+            String sql = "SELECT column1, column2, column3 FROM table1";
+            try (RowRecordset rs = client.queryJson(storeId, sql)) {
+                ArrayList<RowEntry> entries = Lists.newArrayList(rs);
 
-            Assert.assertEquals(n, entries.size());
+                Assert.assertEquals(n, entries.size());
 
-            for (int i = 1; i <= n; i++) {
-                // ByteString expectedKey = Keyspace.ZERO.mapToKey(String.format("%04x", i).getBytes());
-                // JsonObject expectedValue = buildJson(i);
-                RowEntry entry = entries.get(i - 1);
+                for (int i = 1; i <= n; i++) {
+                    // ByteString expectedKey = Keyspace.ZERO.mapToKey(String.format("%04x", i).getBytes());
+                    // JsonObject expectedValue = buildJson(i);
+                    RowEntry entry = entries.get(i - 1);
 
-                System.out.println(entry);
-                Assert.assertEquals(3, entry.size());
-                Assert.assertEquals("value1", entry.get(0).getAsString());
-                if (i >= 2) {
-                    Assert.assertEquals("value2", entry.get(1).getAsString());
-                } else {
-                    Assert.assertTrue(entry.get(1).isNull());
-                }
-                if (i >= 3) {
-                    Assert.assertEquals("value3", entry.get(2).getAsString());
-                } else {
-                    Assert.assertTrue(entry.get(2).isNull());
+                    // System.out.println(entry);
+                    Assert.assertEquals(3, entry.size());
+                    Assert.assertEquals("value1", entry.get(0).getAsString());
+                    if (i >= 2) {
+                        Assert.assertEquals("value2", entry.get(1).getAsString());
+                    } else {
+                        Assert.assertTrue(entry.get(1).isNull());
+                    }
+                    if (i >= 3) {
+                        Assert.assertEquals("value3", entry.get(2).getAsString());
+                    } else {
+                        Assert.assertTrue(entry.get(2).isNull());
+                    }
                 }
             }
         }

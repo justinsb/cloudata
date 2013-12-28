@@ -17,6 +17,7 @@ import com.cloudata.structured.StructuredStore;
 import com.cloudata.structured.sql.provider.CloudataConnectorMetadata;
 import com.cloudata.structured.sql.provider.CloudataSplitManager;
 import com.cloudata.structured.sql.simple.SimpleNode;
+import com.cloudata.structured.sql.simple.SimpleTableScan;
 import com.cloudata.structured.sql.simple.SimpleTreePrinter;
 import com.facebook.presto.client.Column;
 import com.facebook.presto.connector.dual.DualMetadata;
@@ -343,9 +344,48 @@ public class SqlTest {
 
     @Test
     public void testParse() {
-        // String sql = "SELECT * FROM table1 JOIN table2 ON table1.key1=table2.key1 WHERE table1.key2='1'";
-        // String sql = "SELECT * FROM table1  WHERE table1.key2>'1'";
+        String sql = "SELECT * FROM table1 JOIN table1 t2 ON table1.column1=t2.column2";
 
+        Plan plan = parse(sql);
+
+        TableScanCountVisitor visitor = new TableScanCountVisitor();
+        plan.getRoot().accept(visitor, 0);
+        // Assert.assertEquals(1, visitor.count);
+        String p = PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes());
+
+        System.out.println("plan: " + p);
+    }
+
+    @Test
+    public void testParse2() {
+        String sql = "SELECT column1 as k1 FROM table1";
+
+        Plan plan = parse(sql);
+
+        TableScanCountVisitor visitor = new TableScanCountVisitor();
+        plan.getRoot().accept(visitor, 0);
+        // Assert.assertEquals(1, visitor.count);
+        String p = PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes());
+
+        System.out.println("plan: " + p);
+    }
+
+    @Test
+    public void testParseParameter() {
+        String sql = "SELECT * FROM table1 WHERE table1.column1=parameterString(1)";
+
+        Plan plan = parse(sql);
+
+        TableScanCountVisitor visitor = new TableScanCountVisitor();
+        plan.getRoot().accept(visitor, 0);
+        // Assert.assertEquals(1, visitor.count);
+        String p = PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes());
+
+        System.out.println("plan: " + p);
+
+    }
+
+    private Plan parse(String sql) {
         InMemoryNodeManager nodeManager = new InMemoryNodeManager();
 
         MetadataManager metadata = buildMetadata();
@@ -355,60 +395,26 @@ public class SqlTest {
         SplitManager splitManager = buildSplitManager(nodeManager);
         List<PlanOptimizer> planOptimizers = buildPlanOptimizers(metadata, splitManager);
 
-        for (int i = 0; i < 1; i++) {
-            // String sql = "SELECT key1 as k1, key2 || 'hello' as k2, 'world' as k3 FROM table1";
-            String sql = "SELECT * FROM table1 JOIN table1 t2 ON table1.column1=t2.column2";
+        Statement statement = SqlParser.createStatement(sql);
 
-            Statement statement = SqlParser.createStatement(sql);
+        // System.out.println("Statement: " + statement);
 
-            // System.out.println("Statement: " + statement);
+        Session session = buildSession();
+        QueryExplainer queryExplainer = new QueryExplainer(session, planOptimizers, metadata, periodicImportManager,
+                storageManager);
+        // analyze query
+        Analyzer analyzer = new Analyzer(session, metadata, Optional.of(queryExplainer));
 
-            Session session = buildSession();
-            QueryExplainer queryExplainer = new QueryExplainer(session, planOptimizers, metadata,
-                    periodicImportManager, storageManager);
-            // analyze query
-            Analyzer analyzer = new Analyzer(session, metadata, Optional.of(queryExplainer));
+        Analysis analysis = analyzer.analyze(statement);
 
-            Analysis analysis = analyzer.analyze(statement);
+        // System.out.println("analysis: " + analysis);
 
-            // System.out.println("analysis: " + analysis);
-
-            PlanNodeIdAllocator idAllocator = new PlanNodeIdAllocator();
-            // plan query
-            LogicalPlanner logicalPlanner = new LogicalPlanner(session, planOptimizers, idAllocator, metadata,
-                    periodicImportManager, storageManager);
-            Plan plan = logicalPlanner.plan(analysis);
-
-            TableScanCountVisitor visitor = new TableScanCountVisitor();
-            plan.getRoot().accept(visitor, 0);
-            // Assert.assertEquals(1, visitor.count);
-            String p = PlanPrinter.textLogicalPlan(plan.getRoot(), plan.getTypes());
-
-            System.out.println("plan: " + p);
-        }
-
-        // plan: - Output[key1, key2]
-        // - TableScan[com.cloudata.structured.sql.MockTableHandle@6c6dba0d, domain={}] => [key1:varchar, key2:varchar]
-        // key1 := com.cloudata.structured.sql.MockColumnHandle@319560e6
-        // key2 := com.cloudata.structured.sql.MockColumnHandle@460cb578
-
-        // plan: - Output[key1, key2]
-        // - Filter[("key2" > '1')] => [key1:varchar, key2:varchar]
-        // - TableScan[com.cloudata.structured.sql.MockTableHandle@6d3a3c8e, domain={}] => [key1:varchar, key2:varchar]
-        // key1 := com.cloudata.structured.sql.MockColumnHandle@5bb10cf0
-        // key2 := com.cloudata.structured.sql.MockColumnHandle@6311c509
-        //
-
-        // List<Input> inputs = new InputExtractor(metadata).extract(plan.getRoot());
-        // stateMachine.setInputs(inputs);
-
-        // // fragment the plan
-        // SubPlan subplan = new DistributedLogicalPlanner(metadata, idAllocator).createSubPlans(plan, false);
-        //
-        // stateMachine.recordAnalysisTime(analysisStart);
-        // return subplan;
-        // }
-
+        PlanNodeIdAllocator idAllocator = new PlanNodeIdAllocator();
+        // plan query
+        LogicalPlanner logicalPlanner = new LogicalPlanner(session, planOptimizers, idAllocator, metadata,
+                periodicImportManager, storageManager);
+        Plan plan = logicalPlanner.plan(analysis);
+        return plan;
     }
 
     @Test
@@ -441,6 +447,12 @@ public class SqlTest {
 
         SimpleNode simple = statement.getSimple();
         Assert.assertNotNull(simple);
+
+        Assert.assertTrue(simple instanceof SimpleTableScan);
+
+        SimpleTableScan simpleTableScan = (SimpleTableScan) simple;
+        Assert.assertEquals(1, simpleTableScan.columnNames.size());
+        Assert.assertEquals("k1", simpleTableScan.columnNames.get(0));
 
         System.out.println(SimpleTreePrinter.toString(simple));
     }

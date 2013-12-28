@@ -11,6 +11,12 @@ public class SimpleTableScan extends SimpleNode {
     public List<String> columnNames;
     public List<SimpleExpression> expressions;
 
+    /**
+     * The columns array contains expressions that are bound to the current table row.
+     * 
+     * When we advance the current table row, we refresh each of the columns, and this is how we update the expression
+     * values.
+     */
     SimpleColumnExpression[] columns;
 
     Map<Symbol, SimpleExpression> symbolToExpression;

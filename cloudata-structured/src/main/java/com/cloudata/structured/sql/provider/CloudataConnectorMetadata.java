@@ -5,14 +5,14 @@ import java.util.Map;
 
 import com.facebook.presto.spi.ColumnHandle;
 import com.facebook.presto.spi.ColumnMetadata;
-import com.facebook.presto.spi.ConnectorMetadata;
 import com.facebook.presto.spi.ConnectorTableMetadata;
+import com.facebook.presto.spi.ReadOnlyConnectorMetadata;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.SchemaTablePrefix;
 import com.facebook.presto.spi.TableHandle;
 import com.google.common.collect.Lists;
 
-public class CloudataConnectorMetadata implements ConnectorMetadata {
+public class CloudataConnectorMetadata extends ReadOnlyConnectorMetadata {
 
     final String connectorId;
 
@@ -129,16 +129,6 @@ public class CloudataConnectorMetadata implements ConnectorMetadata {
 
     @Override
     public Map<SchemaTableName, List<ColumnMetadata>> listTableColumns(SchemaTablePrefix prefix) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public TableHandle createTable(ConnectorTableMetadata tableMetadata) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void dropTable(TableHandle tableHandle) {
         throw new UnsupportedOperationException();
     }
 

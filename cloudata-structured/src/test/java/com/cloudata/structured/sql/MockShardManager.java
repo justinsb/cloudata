@@ -64,11 +64,15 @@ public class MockShardManager implements ShardManager {
     @Override
     public void dropOrphanedPartitions() {
         throw new UnsupportedOperationException();
-
     }
 
     @Override
     public Iterable<Long> getOrphanedShardIds(Optional<String> nodeIdentifier) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void commitUnpartitionedTable(TableHandle tableHandle, Map<UUID, String> shards) {
         throw new UnsupportedOperationException();
     }
 

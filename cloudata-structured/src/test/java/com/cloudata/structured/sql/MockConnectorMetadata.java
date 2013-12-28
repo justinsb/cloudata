@@ -10,13 +10,13 @@ import org.weakref.jmx.com.google.common.collect.Lists;
 
 import com.facebook.presto.spi.ColumnHandle;
 import com.facebook.presto.spi.ColumnMetadata;
-import com.facebook.presto.spi.ConnectorMetadata;
 import com.facebook.presto.spi.ConnectorTableMetadata;
+import com.facebook.presto.spi.ReadOnlyConnectorMetadata;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.SchemaTablePrefix;
 import com.facebook.presto.spi.TableHandle;
 
-public class MockConnectorMetadata implements ConnectorMetadata {
+public class MockConnectorMetadata extends ReadOnlyConnectorMetadata {
 
     final String connectorId;
 
@@ -125,16 +125,6 @@ public class MockConnectorMetadata implements ConnectorMetadata {
 
     @Override
     public Map<SchemaTableName, List<ColumnMetadata>> listTableColumns(SchemaTablePrefix prefix) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public TableHandle createTable(ConnectorTableMetadata tableMetadata) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void dropTable(TableHandle tableHandle) {
         throw new UnsupportedOperationException();
     }
 

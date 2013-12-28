@@ -18,9 +18,12 @@ import com.facebook.presto.metadata.InMemoryNodeManager;
 import com.facebook.presto.metadata.Metadata;
 import com.facebook.presto.metadata.MetadataManager;
 import com.facebook.presto.metadata.NodeManager;
+import com.facebook.presto.metadata.OutputTableHandleResolver;
 import com.facebook.presto.metadata.TableMetadata;
+import com.facebook.presto.operator.RecordSinkManager;
 import com.facebook.presto.spi.Connector;
 import com.facebook.presto.spi.ConnectorFactory;
+import com.facebook.presto.spi.ConnectorOutputHandleResolver;
 import com.facebook.presto.spi.ConnectorSplitManager;
 import com.facebook.presto.spi.RecordSet;
 import com.facebook.presto.split.DataStreamManager;
@@ -72,8 +75,12 @@ public class SqlEngine {
         Map<String, ConnectorFactory> connectorFactories = Maps.newHashMap();
         Map<String, Connector> globalConnectors = Maps.newHashMap();
 
-        this.connectorManager = new ConnectorManager(metadataManager, splitManager, dataStreamManager, handleResolver,
-                connectorFactories, globalConnectors);
+        RecordSinkManager recordSinkManager = new RecordSinkManager();
+        Map<String, ConnectorOutputHandleResolver> handleIdResolvers = Maps.newHashMap();
+        OutputTableHandleResolver outputTableHandleResolver = new OutputTableHandleResolver(handleIdResolvers);
+
+        this.connectorManager = new ConnectorManager(metadataManager, splitManager, dataStreamManager,
+                recordSinkManager, handleResolver, outputTableHandleResolver, connectorFactories, globalConnectors);
 
         // NodeManager nodeManager = new InMemoryNodeManager();
         PlanOptimizersFactory planOptimizersFactory = new PlanOptimizersFactory(metadataManager, splitManager);
