@@ -49,8 +49,8 @@ public class StructuredClient {
         return client;
     }
 
-    public void put(long storeId, ByteString key, JsonObject value) throws Exception {
-        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, key))
+    public void put(long storeId, ByteString keyspace, ByteString key, JsonObject value) throws Exception {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, null, keyspace, key))
                 .entity(value, MediaType.APPLICATION_JSON).post(ClientResponse.class);
 
         try {
@@ -69,10 +69,12 @@ public class StructuredClient {
     }
 
     public static class KeyValueJsonEntry {
+        private final ByteString keyspace;
         private final ByteString key;
         private final JsonElement value;
 
-        public KeyValueJsonEntry(ByteString key, JsonElement value) {
+        public KeyValueJsonEntry(ByteString keyspace, ByteString key, JsonElement value) {
+            this.keyspace = keyspace;
             this.key = key;
             this.value = value;
         }
@@ -92,8 +94,8 @@ public class StructuredClient {
 
     }
 
-    public KeyValueJsonEntry readJson(long storeId, ByteString key) throws IOException {
-        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, key))
+    public KeyValueJsonEntry readJson(long storeId, ByteString keyspace, ByteString key) throws IOException {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, null, keyspace, key))
                 .accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
 
         try {
@@ -113,15 +115,15 @@ public class StructuredClient {
             InputStream is = response.getEntityInputStream();
             JsonElement value = new JsonParser().parse(new InputStreamReader(is));
 
-            return new KeyValueJsonEntry(key, value);
+            return new KeyValueJsonEntry(keyspace, key, value);
         } finally {
             response.close();
         }
     }
 
-    public KeyValueJsonRecordset queryJson(long storeId) throws IOException {
-        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId)).accept(MediaType.APPLICATION_JSON_TYPE)
-                .get(ClientResponse.class);
+    public KeyValueJsonRecordset queryJson(long storeId, ByteString keyspace) throws IOException {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, null, keyspace, null))
+                .accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
 
         try {
             int status = response.getStatus();
@@ -134,7 +136,7 @@ public class StructuredClient {
                 throw new IllegalStateException("Unexpected status: " + status);
             }
 
-            KeyValueJsonRecordset records = new KeyValueJsonRecordset(response);
+            KeyValueJsonRecordset records = new KeyValueJsonRecordset(keyspace, response);
             response = null;
             return records;
         } finally {
@@ -145,8 +147,8 @@ public class StructuredClient {
     }
 
     public RowRecordset queryJson(long storeId, String sql) throws IOException {
-        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId) + "/sql").queryParam("sql", sql)
-                .accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, "sql", null, null))
+                .queryParam("sql", sql).accept(MediaType.APPLICATION_JSON_TYPE).get(ClientResponse.class);
 
         try {
             int status = response.getStatus();
@@ -171,9 +173,11 @@ public class StructuredClient {
 
     public static class KeyValueJsonRecordset extends StreamingRecordsetBase<KeyValueJsonEntry> {
         private final DataInputStream dis;
+        private final ByteString keyspace;
 
-        public KeyValueJsonRecordset(ClientResponse response) {
+        public KeyValueJsonRecordset(ByteString keyspace, ClientResponse response) {
             super(response);
+            this.keyspace = keyspace;
 
             InputStream is = response.getEntityInputStream();
             this.dis = new DataInputStream(is);
@@ -194,7 +198,7 @@ public class StructuredClient {
             int valueLength = dis.readInt();
             JsonElement object = new JsonParser().parse(new InputStreamReader(ByteStreams.limit(dis, valueLength)));
 
-            return new KeyValueJsonEntry(key, object);
+            return new KeyValueJsonEntry(keyspace, key, object);
         }
     }
 
@@ -228,6 +232,29 @@ public class StructuredClient {
         }
     }
 
+    public static class ByteStringRecordset extends StreamingRecordsetBase<ByteString> {
+        private final CodedInputStream cis;
+
+        public ByteStringRecordset(ClientResponse response) {
+            super(response);
+
+            InputStream is = response.getEntityInputStream();
+            this.cis = CodedInputStream.newInstance(is);
+        }
+
+        @Override
+        protected ByteString read() throws IOException {
+            int length = cis.readRawVarint32();
+            if (length == -1) {
+                return null;
+            }
+
+            byte[] b = cis.readRawBytes(length);
+
+            return ByteString.copyFrom(b);
+        }
+    }
+
     public static class RowEntry {
         final ValueHolder[] values;
 
@@ -250,16 +277,33 @@ public class StructuredClient {
 
     }
 
-    private String toUrlPath(long storeId, ByteString key) {
-        return Long.toString(storeId) + "/" + Hex.toHex(key);
+    private String toUrlPath(long storeId, String action, ByteString keyspace, ByteString key) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(storeId);
+
+        if (action != null) {
+            sb.append('/');
+            sb.append(action);
+        }
+
+        if (keyspace != null) {
+            sb.append('/');
+            sb.append(keyspace.toStringUtf8());
+        }
+
+        if (key != null) {
+            assert keyspace != null;
+
+            sb.append('/');
+            sb.append(key.toStringUtf8());
+        }
+
+        return sb.toString();
     }
 
-    private String toUrlPath(long storeId) {
-        return Long.toString(storeId);
-    }
-
-    public void delete(long storeId, ByteString key) {
-        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, key)).delete(ClientResponse.class);
+    public void delete(long storeId, ByteString keyspace, ByteString key) {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, null, keyspace, key))
+                .delete(ClientResponse.class);
 
         try {
             int status = response.getStatus();
@@ -274,6 +318,31 @@ public class StructuredClient {
             }
         } finally {
             response.close();
+        }
+    }
+
+    public Iterable<ByteString> getKeys(long storeId, ByteString keyspace) {
+        ClientResponse response = CLIENT.resource(url).path(toUrlPath(storeId, "keys", keyspace, null))
+                .get(ClientResponse.class);
+
+        try {
+            int status = response.getStatus();
+
+            switch (status) {
+            case 200:
+                break;
+
+            default:
+                throw new IllegalStateException("Unexpected status: " + status);
+            }
+
+            ByteStringRecordset records = new ByteStringRecordset(response);
+            response = null;
+            return records;
+        } finally {
+            if (response != null) {
+                response.close();
+            }
         }
     }
 }

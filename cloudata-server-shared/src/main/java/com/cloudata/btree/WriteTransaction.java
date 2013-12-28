@@ -1,6 +1,5 @@
 package com.cloudata.btree;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -177,11 +176,12 @@ public class WriteTransaction extends Transaction {
         this.transactionId = transactionId;
     }
 
-    public <V> void doAction(Btree btree, ByteBuffer key, BtreeOperation<V> operation) {
+    public <V> void doAction(Btree btree, BtreeOperation<V> operation) {
         if (operation instanceof RowOperation) {
-            getRootPage(btree, true).doAction(this, key, (RowOperation<V>) operation);
+            RowOperation<V> rowOperation = (RowOperation<V>) operation;
+            getRootPage(btree, true).doAction(this, rowOperation.getKey(), rowOperation);
         } else if (operation instanceof ComplexOperation) {
-            ((ComplexOperation) operation).doAction(btree, this, key);
+            ((ComplexOperation) operation).doAction(btree, this);
         } else {
             throw new UnsupportedOperationException();
         }

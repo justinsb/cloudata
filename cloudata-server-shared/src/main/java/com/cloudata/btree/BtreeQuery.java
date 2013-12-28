@@ -4,17 +4,27 @@ import java.nio.ByteBuffer;
 
 import javax.ws.rs.core.MediaType;
 
+import com.google.protobuf.ByteString;
+
 public class BtreeQuery {
 
     private final Btree btree;
     private final ByteBuffer start;
     private MediaType format;
     private final Keyspace keyspace;
+    final boolean stripKeyspace;
 
-    public BtreeQuery(Btree btree, Keyspace keyspace) {
+    public BtreeQuery(Btree btree, Keyspace keyspace, boolean stripKeyspace) {
         this.btree = btree;
         this.keyspace = keyspace;
-        this.start = null;
+        this.stripKeyspace = stripKeyspace;
+
+        if (keyspace != null) {
+            this.start = keyspace.mapToKey(ByteString.EMPTY).asReadOnlyByteBuffer();
+        } else {
+            this.start = null;
+        }
+
     }
 
     public KeyValueResultset execute() {
@@ -44,7 +54,7 @@ public class BtreeQuery {
 
         public void walk(EntryListener entryListener) {
             if (keyspace != null) {
-                entryListener = new KeyspaceFilter(keyspace, entryListener);
+                entryListener = new KeyspaceFilter(keyspace, stripKeyspace, entryListener);
             }
             txn.walk(btree, start, entryListener);
         }

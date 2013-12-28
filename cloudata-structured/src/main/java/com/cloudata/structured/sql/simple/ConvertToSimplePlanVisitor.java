@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.presto.metadata.Metadata;
+import com.facebook.presto.metadata.QualifiedTableName;
 import com.facebook.presto.metadata.TableMetadata;
 import com.facebook.presto.spi.ColumnHandle;
 import com.facebook.presto.spi.ColumnMetadata;
@@ -191,11 +192,14 @@ public class ConvertToSimplePlanVisitor extends PlanVisitor<Object, SimpleNode> 
 
         TableHandle tableHandle = node.getTable();
         TableMetadata table = metadata.getTableMetadata(tableHandle);
-        // SchemaTableName schemaTable = table.getTable();
-        //
-        // TableEntry entry = new TableEntry(table.getConnectorId(), schemaTable.getSchemaName(),
-        // schemaTable.getTableName());
+
         String tableName = table.getTable().getTableName();
+        String schemaName = table.getTable().getSchemaName();
+
+        // This seems to be hard coded in presto for now
+        String catalogName = table.getConnectorId();
+
+        QualifiedTableName qualifiedTableName = new QualifiedTableName(catalogName, schemaName, tableName);
 
         Map<Symbol, SimpleExpression> symbolToExpression = Maps.newHashMap();
         List<String> columnNames = Lists.newArrayList();
@@ -230,7 +234,7 @@ public class ConvertToSimplePlanVisitor extends PlanVisitor<Object, SimpleNode> 
             // }
         }
 
-        SimpleTableScan tableScan = new SimpleTableScan(table);
+        SimpleTableScan tableScan = new SimpleTableScan(qualifiedTableName);
         tableScan.columnNames = columnNames;
         tableScan.expressions = Lists.<SimpleExpression> newArrayList(expressions);
         tableScan.symbolToExpression = symbolToExpression;

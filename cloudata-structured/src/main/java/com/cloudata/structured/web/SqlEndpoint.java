@@ -11,7 +11,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.cloudata.btree.Keyspace;
 import com.cloudata.structured.sql.SqlEngine;
 import com.cloudata.structured.sql.SqlEngineFactory;
 import com.cloudata.structured.sql.SqlSession;
@@ -39,10 +38,6 @@ public class SqlEndpoint {
         }
 
         return Response.ok(statement).build();
-    }
-
-    private Keyspace getKeyspace() {
-        return Keyspace.ZERO;
     }
 
 }

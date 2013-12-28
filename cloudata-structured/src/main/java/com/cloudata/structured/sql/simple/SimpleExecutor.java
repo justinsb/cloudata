@@ -11,8 +11,9 @@ import com.cloudata.structured.sql.SqlSession;
 import com.cloudata.structured.sql.SqlStatement;
 import com.cloudata.structured.sql.provider.CloudataRecordCursor;
 import com.cloudata.structured.sql.provider.CloudataRecordCursor.WalkListener;
+import com.cloudata.structured.sql.provider.CloudataRecordSet;
+import com.cloudata.structured.sql.provider.CloudataTableHandle;
 import com.cloudata.structured.sql.value.ValueHolder;
-import com.facebook.presto.spi.RecordSet;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.gson.JsonObject;
@@ -55,8 +56,11 @@ public class SimpleExecutor {
 
         SimpleTableScan tableScan = (SimpleTableScan) simpleNode;
 
-        RecordSet rs = sqlEngine.getRecordSet(tableScan.tableMetadata);
-        CloudataRecordCursor cursor = (CloudataRecordCursor) rs.cursor();
+        CloudataTableHandle tableHandle = (CloudataTableHandle) sqlEngine.getMetadata()
+                .getTableHandle(tableScan.tableName).get();
+
+        CloudataRecordSet rs = sqlEngine.getRecordSet(tableHandle);
+        CloudataRecordCursor cursor = rs.cursor();
 
         final SimpleColumnExpression[] columns = tableScan.columns;
 
@@ -75,10 +79,10 @@ public class SimpleExecutor {
         try {
             listener.beginRows();
 
-            Keyspace keyspace = Keyspace.ZERO;
+            Keyspace keyspace = rs.getKeyspace();
 
             ByteString start = keyspace.mapToKey(ByteString.EMPTY);
-            cursor.walk(Keyspace.ZERO, start.asReadOnlyByteBuffer(), new WalkListener() {
+            cursor.walk(keyspace, start.asReadOnlyByteBuffer(), new WalkListener() {
 
                 @Override
                 public boolean found(ByteBuffer key, JsonObject json) {

@@ -3,6 +3,8 @@ package com.cloudata.structured.sql.provider;
 import java.util.List;
 import java.util.Map;
 
+import com.cloudata.btree.Keyspace;
+import com.cloudata.structured.StructuredStore;
 import com.facebook.presto.spi.ColumnHandle;
 import com.facebook.presto.spi.ColumnMetadata;
 import com.facebook.presto.spi.ConnectorTableMetadata;
@@ -11,13 +13,16 @@ import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.SchemaTablePrefix;
 import com.facebook.presto.spi.TableHandle;
 import com.google.common.collect.Lists;
+import com.google.protobuf.ByteString;
 
 public class CloudataConnectorMetadata extends ReadOnlyConnectorMetadata {
 
     final String connectorId;
+    private final StructuredStore store;
 
-    public CloudataConnectorMetadata(String connectorId) {
+    public CloudataConnectorMetadata(String connectorId, StructuredStore store) {
         this.connectorId = connectorId;
+        this.store = store;
     }
 
     @Override
@@ -39,12 +44,13 @@ public class CloudataConnectorMetadata extends ReadOnlyConnectorMetadata {
             return null;
         }
 
-        // ExampleTable table = exampleClient.getTable(tableName.getSchemaName(), tableName.getTableName());
-        // if (table == null) {
-        // return null;
-        // }
+        Keyspace keyspace = store.findKeyspace(ByteString.copyFromUtf8(tableName.getTableName()));
+        if (keyspace == null) {
+            return null;
+        }
 
-        return new CloudataTableHandle(connectorId, tableName.getSchemaName(), tableName.getTableName());
+        return new CloudataTableHandle(store, connectorId, tableName.getSchemaName(), tableName.getTableName(),
+                keyspace);
     }
 
     @Override

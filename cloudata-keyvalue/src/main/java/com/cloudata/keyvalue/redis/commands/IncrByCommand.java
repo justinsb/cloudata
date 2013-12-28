@@ -25,9 +25,10 @@ public class IncrByCommand implements RedisCommand {
     protected IntegerRedisResponse execute(RedisServer server, RedisSession session, RedisRequest command,
             long deltaLong) throws RedisException {
         ByteString key = command.getByteString(1);
+        ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
 
-        IncrementOperation operation = new IncrementOperation(deltaLong);
-        Long v = server.doAction(session.getKeyspace(), key, operation);
+        IncrementOperation operation = new IncrementOperation(qualifiedKey, deltaLong);
+        Long v = server.doAction(operation);
         return new IntegerRedisResponse(v);
     }
 }

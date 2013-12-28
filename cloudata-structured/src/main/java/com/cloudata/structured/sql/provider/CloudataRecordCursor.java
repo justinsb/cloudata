@@ -21,14 +21,13 @@ import com.cloudata.btree.Keyspace;
 import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.structured.StructuredStore;
 import com.cloudata.values.Value;
-import com.facebook.presto.metadata.TableMetadata;
 import com.facebook.presto.spi.ColumnType;
 import com.facebook.presto.spi.RecordCursor;
 import com.google.gson.JsonObject;
 
 public class CloudataRecordCursor implements RecordCursor {
     private final StructuredStore store;
-    private final TableMetadata tableMetadata;
+    private final CloudataTableHandle tableHandle;
 
     // private static final Splitter LINE_SPLITTER = Splitter.on(",").trimResults();
 
@@ -127,9 +126,9 @@ public class CloudataRecordCursor implements RecordCursor {
     // checkArgument(actual == expected, "Expected field %s to be type %s but is %s", field, expected, actual);
     // }
 
-    public CloudataRecordCursor(StructuredStore store, TableMetadata tableMetadata) {
+    public CloudataRecordCursor(StructuredStore store, CloudataTableHandle tableHandle) {
         this.store = store;
-        this.tableMetadata = tableMetadata;
+        this.tableHandle = tableHandle;
     }
 
     @Override

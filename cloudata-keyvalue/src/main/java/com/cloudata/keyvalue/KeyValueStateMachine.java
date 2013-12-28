@@ -62,10 +62,8 @@ public class KeyValueStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public <V> V doAction(long storeId, Keyspace keyspace, ByteString key, KeyOperation<V> operation)
-            throws InterruptedException, RaftException {
+    public <V> V doAction(long storeId, KeyOperation<V> operation) throws InterruptedException, RaftException {
         KvEntry.Builder entry = operation.serialize();
-        entry.setKey(keyspace.mapToKey(key));
         entry.setStoreId(storeId);
 
         log.debug("Proposing operation {}", entry.getAction());
@@ -93,11 +91,11 @@ public class KeyValueStateMachine implements StateMachine {
             switch (entry.getAction()) {
 
             case APPEND:
-                operation = new AppendOperation(value);
+                operation = new AppendOperation(key, value);
                 break;
 
             case DELETE:
-                operation = new DeleteOperation();
+                operation = new DeleteOperation(key);
                 break;
 
             case INCREMENT: {
@@ -105,19 +103,19 @@ public class KeyValueStateMachine implements StateMachine {
                 if (entry.hasIncrementBy()) {
                     delta = entry.getIncrementBy();
                 }
-                operation = new IncrementOperation(delta);
+                operation = new IncrementOperation(key, delta);
                 break;
             }
 
             case SET:
-                operation = new SetOperation(Value.deserialize(entry.getValue().asReadOnlyByteBuffer()));
+                operation = new SetOperation(key, Value.deserialize(entry.getValue().asReadOnlyByteBuffer()));
                 break;
 
             default:
                 throw new UnsupportedOperationException();
             }
 
-            keyValueStore.doAction(key != null ? key.asReadOnlyByteBuffer() : null, operation);
+            keyValueStore.doAction(operation);
 
             Object ret = operation.getResult();
 
@@ -167,7 +165,7 @@ public class KeyValueStateMachine implements StateMachine {
 
     public BtreeQuery scan(long storeId, Keyspace keyspace) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
-        return keyValueStore.buildQuery(keyspace);
+        return keyValueStore.buildQuery(keyspace, true);
     }
 
 }

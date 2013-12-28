@@ -3,7 +3,7 @@ package com.cloudata.structured.sql.simple;
 import java.util.List;
 import java.util.Map;
 
-import com.facebook.presto.metadata.TableMetadata;
+import com.facebook.presto.metadata.QualifiedTableName;
 import com.facebook.presto.sql.planner.Symbol;
 
 public class SimpleTableScan extends SimpleNode {
@@ -21,10 +21,11 @@ public class SimpleTableScan extends SimpleNode {
 
     Map<Symbol, SimpleExpression> symbolToExpression;
 
-    final TableMetadata tableMetadata;
+    // final TableMetadata tableMetadata;
+    public QualifiedTableName tableName;
 
-    public SimpleTableScan(TableMetadata tableMetadata) {
-        this.tableMetadata = tableMetadata;
+    public SimpleTableScan(QualifiedTableName tableName) {
+        this.tableName = tableName;
     }
 
     public SimpleExpression getExpression(Symbol symbol) {
@@ -32,7 +33,7 @@ public class SimpleTableScan extends SimpleNode {
     }
 
     public String getTableName() {
-        return tableMetadata.getTable().getTableName();
+        return tableName.getTableName();
     }
 
     @Override

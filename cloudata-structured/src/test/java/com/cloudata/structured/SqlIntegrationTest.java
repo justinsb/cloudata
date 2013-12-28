@@ -26,6 +26,7 @@ public class SqlIntegrationTest extends IntegrationTestBase {
         String url = SERVERS[0].getHttpUrl();
 
         long storeId = newLogId();
+        ByteString keyspace = ByteString.copyFromUtf8("space1");
 
         StructuredClient client = new StructuredClient(url);
 
@@ -34,12 +35,12 @@ public class SqlIntegrationTest extends IntegrationTestBase {
         for (int i = 1; i <= n; i++) {
             byte[] key = String.format("%04x", i).getBytes();
             JsonObject data = buildSqlJson(i);
-            client.put(storeId, ByteString.copyFrom(key), data);
+            client.put(storeId, keyspace, ByteString.copyFrom(key), data);
         }
 
         int reps = 1;
         for (int rep = 1; rep <= reps; rep++) {
-            String sql = "SELECT column1, column2, column3 FROM table1";
+            String sql = "SELECT column1, column2, column3 FROM space1";
             try (RowRecordset rs = client.queryJson(storeId, sql)) {
                 ArrayList<RowEntry> entries = Lists.newArrayList(rs);
 

@@ -36,8 +36,8 @@ public class TestBtree {
     private void put(Btree btree, byte[] key, byte[] valueBytes) {
         try (WriteTransaction txn = btree.beginReadWrite()) {
             Value value = Value.fromRawBytes(valueBytes);
-            SetOperation operation = new SetOperation(value);
-            txn.doAction(btree, ByteString.copyFrom(key).asReadOnlyByteBuffer(), operation);
+            SetOperation operation = new SetOperation(ByteString.copyFrom(key), value);
+            txn.doAction(btree, operation);
             txn.commit();
         }
     }

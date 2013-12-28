@@ -1,10 +1,10 @@
 package com.cloudata.structured.operation;
 
-import java.nio.ByteBuffer;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import com.cloudata.btree.Btree;
+import com.cloudata.btree.Keyspace;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.btree.operation.ComplexOperation;
 import com.cloudata.btree.operation.SetOperation;
@@ -21,9 +21,13 @@ public class StructuredSetOperation implements StructuredOperation<Void>, Comple
 
     protected final Value newValue;
     private final StructuredStore store;
+    private final ByteString keyspaceName;
+    private final ByteString key;
 
-    public StructuredSetOperation(StructuredStore store, Value newValue) {
+    public StructuredSetOperation(StructuredStore store, ByteString keyspaceName, ByteString key, Value newValue) {
         this.store = store;
+        this.keyspaceName = keyspaceName;
+        this.key = key;
         this.newValue = newValue;
     }
 
@@ -35,15 +39,21 @@ public class StructuredSetOperation implements StructuredOperation<Void>, Comple
     @Override
     public LogEntry.Builder serialize() {
         LogEntry.Builder b = LogEntry.newBuilder();
+        b.setKeyspaceName(keyspaceName);
+        b.setKey(key);
         b.setAction(LogAction.SET);
         b.setValue(ByteString.copyFrom(newValue.serialize()));
         return b;
     }
 
     @Override
-    public void doAction(Btree btree, WriteTransaction txn, ByteBuffer key) {
+    public void doAction(Btree btree, WriteTransaction txn) {
+        Keyspace keyspace = store.ensureKeyspace(txn, keyspaceName);
+
+        ByteString qualifiedKey = keyspace.mapToKey(key);
+
         // Set the value
-        txn.doAction(btree, key, new SetOperation(newValue));
+        txn.doAction(btree, new SetOperation(qualifiedKey, newValue));
 
         // Update the key dictionary
         JsonObject json = newValue.asJsonObject();
@@ -53,7 +63,7 @@ public class StructuredSetOperation implements StructuredOperation<Void>, Comple
             keys.add(entry.getKey());
         }
 
-        store.ensureKeys(txn, keys);
+        store.ensureKeys(txn, keyspace, keys);
     }
 
 }

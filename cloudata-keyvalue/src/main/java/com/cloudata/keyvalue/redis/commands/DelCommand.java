@@ -18,8 +18,10 @@ public class DelCommand implements RedisCommand {
         for (int i = 1; i < command.getArgc(); i++) {
             ByteString key = command.getByteString(i);
 
-            DeleteOperation operation = new DeleteOperation();
-            Integer deleted = server.doAction(session.getKeyspace(), key, operation);
+            ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
+
+            DeleteOperation operation = new DeleteOperation(qualifiedKey);
+            Integer deleted = server.doAction(operation);
 
             count += deleted.intValue();
         }

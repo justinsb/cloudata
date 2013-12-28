@@ -473,7 +473,8 @@ public class SqlTest {
         // Metadata metadata = new TestMetadata();
         MetadataManager metadata = new MetadataManager();
 
-        metadata.addConnectorMetadata(connectorId, catalog, new CloudataConnectorMetadata(connectorId));
+        StructuredStore store = null;
+        metadata.addConnectorMetadata(connectorId, catalog, new CloudataConnectorMetadata(connectorId, store));
 
         return metadata;
     }

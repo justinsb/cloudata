@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue.operation;
 
+import java.nio.ByteBuffer;
+
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.values.Value;
@@ -9,8 +11,10 @@ public class AppendOperation implements KeyOperation<Integer> {
 
     final ByteString appendValue;
     private int newLength;
+    private final ByteString key;
 
-    public AppendOperation(ByteString appendValue) {
+    public AppendOperation(ByteString key, ByteString appendValue) {
+        this.key = key;
         this.appendValue = appendValue;
     }
 
@@ -31,6 +35,7 @@ public class AppendOperation implements KeyOperation<Integer> {
     public KvEntry.Builder serialize() {
         KvEntry.Builder b = KvEntry.newBuilder();
         b.setAction(KvAction.APPEND);
+        b.setKey(key);
         b.setValue(appendValue);
         return b;
     }
@@ -38,6 +43,11 @@ public class AppendOperation implements KeyOperation<Integer> {
     @Override
     public Integer getResult() {
         return newLength;
+    }
+
+    @Override
+    public ByteBuffer getKey() {
+        return key.asReadOnlyByteBuffer();
     }
 
 }

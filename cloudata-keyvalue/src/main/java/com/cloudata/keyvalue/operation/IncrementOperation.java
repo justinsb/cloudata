@@ -1,11 +1,14 @@
 package com.cloudata.keyvalue.operation;
 
+import java.nio.ByteBuffer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.KeyValueProto.KvAction;
 import com.cloudata.keyvalue.KeyValueProto.KvEntry;
 import com.cloudata.values.Value;
+import com.google.protobuf.ByteString;
 
 public class IncrementOperation implements KeyOperation<Long> {
 
@@ -14,7 +17,10 @@ public class IncrementOperation implements KeyOperation<Long> {
     final long delta;
     private Long result;
 
-    public IncrementOperation(long delta) {
+    final ByteString key;
+
+    public IncrementOperation(ByteString key, long delta) {
+        this.key = key;
         this.delta = delta;
     }
 
@@ -42,6 +48,7 @@ public class IncrementOperation implements KeyOperation<Long> {
     @Override
     public KvEntry.Builder serialize() {
         KvEntry.Builder b = KvEntry.newBuilder();
+        b.setKey(key);
         b.setAction(KvAction.INCREMENT);
         b.setIncrementBy(delta);
         return b;
@@ -50,6 +57,11 @@ public class IncrementOperation implements KeyOperation<Long> {
     @Override
     public Long getResult() {
         return result;
+    }
+
+    @Override
+    public ByteBuffer getKey() {
+        return key.asReadOnlyByteBuffer();
     }
 
 }

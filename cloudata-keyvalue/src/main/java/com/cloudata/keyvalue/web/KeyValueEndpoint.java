@@ -82,6 +82,8 @@ public class KeyValueEndpoint {
             ByteString k = ByteString.copyFrom(BaseEncoding.base16().decode(key));
             byte[] v = ByteStreams.toByteArray(valueStream);
 
+            Keyspace keyspace = getKeyspace();
+            ByteString qualifiedKey = keyspace.mapToKey(k);
             KvAction action = KvAction.SET;
 
             if (actionString != null) {
@@ -94,15 +96,15 @@ public class KeyValueEndpoint {
             switch (action) {
             case SET: {
                 Value value = Value.fromRawBytes(v);
-                SetOperation operation = new SetOperation(value);
-                stateMachine.doAction(storeId, getKeyspace(), k, operation);
+                SetOperation operation = new SetOperation(qualifiedKey, value);
+                stateMachine.doAction(storeId, operation);
                 ret = null;
                 break;
             }
 
             case INCREMENT: {
-                IncrementOperation operation = new IncrementOperation(1);
-                Long newValue = stateMachine.doAction(storeId, getKeyspace(), k, operation);
+                IncrementOperation operation = new IncrementOperation(qualifiedKey, 1);
+                Long newValue = stateMachine.doAction(storeId, operation);
                 ret = Value.fromLong(newValue).asBytes();
                 break;
             }
@@ -131,9 +133,12 @@ public class KeyValueEndpoint {
     @Path("{key}")
     public Response delete(@PathParam("key") String key) throws IOException {
         try {
-            byte[] k = BaseEncoding.base16().decode(key);
+            ByteString k = ByteString.copyFrom(BaseEncoding.base16().decode(key));
 
-            stateMachine.doAction(storeId, getKeyspace(), ByteString.copyFrom(k), new DeleteOperation());
+            Keyspace keyspace = getKeyspace();
+            ByteString qualifiedKey = keyspace.mapToKey(k);
+
+            stateMachine.doAction(storeId, new DeleteOperation(qualifiedKey));
 
             return Response.noContent().build();
         } catch (InterruptedException e) {

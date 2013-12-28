@@ -32,9 +32,9 @@ public class KeyValueStore {
         this.btree = new Btree(pageStore, uniqueKeys);
     }
 
-    public void doAction(ByteBuffer key, KeyOperation<?> operation) {
+    public void doAction(KeyOperation<?> operation) {
         try (WriteTransaction txn = btree.beginReadWrite()) {
-            txn.doAction(btree, key, operation);
+            txn.doAction(btree, operation);
             txn.commit();
         }
     }
@@ -45,8 +45,8 @@ public class KeyValueStore {
         }
     }
 
-    public BtreeQuery buildQuery(Keyspace keyspace) {
-        return new BtreeQuery(btree, keyspace);
+    public BtreeQuery buildQuery(Keyspace keyspace, boolean stripKeyspace) {
+        return new BtreeQuery(btree, keyspace, stripKeyspace);
     }
 
 }

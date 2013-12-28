@@ -17,9 +17,9 @@ public class RedisServer {
         this.storeId = storeId;
     }
 
-    public <V> V doAction(Keyspace keyspace, ByteString key, KeyOperation<V> operation) throws RedisException {
+    public <V> V doAction(KeyOperation<V> operation) throws RedisException {
         try {
-            return stateMachine.doAction(storeId, keyspace, key, operation);
+            return stateMachine.doAction(storeId, operation);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RedisException("Interrupted during processing", e);

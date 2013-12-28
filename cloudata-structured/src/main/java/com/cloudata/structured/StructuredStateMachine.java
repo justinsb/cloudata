@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
 import com.cloudata.structured.StructuredProto.LogEntry;
-import com.cloudata.structured.operation.DeleteOperation;
+import com.cloudata.structured.operation.StructuredDeleteOperation;
 import com.cloudata.structured.operation.StructuredOperation;
 import com.cloudata.structured.operation.StructuredSetOperation;
 import com.cloudata.values.Value;
@@ -60,10 +60,8 @@ public class StructuredStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public <V> V doAction(long storeId, Keyspace keyspace, ByteString key, StructuredOperation<V> operation)
-            throws InterruptedException, RaftException {
+    public <V> V doAction(long storeId, StructuredOperation<V> operation) throws InterruptedException, RaftException {
         LogEntry.Builder entry = operation.serialize();
-        entry.setKey(keyspace.mapToKey(key));
         entry.setStoreId(storeId);
 
         log.debug("Proposing operation {}", entry.getAction());
@@ -82,27 +80,29 @@ public class StructuredStateMachine implements StateMachine {
             long storeId = entry.getStoreId();
 
             ByteString key = entry.getKey();
+            ByteString keyspaceName = entry.getKeyspaceName();
             ByteString value = entry.getValue();
 
-            StructuredStore keyValueStore = getStructuredStore(storeId);
+            StructuredStore store = getStructuredStore(storeId);
 
             StructuredOperation<?> operation;
 
             switch (entry.getAction()) {
-            case DELETE:
-                operation = new DeleteOperation();
+            case DELETE: {
+                operation = new StructuredDeleteOperation(store, keyspaceName, key);
                 break;
-
-            case SET:
-                operation = new StructuredSetOperation(keyValueStore, Value.deserialize(entry.getValue()
+            }
+            case SET: {
+                operation = new StructuredSetOperation(store, keyspaceName, key, Value.deserialize(entry.getValue()
                         .asReadOnlyByteBuffer()));
                 break;
+            }
 
             default:
                 throw new UnsupportedOperationException();
             }
 
-            keyValueStore.doAction(key != null ? key.asReadOnlyByteBuffer() : null, operation);
+            store.doAction(operation);
 
             Object ret = operation.getResult();
             return ret;
@@ -144,14 +144,36 @@ public class StructuredStateMachine implements StateMachine {
         }
     }
 
-    public Value get(long storeId, Keyspace keyspace, ByteString key) {
+    public Value get(long storeId, ByteString keyspaceName, ByteString key) {
         StructuredStore keyValueStore = getStructuredStore(storeId);
-        return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
+
+        Keyspace keyspace = keyValueStore.findKeyspace(keyspaceName);
+        if (keyspace == null) {
+            return null;
+        }
+
+        ByteString qualifiedKey = keyspace.mapToKey(key);
+        return keyValueStore.get(qualifiedKey.asReadOnlyByteBuffer());
     }
 
-    public BtreeQuery scan(long storeId, Keyspace keyspace) {
+    public BtreeQuery scan(long storeId, ByteString keyspaceName) {
         StructuredStore keyValueStore = getStructuredStore(storeId);
-        return keyValueStore.buildQuery(keyspace);
+        Keyspace keyspace = keyValueStore.findKeyspace(keyspaceName);
+        if (keyspace == null) {
+            return null;
+        }
+        return keyValueStore.buildQuery(keyspace, true);
+    }
+
+    public void listKeys(long storeId, ByteString keyspaceName, Listener<ByteBuffer> listener) {
+        StructuredStore keyValueStore = getStructuredStore(storeId);
+
+        Keyspace keyspace = keyValueStore.findKeyspace(keyspaceName);
+        if (keyspace != null) {
+            keyValueStore.listKeys(keyspace, listener);
+        }
+
+        listener.done();
     }
 
 }

@@ -16,9 +16,8 @@ package com.cloudata.structured.sql.provider;
 import java.util.Map;
 
 import com.cloudata.structured.StructuredStore;
-import com.facebook.presto.metadata.TableMetadata;
 import com.facebook.presto.spi.Connector;
-import com.facebook.presto.spi.RecordSet;
+import com.facebook.presto.spi.TableHandle;
 import com.google.common.collect.ClassToInstanceMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 
@@ -36,7 +35,8 @@ public class CloudataConnector implements Connector {
         return services.getInstance(type);
     }
 
-    public RecordSet getRecordset(TableMetadata tableMetadata) {
-        return new CloudataRecordSet(store, tableMetadata);
+    public CloudataRecordSet getRecordset(TableHandle tableHandle) {
+        CloudataTableHandle cloudataTableHandle = (CloudataTableHandle) tableHandle;
+        return new CloudataRecordSet(store, cloudataTableHandle);
     }
 }

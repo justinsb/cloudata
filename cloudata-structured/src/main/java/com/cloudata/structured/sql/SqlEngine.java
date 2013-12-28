@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.structured.StructuredStore;
 import com.cloudata.structured.sql.provider.CloudataConnector;
 import com.cloudata.structured.sql.provider.CloudataConnectorFactory;
+import com.cloudata.structured.sql.provider.CloudataRecordSet;
+import com.cloudata.structured.sql.provider.CloudataTableHandle;
 import com.cloudata.structured.sql.simple.SimpleExecutor;
 import com.facebook.presto.connector.ConnectorManager;
 import com.facebook.presto.importer.PeriodicImportManager;
@@ -19,13 +21,11 @@ import com.facebook.presto.metadata.Metadata;
 import com.facebook.presto.metadata.MetadataManager;
 import com.facebook.presto.metadata.NodeManager;
 import com.facebook.presto.metadata.OutputTableHandleResolver;
-import com.facebook.presto.metadata.TableMetadata;
 import com.facebook.presto.operator.RecordSinkManager;
 import com.facebook.presto.spi.Connector;
 import com.facebook.presto.spi.ConnectorFactory;
 import com.facebook.presto.spi.ConnectorOutputHandleResolver;
 import com.facebook.presto.spi.ConnectorSplitManager;
-import com.facebook.presto.spi.RecordSet;
 import com.facebook.presto.split.DataStreamManager;
 import com.facebook.presto.split.SplitManager;
 import com.facebook.presto.sql.analyzer.Analysis;
@@ -155,7 +155,7 @@ public class SqlEngine {
         return this.executor;
     }
 
-    public RecordSet getRecordSet(TableMetadata tableMetadata) {
-        return cloudataConnector.getRecordset(tableMetadata);
+    public CloudataRecordSet getRecordSet(CloudataTableHandle tableHandle) {
+        return cloudataConnector.getRecordset(tableHandle);
     }
 }

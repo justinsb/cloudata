@@ -1,5 +1,6 @@
 package com.cloudata.structured.sql.provider;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -8,12 +9,17 @@ import org.slf4j.LoggerFactory;
 import org.weakref.jmx.com.google.common.collect.Lists;
 import org.weakref.jmx.com.google.common.collect.Maps;
 
+import com.cloudata.btree.ByteBuffers;
+import com.cloudata.btree.Keyspace;
+import com.cloudata.structured.Listener;
+import com.cloudata.structured.StructuredStore;
 import com.facebook.presto.spi.ColumnHandle;
 import com.facebook.presto.spi.ColumnMetadata;
 import com.facebook.presto.spi.ColumnType;
 import com.facebook.presto.spi.ConnectorTableMetadata;
 import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.TableHandle;
+import com.google.common.base.Charsets;
 
 public class CloudataTableHandle implements TableHandle {
 
@@ -25,24 +31,37 @@ public class CloudataTableHandle implements TableHandle {
     private final String connectorId;
     private final String schemaName;
 
-    public CloudataTableHandle(String connectorId, String schemaName, String tableName) {
+    private final Keyspace keyspace;
+
+    private final StructuredStore store;
+
+    public CloudataTableHandle(StructuredStore store, String connectorId, String schemaName, String tableName,
+            Keyspace keyspace) {
+        this.store = store;
         this.connectorId = connectorId;
         this.schemaName = schemaName;
         this.tableName = tableName;
+        this.keyspace = keyspace;
         SchemaTableName schemaTableName = new SchemaTableName(schemaName, tableName);
 
-        List<String> keys = Lists.newArrayList();
-        log.error("Keys are hard-coded");
-        keys.add("column1");
-        keys.add("column2");
-        keys.add("column3");
+        final List<ColumnMetadata> columns = Lists.newArrayList();
 
-        List<ColumnMetadata> columns = Lists.newArrayList();
-        for (int i = 0; i < keys.size(); i++) {
-            ColumnType type = ColumnType.STRING;
-            boolean paritionKey = false;
-            columns.add(new ColumnMetadata(keys.get(i), type, i, paritionKey));
-        }
+        store.listKeys(keyspace, new Listener<ByteBuffer>() {
+            @Override
+            public boolean next(ByteBuffer value) {
+                ColumnType type = ColumnType.STRING;
+                boolean paritionKey = false;
+                String key = ByteBuffers.toString(Charsets.UTF_8, value);
+                columns.add(new ColumnMetadata(key, type, columns.size(), paritionKey));
+                return true;
+            }
+
+            @Override
+            public void done() {
+
+            }
+        });
+
         this.columns = columns;
         ConnectorTableMetadata metadata = new ConnectorTableMetadata(schemaTableName, columns);
         this.tableMetadata = metadata;
@@ -75,6 +94,10 @@ public class CloudataTableHandle implements TableHandle {
 
     public ColumnHandle getColumnHandle(String columnName) {
         return getColumnHandles().get(columnName);
+    }
+
+    public Keyspace getKeyspace() {
+        return keyspace;
     }
 
 }

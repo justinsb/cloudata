@@ -67,7 +67,7 @@ public class CloudataConnectorFactory implements ConnectorFactory {
 
             ClassToInstanceMap<Object> services = ImmutableClassToInstanceMap.builder()
 
-            .put(ConnectorMetadata.class, new CloudataConnectorMetadata(connectorId))
+            .put(ConnectorMetadata.class, new CloudataConnectorMetadata(connectorId, store))
 
             .put(ConnectorSplitManager.class, new CloudataSplitManager(nodeManager, connectorId))
 

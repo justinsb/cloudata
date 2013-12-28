@@ -104,4 +104,8 @@ public class Keyspace {
         return dup;
     }
 
+    public ByteString mapToKey(ByteBuffer key) {
+        return mapToKey(ByteString.copyFrom(key));
+    }
+
 }

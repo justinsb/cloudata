@@ -1,6 +1,7 @@
 package com.cloudata.btree;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import com.google.protobuf.ByteString;
 
@@ -95,5 +96,16 @@ public class ByteBuffers {
             return null;
         }
         return b.asReadOnlyByteBuffer();
+    }
+
+    public static String toString(Charset charset, ByteBuffer buffer) {
+        // TODO: Something more efficient
+
+        buffer = buffer.duplicate();
+        byte[] array = new byte[buffer.remaining()];
+        buffer.get(array);
+        String s = new String(array, charset);
+
+        return s;
     }
 }
