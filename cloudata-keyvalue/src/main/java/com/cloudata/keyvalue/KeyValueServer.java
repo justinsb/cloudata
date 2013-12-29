@@ -3,11 +3,19 @@ package com.cloudata.keyvalue;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.EnumSet;
 import java.util.List;
 
+import javax.servlet.DispatcherType;
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
@@ -16,23 +24,19 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.sun.grizzly.http.SelectorThread;
-import com.sun.jersey.api.container.grizzly.GrizzlyServerFactory;
-import com.sun.jersey.api.core.PackagesResourceConfig;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.core.spi.component.ioc.IoCComponentProviderFactory;
-import com.sun.jersey.guice.spi.container.GuiceComponentProviderFactory;
+import com.google.inject.servlet.GuiceFilter;
 
 public class KeyValueServer {
+    private static final Logger log = LoggerFactory.getLogger(KeyValueServer.class);
 
     final File baseDir;
     final int httpPort;
     private final Replica local;
     private final List<Replica> peers;
     private RaftService raft;
-    private SelectorThread selector;
     private final SocketAddress redisSocketAddress;
     private RedisEndpoint redisEndpoint;
+    private Server jetty;
 
     public KeyValueServer(File baseDir, Replica local, List<Replica> peers, int httpPort,
             SocketAddress redisSocketAddress) {
@@ -44,7 +48,7 @@ public class KeyValueServer {
     }
 
     public synchronized void start() throws Exception {
-        if (raft != null || selector != null) {
+        if (raft != null || jetty != null) {
             throw new IllegalStateException();
         }
 
@@ -63,14 +67,26 @@ public class KeyValueServer {
 
         raft.startAsync().awaitRunning();
 
-        final String baseUri = getHttpUrl();
+        // final String baseUri = getHttpUrl();
 
         Injector injector = Guice.createInjector(new KeyValueModule(stateMachine), new WebModule());
 
-        ResourceConfig rc = new PackagesResourceConfig(WebModule.class.getPackage().getName());
-        IoCComponentProviderFactory ioc = new GuiceComponentProviderFactory(rc, injector);
+        // ResourceConfig rc = new PackagesResourceConfig(WebModule.class.getPackage().getName());
+        // IoCComponentProviderFactory ioc = new GuiceComponentProviderFactory(rc, injector);
 
-        this.selector = GrizzlyServerFactory.create(baseUri, rc, ioc);
+        // this.selector = GrizzlyServerFactory.create(baseUri, rc, ioc);
+
+        this.jetty = new Server(httpPort);
+
+        ServletContextHandler context = new ServletContextHandler();
+        context.setContextPath("/");
+
+        FilterHolder filterHolder = new FilterHolder(injector.getInstance(GuiceFilter.class));
+        context.addFilter(filterHolder, "*", EnumSet.of(DispatcherType.REQUEST));
+
+        jetty.setHandler(context);
+
+        jetty.start();
 
         if (redisSocketAddress != null) {
             long storeId = 1;
@@ -104,15 +120,19 @@ public class KeyValueServer {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                server.stop();
+                try {
+                    server.stop();
+                } catch (Exception e) {
+                    log.error("Error stopping server", e);
+                }
             }
         });
     }
 
-    public synchronized void stop() {
-        if (selector != null) {
-            selector.stopEndpoint();
-            selector = null;
+    public synchronized void stop() throws Exception {
+        if (jetty != null) {
+            jetty.stop();
+            jetty = null;
         }
 
         if (redisEndpoint != null) {

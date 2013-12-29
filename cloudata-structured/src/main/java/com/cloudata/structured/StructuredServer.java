@@ -59,7 +59,7 @@ public class StructuredServer {
 
         raft.startAsync().awaitRunning();
 
-        final String baseUri = getHttpUrl();
+        // final String baseUri = getHttpUrl();
 
         Injector injector = Guice.createInjector(new StructuredStoreModule(stateMachine), new WebModule());
 

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.cloudata.btree.Keyspace;
 import com.cloudata.keyvalue.KeyValueClient.KeyValueEntry;
 import com.cloudata.keyvalue.KeyValueClient.KeyValueRecordset;
 import com.google.common.collect.Lists;
@@ -62,7 +61,7 @@ public class KeyValueIntegrationTest extends IntegrationTestBase {
             Assert.assertEquals(n, entries.size());
 
             for (int i = 1; i <= n; i++) {
-                ByteString expectedKey = Keyspace.ZERO.mapToKey(String.format("%04x", i).getBytes());
+                ByteString expectedKey = ByteString.copyFromUtf8(String.format("%04x", i));
                 byte[] expectedValue = buildBytes(i);
                 KeyValueEntry entry = entries.get(i - 1);
                 Assert.assertEquals(expectedKey, entry.getKey());

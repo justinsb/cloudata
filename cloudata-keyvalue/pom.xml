@@ -28,7 +28,6 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<version>2.2.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

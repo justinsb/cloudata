@@ -45,7 +45,7 @@ public class IntegrationTestBase {
     }
 
     @AfterClass
-    public static void stopServers() throws InterruptedException {
+    public static void stopServers() throws Exception {
         for (int i = 0; i < SERVERS.length; i++) {
             if (SERVERS[i] != null) {
                 SERVERS[i].stop();

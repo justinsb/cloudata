@@ -45,7 +45,7 @@ public class AppendLogIntegrationTest {
     }
 
     @AfterClass
-    public static void stopServers() {
+    public static void stopServers() throws Exception {
         for (int i = 0; i < SERVERS.length; i++) {
             SERVERS[i].stop();
         }

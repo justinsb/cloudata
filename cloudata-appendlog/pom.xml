@@ -14,7 +14,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.cloudata</groupId>
-			<artifactId>cloudata-shared</artifactId>
+			<artifactId>cloudata-server-shared</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
