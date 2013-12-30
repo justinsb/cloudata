@@ -1,0 +1,16 @@
+option java_package = "com.cloudata.blockstore";
+
+message LogEntry {
+	required uint64 store_id = 1;
+	required LogAction action = 2;
+	optional bytes key = 3;
+	optional bytes value = 4;
+	optional int64 increment_by = 5;
+}
+
+enum LogAction {
+	SET = 1;
+	DELETE = 2;
+	INCREMENT = 3;
+	APPEND = 4;
+}

@@ -17,6 +17,7 @@
 		<module>cloudata-structured</module>
 		<module>cloudata-git</module>
 		<module>cloudata-files</module>
+		<module>cloudata-blocks</module>
 	</modules>
 
 	<dependencyManagement>
