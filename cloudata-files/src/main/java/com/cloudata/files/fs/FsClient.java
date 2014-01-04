@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,8 +24,10 @@ import com.cloudata.files.blobs.BlobCache.CacheFileHandle;
 import com.cloudata.files.blobs.BlobStore;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.common.io.ByteSource;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 
 @Singleton
@@ -33,14 +36,17 @@ public class FsClient {
 
     private static final long ROOT_INODE = 1;
 
-    private static final ByteString DIR_CHILDREN = ByteString.copyFrom(new byte[] { 'D' });
-    private static final ByteString INODES = ByteString.copyFrom(new byte[] { 'I' });
-    private static final ByteString DELETED_INODES = ByteString.copyFrom(new byte[] { 'X' });
+    // private static final ByteString DIR_CHILDREN = ByteString.copyFrom(new byte[] { 'D' });
+    // private static final ByteString INODES = ByteString.copyFrom(new byte[] { 'I' });
+    // private static final ByteString DELETED_INODES = ByteString.copyFrom(new byte[] { 'X' });
+
+    public static final int SPACE_INODES = 0;
+    public static final int SPACE_DIR_CHILDREN = 1;
+    public static final int SPACE_DELETED_CHILDREN = 2;
 
     private static final ByteString CHUNK_PREFIX = ByteString.copyFrom(new byte[] { 'C' });
 
     final KeyValueStore store;
-
     final BlobStore blobStore;
 
     @Inject
@@ -89,7 +95,7 @@ public class FsClient {
     private long findChild(FsPath parent, ByteString name) throws IOException {
         ByteString key = buildDirEntryKey(parent, name);
 
-        ByteString value = store.read(key);
+        ByteString value = store.read(SPACE_DIR_CHILDREN, key);
         if (value == null) {
             return 0;
         }
@@ -98,14 +104,13 @@ public class FsClient {
 
     private ByteString buildDirEntryKey(FsPath parent, ByteString name) {
         ByteString volumePrefix = parent.getVolume().getPrefix();
-        ByteString key = volumePrefix.concat(DIR_CHILDREN).concat(ByteStrings.encode(parent.getId())).concat(name);
+        ByteString key = volumePrefix.concat(ByteStrings.encode(parent.getId())).concat(name);
         return key;
     }
 
     private ByteString buildDirEntryKey(FsPath path) {
         ByteString volumePrefix = path.getVolume().getPrefix();
-        ByteString key = volumePrefix.concat(DIR_CHILDREN).concat(ByteStrings.encode(path.getParent().getId()))
-                .concat(path.getNameBytes());
+        ByteString key = volumePrefix.concat(ByteStrings.encode(path.getParent().getId())).concat(path.getNameBytes());
         return key;
     }
 
@@ -133,7 +138,7 @@ public class FsClient {
         public Inode readInode() throws IOException {
             ByteString key = buildInodeKey(parent.getVolume(), inode);
 
-            ByteString value = client.store.read(key);
+            ByteString value = client.store.read(SPACE_INODES, key);
             if (value == null) {
                 return null;
             }
@@ -143,23 +148,24 @@ public class FsClient {
 
     public Iterator<DirEntry> listChildren(final FsPath fsPath) {
         FsVolume volume = fsPath.getVolume();
-        final ByteString prefix = volume.getPrefix().concat(DIR_CHILDREN).concat(ByteStrings.encode(fsPath.getId()));
+        final ByteString prefix = volume.getPrefix().concat(ByteStrings.encode(fsPath.getId()));
 
-        return Iterators.transform(store.listEntriesWithPrefix(prefix), new Function<KeyValueEntry, DirEntry>() {
-            @Override
-            public DirEntry apply(KeyValueEntry entry) {
-                ByteString name = entry.getKey().substring(prefix.size());
-                long inode = ByteStrings.decodeLong(entry.getValue());
-                return new DirEntry(FsClient.this, fsPath, name, inode);
-            }
+        return Iterators.transform(store.listEntriesWithPrefix(SPACE_DIR_CHILDREN, prefix),
+                new Function<KeyValueEntry, DirEntry>() {
+                    @Override
+                    public DirEntry apply(KeyValueEntry entry) {
+                        ByteString name = entry.getKey().substring(prefix.size());
+                        long inode = ByteStrings.decodeLong(entry.getValue());
+                        return new DirEntry(FsClient.this, fsPath, name, inode);
+                    }
 
-        });
+                });
     }
 
     private InodeData readInode(FsVolume volume, FsCredentials credentials, long inode) throws IOException {
         ByteString key = buildInodeKey(volume, inode);
 
-        ByteString value = store.read(key);
+        ByteString value = store.read(SPACE_INODES, key);
         if (value == null) {
             return null;
         }
@@ -167,7 +173,7 @@ public class FsClient {
     }
 
     private static ByteString buildInodeKey(FsVolume volume, long inode) {
-        ByteString key = volume.getPrefix().concat(INODES).concat(ByteStrings.encode(inode));
+        ByteString key = volume.getPrefix().concat(ByteStrings.encode(inode));
         return key;
     }
 
@@ -192,7 +198,10 @@ public class FsClient {
         ByteString key = buildInodeKey(volume, inode);
         ByteString value = data.toByteString();
 
-        store.put(key, value);
+        if (!store.putSync(SPACE_INODES, key, value)) {
+            throw new IllegalStateException();
+        }
+
         return data;
     }
 
@@ -202,7 +211,16 @@ public class FsClient {
 
         long length = source.size();
 
-        ByteString hash = blobStore.put(CHUNK_PREFIX, source);
+        ByteString hash;
+        try {
+            hash = blobStore.put(CHUNK_PREFIX, source).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw Throwables.propagate(e);
+        } catch (ExecutionException e) {
+            throw Throwables.propagate(e);
+        }
+
         Builder chunkBuilder = inode.addChunkBuilder();
         chunkBuilder.setHash(hash);
         chunkBuilder.setLength(length);
@@ -234,7 +252,7 @@ public class FsClient {
             created = inode.build();
 
             inodeKey = buildInodeKey(parent.getVolume(), id);
-            if (store.put(inodeKey, created.toByteString(), IfNotExists.INSTANCE)) {
+            if (store.putSync(SPACE_INODES, inodeKey, created.toByteString(), IfNotExists.INSTANCE)) {
                 log.debug("Wrote inode entry: {} = {}", id, created);
 
                 break;
@@ -257,11 +275,11 @@ public class FsClient {
                 modifiers = new Modifier[] { IfNotExists.INSTANCE };
             }
 
-            if (store.put(dirEntryKey, dirEntryValue, modifiers)) {
+            if (store.putSync(SPACE_DIR_CHILDREN, dirEntryKey, dirEntryValue, modifiers)) {
                 return;
             } else {
                 // Cleanup inode
-                store.delete(inodeKey);
+                store.delete(SPACE_INODES, inodeKey);
 
                 if (!overwrite) {
                     throw new FsFileAlreadyExistsException();
@@ -308,7 +326,7 @@ public class FsClient {
         }
     }
 
-    public CacheFileHandle findChunk(ChunkData chunkData) throws IOException {
+    public ListenableFuture<CacheFileHandle> findChunk(ChunkData chunkData) throws IOException {
         ByteString key = chunkData.getHash();
         return blobStore.find(key);
     }
@@ -329,10 +347,10 @@ public class FsClient {
         ByteString volumePrefix = fsPath.getVolume().getPrefix();
 
         while (true) {
-            ByteString key = volumePrefix.concat(DELETED_INODES).concat(ByteStrings.encode(id))
-                    .concat(ByteStrings.encode(System.currentTimeMillis()));
+            ByteString key = volumePrefix.concat(ByteStrings.encode(id)).concat(
+                    ByteStrings.encode(System.currentTimeMillis()));
 
-            if (store.put(key, deletedValue, IfNotExists.INSTANCE)) {
+            if (store.putSync(SPACE_DELETED_CHILDREN, key, deletedValue, IfNotExists.INSTANCE)) {
                 break;
             }
         }
@@ -341,7 +359,7 @@ public class FsClient {
         {
             ByteString key = buildDirEntryKey(fsPath);
 
-            return store.delete(key);
+            return store.delete(SPACE_DIR_CHILDREN, key);
         }
     }
 
@@ -356,11 +374,11 @@ public class FsClient {
             ByteString dirEntryValue = ByteStrings.encode(id);
             Modifier[] modifiers = new Modifier[] { IfNotExists.INSTANCE };
 
-            if (!store.put(newKey, dirEntryValue, modifiers)) {
+            if (!store.putSync(SPACE_DIR_CHILDREN, newKey, dirEntryValue, modifiers)) {
                 throw new FsFileAlreadyExistsException();
             }
         }
 
-        store.delete(oldKey);
+        store.delete(SPACE_DIR_CHILDREN, oldKey);
     }
 }

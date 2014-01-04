@@ -9,10 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.blockstore.Volume;
-import com.cloudata.blockstore.iscsi.ScsiResponse.ResponseCode;
-import com.cloudata.blockstore.iscsi.ScsiResponse.ScsiStatus;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
@@ -21,6 +21,8 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
     private static final Logger log = LoggerFactory.getLogger(ScsiWriteRequest.class);
 
     public static final byte SCSI_CODE_WRITE_16 = (byte) 0x8a;
+
+    private static final byte FLAG_FUA = 0x08;
 
     final byte flags;
 
@@ -37,6 +39,8 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
     final SettableFuture<Void> future;
 
     final Volume volume;
+
+    final boolean fua;
 
     public ScsiWriteRequest(IscsiSession session, ByteBuf buf) {
         super(session, buf);
@@ -55,6 +59,8 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
         default:
             throw new IllegalStateException();
         }
+
+        this.fua = (flags & FLAG_FUA) != 0;
 
         this.volume = session.getVolume(lun);
 
@@ -92,8 +98,10 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
             throw new IllegalArgumentException();
         }
 
-        buffer.addComponent(data);
+        // log.debug("Adding buffer: {}", ByteBufUtil.hexDump(data));
         data.retain();
+
+        buffer.addComponent(data);
         buffer.writerIndex(buffer.writerIndex() + data.readableBytes());
         pos += data.readableBytes();
 
@@ -101,13 +109,15 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
 
         while (pos >= this.nextChunkEnd) {
             int n = Ints.checkedCast(nextChunkEnd - bufferStart);
+            assert buffer.readableBytes() >= n;
+
             ByteBuf slice = buffer.slice(buffer.readerIndex(), n);
 
-            ListenableFuture<Void> writeFuture = volume.write(bufferStart, n, slice);
+            volume.write(bufferStart, n, slice);
 
             buffer.skipBytes(n);
             bufferStart += n;
-            buffer.discardSomeReadBytes();
+            // buffer.discardSomeReadBytes();
 
             nextChunkEnd += volume.getChunkSize();
         }
@@ -117,25 +127,45 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
 
             if (buffer.isReadable()) {
                 int n = buffer.readableBytes();
-                ListenableFuture<Void> writeFuture = volume.write(bufferStart, n, buffer);
+                volume.write(bufferStart, n, buffer);
 
-                bufferStart += n;
                 buffer.skipBytes(n);
+                bufferStart += n;
             }
 
-            buffer.discardSomeReadBytes();
+            // buffer.discardSomeReadBytes();
 
             Preconditions.checkState(bufferStart == end);
 
-            {
-                ScsiResponse response = new ScsiResponse();
-                populateResponseFields(session, response);
+            ListenableFuture<Void> syncFuture;
 
-                response.setStatus(ResponseCode.CompletedAtTarget, ScsiStatus.Good);
+            if (fua) {
+                // TODO: Do we have to do a full sync? Can we just sync the written range?
+                // (Is this allowed? Is it a win?)
 
-                ChannelFuture sendFuture = session.send(response, true);
-                chain(future, sendFuture);
+                syncFuture = volume.sync();
+            } else {
+                syncFuture = Futures.immediateFuture(null);
             }
+
+            Futures.addCallback(syncFuture, new FutureCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    ScsiResponse response = new ScsiResponse();
+                    populateResponseFields(session, response);
+
+                    response.setStatus(ResponseCode.CompletedAtTarget, ScsiStatus.Good);
+
+                    ChannelFuture sendFuture = session.send(response, true);
+                    chain(future, sendFuture);
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    future.setException(t);
+                }
+            });
+
         }
     }
 
@@ -174,7 +204,7 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
             r2t.targetTransferTag = transfer.targetTransferTag;
 
             r2t.r2tsn = nextR2TSN++;
-            r2t.bufferOffset = Ints.checkedCast(pos - start);
+            r2t.bufferOffset = transferOffset;
             r2t.desiredDataTransferLength = length;
 
             session.send(r2t, true);
@@ -193,6 +223,13 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
         startNextTransfer();
 
         return future;
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+        this.buffer.release();
     }
 
 }

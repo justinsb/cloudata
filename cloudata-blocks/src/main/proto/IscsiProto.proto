@@ -14,3 +14,4 @@ enum LogAction {
 	INCREMENT = 3;
 	APPEND = 4;
 }
+

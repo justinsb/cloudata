@@ -25,6 +25,8 @@ public class CloudRefDatabase extends DfsRefDatabase {
     private final KeyValueStore store;
     private final ByteString prefix;
 
+    static final int SPACE_REFS = 0;
+
     public CloudRefDatabase(CloudDfsRepository repository, KeyValuePath refsPath) {
         super(repository);
         this.store = refsPath.store;
@@ -37,7 +39,7 @@ public class CloudRefDatabase extends DfsRefDatabase {
         RefList.Builder<Ref> sym = new RefList.Builder<Ref>();
 
         try {
-            Iterator<KeyValueEntry> entriesWithPrefix = store.listEntriesWithPrefix(prefix);
+            Iterator<KeyValueEntry> entriesWithPrefix = store.listEntriesWithPrefix(SPACE_REFS, prefix);
             while (entriesWithPrefix.hasNext()) {
                 KeyValueEntry entry = entriesWithPrefix.next();
                 ByteString value = entry.getValue();
@@ -103,7 +105,7 @@ public class CloudRefDatabase extends DfsRefDatabase {
             try {
                 ByteString value = newRef.toByteString();
 
-                if (!store.put(key, value, new IfVersion(version))) {
+                if (!store.putSync(SPACE_REFS, key, value, new IfVersion(version))) {
                     return false;
                 }
                 return true;
@@ -116,7 +118,7 @@ public class CloudRefDatabase extends DfsRefDatabase {
             try {
                 ByteString bytes = data.toByteString();
 
-                return store.put(key, bytes, IfNotExists.INSTANCE);
+                return store.putSync(SPACE_REFS, key, bytes, IfNotExists.INSTANCE);
             } catch (IOException e) {
                 throw new IOException("Error creating reference", e);
             }
@@ -129,7 +131,7 @@ public class CloudRefDatabase extends DfsRefDatabase {
 
         public boolean delete() throws IOException {
             try {
-                if (!store.delete(key, new IfVersion(version))) {
+                if (!store.delete(SPACE_REFS, key, new IfVersion(version))) {
                     return false;
                 }
                 return true;
@@ -154,7 +156,7 @@ public class CloudRefDatabase extends DfsRefDatabase {
         ByteString refPath = getRefPath(name);
 
         try {
-            ByteString value = store.read(refPath);
+            ByteString value = store.read(SPACE_REFS, refPath);
 
             if (value == null) {
                 return null;

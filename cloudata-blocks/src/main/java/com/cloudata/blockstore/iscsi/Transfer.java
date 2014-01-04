@@ -32,7 +32,7 @@ class Transfer {
         ByteBuf data = scsiDataOutRequest.getData();
 
         if (bufferOffset != bufferPos) {
-            log.warn("Got transfer data out of order");
+            log.warn("Got transfer data out of order: {} vs {}", bufferOffset, bufferPos);
             throw new IllegalArgumentException();
         }
 

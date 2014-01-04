@@ -6,6 +6,7 @@ import io.netty.handler.stream.ChunkedNioStream;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,8 +41,14 @@ public class SimpleFsFile implements FsFile {
     public ChunkedInput<ByteBuf> open() throws IOException {
         final BlobCache.CacheFileHandle handle;
         try {
-            handle = fsClient.findChunk(chunkData);
+            handle = fsClient.findChunk(chunkData).get();
         } catch (IOException e) {
+            throw new IOException("Error opening blob", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+
+            throw new IOException("Error opening blob", e);
+        } catch (ExecutionException e) {
             throw new IOException("Error opening blob", e);
         }
 

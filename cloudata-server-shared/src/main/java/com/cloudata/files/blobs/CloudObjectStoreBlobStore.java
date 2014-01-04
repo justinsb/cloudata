@@ -13,6 +13,7 @@ import com.cloudata.objectstore.ObjectStore;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteSource;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 
 @Singleton
@@ -40,8 +41,9 @@ public class CloudObjectStoreBlobStore implements BlobStore {
     };
 
     @Override
-    public CacheFileHandle find(ByteString key) throws IOException {
-        return cache.find(key, fetcher);
+    public ListenableFuture<CacheFileHandle> find(ByteString key) {
+        throw new UnsupportedOperationException();
+        // return cache.find(key, fetcher);
     }
 
     protected String toPath(ByteString key) {
@@ -49,7 +51,7 @@ public class CloudObjectStoreBlobStore implements BlobStore {
     }
 
     @Override
-    public ByteString put(ByteString prefix, ByteSource source) throws IOException {
+    public ListenableFuture<ByteString> put(ByteString prefix, ByteSource source) {
         throw new UnsupportedOperationException();
     }
 

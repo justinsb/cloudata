@@ -13,28 +13,6 @@ public class ScsiResponse extends IscsiResponse {
 
     public ByteBuf data;
 
-    public enum ResponseCode {
-        CompletedAtTarget(0x00);
-
-        final byte code;
-
-        private ResponseCode(int code) {
-            this.code = (byte) code;
-        }
-
-    }
-
-    public enum ScsiStatus {
-        Good(0x00);
-
-        final byte code;
-
-        private ScsiStatus(int code) {
-            this.code = (byte) code;
-        }
-
-    }
-
     @Override
     public void encode(ByteBuf buf) {
         int startWriterIndex = buf.writerIndex();

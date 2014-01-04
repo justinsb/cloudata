@@ -1,4 +1,4 @@
-package com.cloudata.blockstore;
+package com.cloudata.blockstore.backend;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.blockstore.Volume;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.Futures;
@@ -30,10 +31,9 @@ public class DummyVolume implements Volume {
     }
 
     @Override
-    public ListenableFuture<Void> write(long offset, long length, ByteBuf buf) {
+    public void write(long offset, long length, ByteBuf buf) {
         Preconditions.checkState(length == buf.readableBytes());
         log.warn("DUMMY: write {} {}", offset, length);
-        return Futures.immediateFuture(null);
     }
 
     @Override
@@ -45,6 +45,11 @@ public class DummyVolume implements Volume {
     @Override
     public int getChunkSize() {
         return CHUNK_SIZE;
+    }
+
+    @Override
+    public long getLength() {
+        return CHUNK_SIZE * 64;
     }
 
 }

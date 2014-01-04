@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
 
 public class RedisKeyValueStore implements KeyValueStore {
@@ -30,6 +34,7 @@ public class RedisKeyValueStore implements KeyValueStore {
     private static final Logger log = LoggerFactory.getLogger(RedisKeyValueStore.class);
 
     final Pool<RedisClient> clientPool;
+    final ListeningExecutorService executor;
 
     /**
      * Jedis doesn't implements Closaeable :-(
@@ -52,6 +57,11 @@ public class RedisKeyValueStore implements KeyValueStore {
     }
 
     public RedisKeyValueStore(final InetSocketAddress address) {
+        this(address, MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
+    }
+
+    public RedisKeyValueStore(final InetSocketAddress address, ListeningExecutorService executor) {
+        this.executor = executor;
         this.clientPool = new SimplePool<RedisClient>(new Callable<RedisClient>() {
             @Override
             public RedisClient call() throws Exception {
@@ -62,13 +72,16 @@ public class RedisKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public Iterator<ByteString> listKeysWithPrefix(ByteString prefix) {
+    public Iterator<ByteString> listKeysWithPrefix(int space, ByteString prefix) {
         byte[] pattern = new byte[prefix.size() + 1];
         prefix.copyTo(pattern, 0);
         pattern[prefix.size()] = '*';
 
         try (Pooled<RedisClient> lease = clientPool.borrow()) {
             Jedis client = lease.get().getClient();
+            if (client.getDB().intValue() != space) {
+                client.select(space);
+            }
 
             return Iterables.transform(client.keys(pattern), new Function<byte[], ByteString>() {
 
@@ -82,8 +95,8 @@ public class RedisKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public Iterator<KeyValueEntry> listEntriesWithPrefix(ByteString prefix) {
-        Iterator<ByteString> keys = listKeysWithPrefix(prefix);
+    public Iterator<KeyValueEntry> listEntriesWithPrefix(final int space, ByteString prefix) {
+        Iterator<ByteString> keys = listKeysWithPrefix(space, prefix);
 
         log.warn("Redis listEntriesWithPrefix makes N calls");
         return Iterators.transform(keys, new Function<ByteString, KeyValueEntry>() {
@@ -92,7 +105,7 @@ public class RedisKeyValueStore implements KeyValueStore {
             public KeyValueEntry apply(ByteString key) {
                 ByteString value;
                 try {
-                    value = read(key);
+                    value = read(space, key);
                 } catch (IOException e) {
                     throw Throwables.propagate(e);
                 }
@@ -106,9 +119,12 @@ public class RedisKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public ByteString read(ByteString key) throws IOException {
+    public ByteString read(int space, ByteString key) throws IOException {
         try (Pooled<RedisClient> lease = clientPool.borrow()) {
             Jedis client = lease.get().getClient();
+            if (client.getDB().intValue() != space) {
+                client.select(space);
+            }
 
             byte[] value = client.get(key.toByteArray());
             if (value == null) {
@@ -119,9 +135,13 @@ public class RedisKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public boolean delete(ByteString key, Modifier... modifiers) throws IOException {
+    public boolean delete(int space, ByteString key, Modifier... modifiers) throws IOException {
         try (Pooled<RedisClient> lease = clientPool.borrow()) {
             Jedis client = lease.get().getClient();
+
+            if (client.getDB().intValue() != space) {
+                client.select(space);
+            }
 
             byte[] keyBytes = key.toByteArray();
             if (modifiers == null || modifiers.length == 0) {
@@ -216,9 +236,12 @@ public class RedisKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public boolean put(ByteString key, ByteString value, Modifier... modifiers) throws IOException {
+    public boolean putSync(int space, ByteString key, ByteString value, Modifier... modifiers) throws IOException {
         try (Pooled<RedisClient> lease = clientPool.borrow()) {
             Jedis client = lease.get().getClient();
+            if (client.getDB().intValue() != space) {
+                client.select(space);
+            }
 
             byte[] keyBytes = key.toByteArray();
             byte[] valueBytes = value.toByteArray();
@@ -290,6 +313,19 @@ public class RedisKeyValueStore implements KeyValueStore {
         }
 
         throw new IOException("Expected OK");
+    }
+
+    @Override
+    public ListenableFuture<Boolean> putAsync(final int space, final ByteString key, final ByteString value,
+            final Modifier... modifiers) {
+        return executor.submit(new Callable<Boolean>() {
+
+            @Override
+            public Boolean call() throws Exception {
+                return putSync(space, key, value, modifiers);
+            }
+
+        });
     }
 
 }

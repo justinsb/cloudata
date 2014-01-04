@@ -9,8 +9,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.Future;
 
@@ -25,7 +23,7 @@ public class IscsiEndpoint {
 
     private Channel serverChannel;
 
-    public IscsiEndpoint(SocketAddress localAddress, IscsiServer iscsiServer) {
+    IscsiEndpoint(SocketAddress localAddress, IscsiServer iscsiServer) {
         this.localAddress = localAddress;
         this.iscsiServer = iscsiServer;
     }
@@ -52,7 +50,7 @@ public class IscsiEndpoint {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline p = ch.pipeline();
-                p.addLast(new LoggingHandler(LogLevel.DEBUG));
+                // p.addLast(new LoggingHandler(LogLevel.DEBUG));
                 p.addLast(new IscsiResponseEncoder());
                 p.addLast(new IscsiRequestDecoder(iscsiServer));
                 p.addLast(group, commandHandler);

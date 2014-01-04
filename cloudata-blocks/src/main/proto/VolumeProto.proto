@@ -1,0 +1,21 @@
+option java_package = "com.cloudata.blockstore";
+
+message VolumeData {
+	optional uint32 segment_count = 2;
+	optional uint32 segment_size = 3;
+	
+	optional bytes segment_store_id = 4;
+	optional bytes blob_store_id = 5;
+}
+
+message SegmentData {
+	optional uint64 offset = 1;
+	repeated ChunkData chunk = 2;
+}
+
+message ChunkData {
+	optional uint32 start = 1;
+	optional uint32 length = 2;
+	optional bytes hash = 3;
+	optional uint32 skip = 4;
+}

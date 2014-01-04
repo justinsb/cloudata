@@ -2,6 +2,8 @@ package com.cloudata.blockstore.iscsi;
 
 import io.netty.buffer.ByteBuf;
 
+import com.google.common.util.concurrent.AsyncFunction;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
 public class ScsiSynchronizeCacheRequest extends ScsiCommandRequest {
@@ -49,12 +51,15 @@ public class ScsiSynchronizeCacheRequest extends ScsiCommandRequest {
 
     @Override
     public ListenableFuture<Void> start() {
-        ScsiResponse response = new ScsiResponse();
-        populateResponseFields(session, response);
-
-        session.doFlush(lba, blockCount);
-
-        return sendFinal(response);
+        ListenableFuture<Void> syncFuture = volume.sync();
+        return Futures.transform(syncFuture, new AsyncFunction<Void, Void>() {
+            @Override
+            public ListenableFuture<Void> apply(Void o) {
+                ScsiResponse response = new ScsiResponse();
+                populateResponseFields(session, response);
+                return sendFinal(response);
+            }
+        });
     }
 
 }

@@ -8,7 +8,6 @@ import io.netty.util.AttributeKey;
 import java.util.Map;
 import java.util.Random;
 
-import com.cloudata.blockstore.DummyVolume;
 import com.cloudata.blockstore.Volume;
 import com.cloudata.btree.Keyspace;
 import com.google.common.base.Preconditions;
@@ -70,14 +69,6 @@ public class IscsiSession {
         return 512;
     }
 
-    public long getBlockCount() {
-        return 4 * 1024 * 1024;
-    }
-
-    public void doFlush(long lba, int blockCount) {
-
-    }
-
     public int getNextStatSN() {
         return nextStatSN++;
     }
@@ -99,7 +90,7 @@ public class IscsiSession {
     }
 
     public Volume getVolume(long lun) {
-        return new DummyVolume(lun);
+        return server.getVolume(lun);
     }
 
     public Transfer createTransfer(int bufferStart, int length, TransferListener transferListener) {

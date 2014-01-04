@@ -7,22 +7,32 @@ import io.netty.util.concurrent.GenericFutureListener;
 import java.io.Closeable;
 import java.nio.ByteOrder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
 
 public abstract class IscsiRequest implements Closeable {
+    private static final Logger log = LoggerFactory.getLogger(IscsiRequest.class);
+
     public final IscsiSession session;
 
-    protected final ByteBuf buf;
+    private final ByteBuf buf;
     public final int initiatorTaskTag;
     public final int totalAhsLength;
     public final int totalDataLength;
     public final boolean immediate;
 
+    boolean closed = false;
+
     public IscsiRequest(IscsiSession session, ByteBuf buf) {
         this.session = session;
-        this.buf = buf;
+
+        log.warn("Using buffer copy!!");
+        this.buf = buf.copy();
         this.buf.retain();
 
         assert buf.order() == ByteOrder.BIG_ENDIAN;
@@ -44,11 +54,13 @@ public abstract class IscsiRequest implements Closeable {
 
         ByteBuf data = buf.duplicate();
         int readerIndex = data.readerIndex();
-        readerIndex += BasicHeaderSegment.SIZE + totalAhsLength;
-        data.readerIndex(readerIndex);
-        data.writerIndex(readerIndex + totalDataLength);
-
-        return data.slice();
+        // readerIndex += BasicHeaderSegment.SIZE + totalAhsLength;
+        // data.readerIndex(readerIndex);
+        // data.writerIndex(readerIndex + totalDataLength);
+        //
+        // return data.slice();
+        //
+        return data.slice(readerIndex + BasicHeaderSegment.SIZE + totalAhsLength, totalDataLength);
     }
 
     public int getOpcode() {
@@ -67,6 +79,9 @@ public abstract class IscsiRequest implements Closeable {
 
     @Override
     public void close() {
+        Preconditions.checkState(!closed);
+        closed = true;
+
         buf.release();
     }
 
@@ -125,7 +140,7 @@ public abstract class IscsiRequest implements Closeable {
         return settableFuture;
     }
 
-    protected void chain(final SettableFuture<Void> settableFuture, ChannelFuture future) {
+    protected static void chain(final SettableFuture<Void> settableFuture, ChannelFuture future) {
         future.addListener(new GenericFutureListener<ChannelFuture>() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
@@ -140,4 +155,5 @@ public abstract class IscsiRequest implements Closeable {
             }
         });
     }
+
 }

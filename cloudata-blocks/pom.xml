@@ -11,7 +11,6 @@
 
 	<artifactId>cloudata-blocks</artifactId>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>com.cloudata</groupId>
@@ -28,7 +27,7 @@
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
-			<scope>test</scope>
+			<!-- <scope>test</scope> -->
 		</dependency>
 	</dependencies>
 

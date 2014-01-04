@@ -50,8 +50,10 @@ public class ScsiServiceActionRequest extends ScsiCommandRequest {
         int length = 32;
         ByteBuf data = Unpooled.buffer(length);
 
-        long blocks = session.getBlockCount();
         int blockSize = session.getBlockSize();
+
+        long volumeSize = volume.getLength();
+        long blocks = volumeSize / blockSize;
 
         data.writeLong(blocks);
         data.writeInt(blockSize);

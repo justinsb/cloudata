@@ -61,18 +61,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- 
-		<dependency>
-			<groupId>com.sun.jersey</groupId>
-			<artifactId>jersey-grizzly</artifactId>
-			<version>1.17.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.sun.grizzly</groupId>
-			<artifactId>grizzly-servlet-webserver</artifactId>
-			<version>1.9.59</version>
-		</dependency>
-		 -->
+		<!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-grizzly</artifactId> 
+			<version>1.17.1</version> </dependency> <dependency> <groupId>com.sun.grizzly</groupId> 
+			<artifactId>grizzly-servlet-webserver</artifactId> <version>1.9.59</version> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

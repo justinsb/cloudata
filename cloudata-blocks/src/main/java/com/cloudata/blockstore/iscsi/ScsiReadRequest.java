@@ -1,9 +1,12 @@
 package com.cloudata.blockstore.iscsi;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 
 public class ScsiReadRequest extends ScsiCommandRequest {
 
@@ -42,31 +45,46 @@ public class ScsiReadRequest extends ScsiCommandRequest {
 
     @Override
     public ListenableFuture<Void> start() {
-        ScsiDataInResponse response = new ScsiDataInResponse();
-        populateResponseFields(session, response);
+        final SettableFuture<Void> opFuture = SettableFuture.create();
 
-        sendReadResponse(session, response);
+        int blockSize = session.getBlockSize();
 
-        int dataLength = 0;
-        if (response.data != null) {
-            dataLength = response.data.readableBytes();
-        }
+        final long length = this.blockCount * blockSize;
+        long offset = this.lba * blockSize;
 
-        response.setResiduals(expectedDataTransferLength, dataLength);
+        ListenableFuture<ByteBuf> readFuture = volume.read(offset, length);
 
-        return sendFinal(response);
-    }
+        Futures.addCallback(readFuture, new FutureCallback<ByteBuf>() {
 
-    private void sendReadResponse(IscsiSession session, ScsiDataInResponse response) {
-        response.setStatus((byte) 0);
+            @Override
+            public void onSuccess(ByteBuf data) {
+                ScsiDataInResponse response = new ScsiDataInResponse();
+                populateResponseFields(session, response);
 
-        int dataLength = this.blockCount * session.getBlockSize();
-        ByteBuf data = Unpooled.buffer(dataLength);
+                response.setStatus((byte) 0);
 
-        data.writeZero(dataLength);
+                response.data = data;
 
-        assert data.writerIndex() == dataLength;
-        response.data = data;
+                int dataLength = 0;
+                if (response.data != null) {
+                    dataLength = response.data.readableBytes();
+                    assert dataLength == length;
+                }
+
+                response.setResiduals(expectedDataTransferLength, dataLength);
+
+                ChannelFuture future = session.send(response, true);
+
+                chain(opFuture, future);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                opFuture.setException(t);
+            }
+        });
+
+        return opFuture;
     }
 
 }
