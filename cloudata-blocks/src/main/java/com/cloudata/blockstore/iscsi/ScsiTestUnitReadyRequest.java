@@ -22,4 +22,9 @@ public class ScsiTestUnitReadyRequest extends ScsiCommandRequest {
         return sendFinal(response);
     }
 
+    @Override
+    public String toString() {
+        return "ScsiTestUnitReadyRequest";
+    }
+
 }

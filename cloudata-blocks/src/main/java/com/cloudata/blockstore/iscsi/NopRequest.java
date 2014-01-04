@@ -31,4 +31,9 @@ public class NopRequest extends IscsiRequest {
         return sendFinal(response);
     }
 
+    @Override
+    public String toString() {
+        return "NopRequest";
+    }
+
 }

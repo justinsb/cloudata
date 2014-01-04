@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 public class ParameterData {
@@ -35,6 +36,7 @@ public class ParameterData {
 
             byte[] line = new byte[end - start];
             data.readBytes(line);
+            Preconditions.checkState(0 == data.readByte());
 
             int equals = -1;
             for (int i = 0; i < line.length; i++) {
@@ -49,7 +51,7 @@ public class ParameterData {
             }
 
             String key = new String(line, 0, equals, Charsets.UTF_8);
-            String value = new String(line, equals + 1, line.length - equals, Charsets.UTF_8);
+            String value = new String(line, equals + 1, line.length - equals - 1, Charsets.UTF_8);
 
             parameters.parameters.put(key, value);
         }
@@ -82,6 +84,11 @@ public class ParameterData {
 
     public void put(String key, String value) {
         parameters.put(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return "ParameterData [" + parameters + "]";
     }
 
 }

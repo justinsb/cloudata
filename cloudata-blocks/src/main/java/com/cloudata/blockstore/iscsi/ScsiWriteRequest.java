@@ -232,4 +232,9 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
         this.buffer.release();
     }
 
+    @Override
+    public String toString() {
+        return "ScsiWriteRequest [flags=" + flags + ", lba=" + lba + ", blockCount=" + blockCount + "]";
+    }
+
 }

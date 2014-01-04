@@ -71,7 +71,7 @@ public class CloudVolume implements Volume {
     public ListenableFuture<ByteBuf> read(long offset, final long length) {
         Preconditions.checkArgument(length >= 0);
 
-        log.warn("MMAP: read {} {}", offset, length);
+        log.warn("VOLUME: read {} {}", offset, length);
 
         int segmentIndex = Ints.checkedCast(offset / segmentSize);
         long segmentStart = (long) segmentIndex * (long) segmentSize;

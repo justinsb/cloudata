@@ -87,4 +87,9 @@ public class ScsiReadRequest extends ScsiCommandRequest {
         return opFuture;
     }
 
+    @Override
+    public String toString() {
+        return "ScsiReadRequest [lba=" + lba + ", blockCount=" + blockCount + "]";
+    }
+
 }

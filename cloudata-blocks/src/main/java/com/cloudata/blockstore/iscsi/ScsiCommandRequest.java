@@ -12,7 +12,7 @@ public abstract class ScsiCommandRequest extends IscsiRequest {
 
     public static final int CDB_START = 32;
 
-    public final byte flags;
+    public final byte iscsiFlags;
 
     public final long lun;
 
@@ -23,7 +23,7 @@ public abstract class ScsiCommandRequest extends IscsiRequest {
         assert buf.order() == ByteOrder.BIG_ENDIAN;
         assert getOpcode() == OPCODE;
 
-        this.flags = getByte(1);
+        this.iscsiFlags = getByte(1);
 
         this.lun = getLong(8);
 

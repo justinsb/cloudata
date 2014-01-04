@@ -12,20 +12,27 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
     private static final byte CODEPAGE_SUPPORTED_VPD_PAGES = 0x0;
     private static final byte CODEPAGE_DEVICE_IDENTIFICATION = (byte) 0x83;
 
+    final boolean evpd;
+
+    final byte codepage;
+
+    final int expectedLength;
+
     public ScsiInquiryRequest(IscsiSession session, ByteBuf buf) {
         super(session, buf);
 
         assert getByte(CDB_START) == SCSI_CODE;
+
+        byte flags = getByte(CDB_START + 1);
+        this.evpd = (flags & 0x1) != 0;
+        this.codepage = getByte(CDB_START + 2);
+        this.expectedLength = getShort(CDB_START + 3);
     }
 
     @Override
     public ListenableFuture<Void> start() {
         ScsiDataInResponse response = new ScsiDataInResponse();
         populateResponseFields(session, response);
-
-        boolean evpd = (getByte(CDB_START + 1) & 0x1) != 0;
-        byte codepage = getByte(CDB_START + 2);
-        int expectedLength = getShort(CDB_START + 3);
 
         if (evpd) {
             switch (codepage) {
@@ -58,12 +65,16 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
 
         // PERIPHERAL QUALIFIER
         // PERIPHERAL DEVICE TYPE
+        // 0 => Direct access block device, connected
         data.writeByte(0);
 
-        // RMB: Not removable
+        // RMB
+        // RESERVED
+        // 0 => Not removable
         data.writeByte(0);
 
-        // Version: SPC-4
+        // Version
+        // 0x05 => SPC-4
         data.writeByte(0x5);
 
         // Obsolete
@@ -71,36 +82,37 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
         // NORMACA
         // HISUP
         // RESPONSE DATA FORMAT
+        // 2 => No Normal ACA; No Hierachical LUNs; "Standard" response data format
         data.writeByte(2);
 
         // ADDITIONAL LENGTH
         data.writeByte(length - data.writerIndex() - 1);
 
-        // SCCS
-        // ACC
-        // TPGS
-        // 3PC
+        // SCCS (SCC Supported)
+        // ACC (has Access Controls Coordinator)
+        // TPGS (Target Port Group Support)
+        // 3PC (Third Party Copy supported)
         // Reserved
-        // PROTECT
+        // PROTECT (Protection supported)
         data.writeByte(0xb0);
 
-        // Obsolete Formerly BQUE
-        // ENCSERV
+        // Obsolete (Formerly BQUE)
+        // ENCSERV (Enclosure Services supported)
         // VS
-        // MULTIP
-        // MCHNGR
+        // MULTIP (Multi Port support)
+        // MCHNGR (Medium Changer support)
         // Obsolete
         // Obsolete
-        // ADDR16 a
+        // ADDR16
         data.writeByte(0x00);
 
         // Obsolete
         // Obsolete
-        // WBUS16a
-        // SYNC a
-        // Obsolete Formerly LINKED
+        // WBUS16
+        // SYNC
+        // Obsolete (Formerly LINKED = Linked Command)
         // Obsolete
-        // CMDQUE
+        // CMDQUE (Suports Command Queuing)
         // VS
         data.writeByte(0x2);
 
@@ -144,6 +156,12 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
         data.writeByte(CODEPAGE_DEVICE_IDENTIFICATION);
 
         response.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "ScsiInquiryRequest [codepage=" + codepage + ", evpd=" + evpd + ", expectedLength=" + expectedLength
+                + "]";
     }
 
 }
