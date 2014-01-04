@@ -31,9 +31,12 @@ public abstract class IscsiRequest implements Closeable {
     public IscsiRequest(IscsiSession session, ByteBuf buf) {
         this.session = session;
 
+        // this.buf = buf;
+        // this.buf.retain();
+
         log.warn("Using buffer copy!!");
         this.buf = buf.copy();
-        this.buf.retain();
+        // copy calls retain this.buf.retain();
 
         assert buf.order() == ByteOrder.BIG_ENDIAN;
 
