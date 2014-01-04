@@ -34,9 +34,10 @@ public abstract class IscsiRequest implements Closeable {
         // this.buf = buf;
         // this.buf.retain();
 
-        log.warn("Using buffer copy!!");
+        // https://github.com/netty/netty/issues/1764
+        log.warn("Using buffer copy until issue 1764 resolved!!");
         this.buf = buf.copy();
-        // copy calls retain this.buf.retain();
+        // (copy doesn't need retain) this.buf.retain();
 
         assert buf.order() == ByteOrder.BIG_ENDIAN;
 
