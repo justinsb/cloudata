@@ -418,6 +418,8 @@ public class Segment {
                 chunks.put(chunk.start, chunk);
             }
 
+            assert isValid();
+
             version++;
         }
 
@@ -434,6 +436,29 @@ public class Segment {
                 write(newChunk);
             }
         }, 1, TimeUnit.SECONDS);
+    }
+
+    private boolean isValid() {
+        synchronized (lock) {
+            Chunk lastChunk = null;
+            for (Entry<Integer, Chunk> entry : chunks.entrySet()) {
+                Chunk chunk = entry.getValue();
+                if (entry.getKey().intValue() != chunk.start) {
+                    return false;
+                }
+
+                if (chunk.length == 0) {
+                    return false;
+                }
+
+                if (lastChunk != null) {
+                    if (lastChunk.end() > chunk.start) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
     }
 
     // private ListenableFuture<Void> scheduleWrite(Chunk newChunk) {
