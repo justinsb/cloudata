@@ -360,9 +360,22 @@ public class Segment {
                     } else {
                         assert newChunk.overlaps(existing);
 
-                        Chunk slice = existing.slice(existing.start, newChunk.start - existing.start);
-                        assert !slice.isEmpty();
-                        addList.add(slice);
+                        {
+                            Chunk slice = existing.slice(existing.start, newChunk.start - existing.start);
+                            assert slice.end() == newChunk.start;
+                            assert !slice.isEmpty();
+                            addList.add(slice);
+                        }
+
+                        if (newChunk.end() < existing.end()) {
+                            assert existing.entirelyContains(newChunk);
+
+                            Chunk slice = existing.slice(newChunk.end());
+                            assert (!slice.isEmpty());
+                            assert slice.start == newChunk.end();
+                            assert slice.end() == existing.end();
+                            addList.add(slice);
+                        }
                     }
                 } else if (existing.start == newChunk.start) {
                     assert newChunk.overlaps(existing);
@@ -371,6 +384,7 @@ public class Segment {
                         assert newChunk.entirelyContains(existing);
                     } else {
                         Chunk slice = existing.slice(newChunk.end());
+                        assert newChunk.end() == slice.start;
                         assert !slice.isEmpty();
                         addList.add(slice);
                     }
@@ -388,7 +402,8 @@ public class Segment {
                     } else {
                         Chunk slice = existing.slice(newChunk.end());
                         assert (!slice.isEmpty());
-
+                        assert slice.start == newChunk.end();
+                        assert slice.end() == existing.end();
                         addList.add(slice);
                     }
                 }
