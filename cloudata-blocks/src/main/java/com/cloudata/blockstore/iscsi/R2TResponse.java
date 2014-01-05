@@ -52,4 +52,9 @@ public class R2TResponse extends IscsiResponse {
 
         assert buf.writerIndex() == startWriterIndex + 48;
     }
+
+    @Override
+    protected void deallocate() {
+
+    }
 }

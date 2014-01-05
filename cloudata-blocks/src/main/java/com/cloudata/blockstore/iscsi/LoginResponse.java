@@ -90,4 +90,10 @@ public class LoginResponse extends IscsiResponse {
         // Move to end
         buf.writerIndex(endWriterIndex);
     }
+
+    @Override
+    protected void deallocate() {
+
+    }
+
 }

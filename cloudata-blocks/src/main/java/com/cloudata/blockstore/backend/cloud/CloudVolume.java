@@ -71,7 +71,7 @@ public class CloudVolume implements Volume {
     public ListenableFuture<ByteBuf> read(long offset, final long length) {
         Preconditions.checkArgument(length >= 0);
 
-        log.warn("VOLUME: read {} {}", offset, length);
+        log.debug("VOLUME: read {} {}", offset, length);
 
         int segmentIndex = Ints.checkedCast(offset / segmentSize);
         long segmentStart = (long) segmentIndex * (long) segmentSize;
@@ -127,7 +127,7 @@ public class CloudVolume implements Volume {
     public void write(long offset, long length, ByteBuf buf) {
         Preconditions.checkState(length == buf.readableBytes());
 
-        log.warn("VOLUME: write {} {}", offset, length);
+        log.debug("VOLUME: write {} {}", offset, length);
 
         int segmentIndex = Ints.checkedCast(offset / segmentSize);
         long segmentStart = (long) segmentIndex * (long) segmentSize;
@@ -165,7 +165,7 @@ public class CloudVolume implements Volume {
 
     @Override
     public ListenableFuture<Void> sync() {
-        log.warn("CLOUD: sync");
+        log.debug("CLOUD: sync");
 
         List<Segment> dirtySegmentsSnapshot;
 
@@ -218,7 +218,7 @@ public class CloudVolume implements Volume {
 
                 return new Segment(CloudVolume.this, segment, segmentKey);
             } catch (Exception e) {
-                log.warn("Error building KeyValueStore", e);
+                log.warn("Error building Volume", e);
                 throw e;
             }
         }

@@ -1,8 +1,10 @@
 package com.cloudata.blockstore.iscsi;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.util.AbstractReferenceCounted;
+import io.netty.util.ReferenceCounted;
 
-public abstract class IscsiResponse {
+public abstract class IscsiResponse extends AbstractReferenceCounted implements ReferenceCounted {
     public int initiatorTaskTag = 0xffffffff;
     public int statSN;
     public int expectedCommandSN;

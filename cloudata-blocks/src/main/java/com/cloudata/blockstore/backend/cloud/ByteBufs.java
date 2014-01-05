@@ -23,6 +23,7 @@ public class ByteBufs {
 
         accumulator.writerIndex(accumulator.writerIndex() + size);
 
+        assert accumulator.refCnt() == 1;
         return accumulator;
     }
 

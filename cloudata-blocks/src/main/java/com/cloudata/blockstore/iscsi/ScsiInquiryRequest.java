@@ -47,10 +47,7 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
             addNormalInquiry(response);
         }
 
-        int dataLength = 0;
-        if (response.data != null) {
-            dataLength = response.data.readableBytes();
-        }
+        int dataLength = response.getDataLength();
 
         response.setResiduals(expectedLength, dataLength);
 
@@ -126,7 +123,8 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
         writeFixedString(data, "0.1", 4);
 
         assert data.writerIndex() == length;
-        response.data = data;
+        assert data.refCnt() == 1;
+        response.setData(data, false);
     }
 
     private void writeFixedString(final ByteBuf dst, final String s, final int length) {
@@ -155,7 +153,8 @@ public class ScsiInquiryRequest extends ScsiCommandRequest {
         data.writeByte(CODEPAGE_SUPPORTED_VPD_PAGES);
         data.writeByte(CODEPAGE_DEVICE_IDENTIFICATION);
 
-        response.data = data;
+        assert data.refCnt() == 1;
+        response.setData(data, false);
     }
 
     @Override

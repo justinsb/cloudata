@@ -282,7 +282,7 @@ public class Segment {
 
     private void addZeroes(List<ListenableFuture<ByteBuf>> futures, int length) {
         while (length > 0) {
-            ByteBuf b = Unpooled.unmodifiableBuffer(ZERO_BUF);
+            ByteBuf b = Unpooled.unmodifiableBuffer(ZERO_BUF.retain());
 
             int n = length;
             if (n >= b.readableBytes()) {
@@ -322,7 +322,9 @@ public class Segment {
                     b.limit(offset + blobChunk.skip + length);
                     b = b.slice();
 
-                    return new ExternalByteBuf(Unpooled.wrappedBuffer(b), handle);
+                    ByteBuf bb = new ExternalByteBuf(Unpooled.wrappedBuffer(b), handle);
+                    assert bb.refCnt() == 1;
+                    return bb;
                 }
             });
         } else if (chunk instanceof ByteBufChunk) {

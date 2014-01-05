@@ -2,9 +2,9 @@ package com.cloudata.blockstore.iscsi;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
+import io.netty.util.AbstractReferenceCounted;
 import io.netty.util.concurrent.GenericFutureListener;
 
-import java.io.Closeable;
 import java.nio.ByteOrder;
 
 import org.slf4j.Logger;
@@ -15,7 +15,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.ByteString;
 
-public abstract class IscsiRequest implements Closeable {
+public abstract class IscsiRequest extends AbstractReferenceCounted {
     private static final Logger log = LoggerFactory.getLogger(IscsiRequest.class);
 
     public final IscsiSession session;
@@ -28,14 +28,19 @@ public abstract class IscsiRequest implements Closeable {
 
     boolean closed = false;
 
+    static final OneTime BUG_1764 = new OneTime();
+
     public IscsiRequest(IscsiSession session, ByteBuf buf) {
         this.session = session;
 
         // this.buf = buf;
         // this.buf.retain();
 
-        // https://github.com/netty/netty/issues/1764
-        log.warn("Using buffer copy until issue 1764 resolved!!");
+        if (BUG_1764.isFirst()) {
+            // https://github.com/netty/netty/issues/1764
+            log.warn("Using buffer copy until issue 1764 resolved!!");
+        }
+
         this.buf = buf.copy();
         // (copy doesn't need retain) this.buf.retain();
 
@@ -82,7 +87,7 @@ public abstract class IscsiRequest implements Closeable {
     public abstract ListenableFuture<Void> start();
 
     @Override
-    public void close() {
+    protected void deallocate() {
         Preconditions.checkState(!closed);
         closed = true;
 

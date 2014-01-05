@@ -6,7 +6,7 @@ public class NopResponse extends IscsiResponse {
     public long lun = 0;
     public int targetTransferTag = 0xffffffff;
 
-    public ByteBuf data;
+    private ByteBuf data;
 
     @Override
     public void encode(ByteBuf buf) {
@@ -64,4 +64,10 @@ public class NopResponse extends IscsiResponse {
 
     }
 
+    @Override
+    protected void deallocate() {
+        if (data != null) {
+            data.release();
+        }
+    }
 }

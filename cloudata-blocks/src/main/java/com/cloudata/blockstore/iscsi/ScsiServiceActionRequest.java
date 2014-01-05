@@ -56,10 +56,7 @@ public class ScsiServiceActionRequest extends ScsiCommandRequest {
             throw new UnsupportedOperationException();
         }
 
-        int dataLength = 0;
-        if (response.data != null) {
-            dataLength = response.data.readableBytes();
-        }
+        int dataLength = response.getDataLength();
 
         response.setResiduals(allocationLength, dataLength);
 
@@ -98,7 +95,9 @@ public class ScsiServiceActionRequest extends ScsiCommandRequest {
         data.writeZero(16);
 
         assert data.writerIndex() == length;
-        response.data = data;
+        assert data.refCnt() == 1;
+
+        response.setData(data, false);
     }
 
     @Override

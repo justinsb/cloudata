@@ -2,6 +2,8 @@ package com.cloudata.blockstore.iscsi;
 
 import io.netty.buffer.ByteBuf;
 
+import com.google.common.base.Preconditions;
+
 public class ScsiDataInResponse extends IscsiResponse {
 
     public boolean flagAcknowledge;
@@ -16,7 +18,7 @@ public class ScsiDataInResponse extends IscsiResponse {
     public int bufferOffset;
     public int residualCount;
 
-    public ByteBuf data;
+    private ByteBuf data;
 
     @Override
     public void encode(ByteBuf buf) {
@@ -90,6 +92,31 @@ public class ScsiDataInResponse extends IscsiResponse {
     public void setStatus(byte status) {
         this.flagHasStatus = true;
         this.status = status;
+    }
+
+    @Override
+    protected void deallocate() {
+        if (data != null) {
+            data.release();
+            data = null;
+        }
+    }
+
+    public void setData(ByteBuf data, boolean addRef) {
+        Preconditions.checkState(this.data == null);
+
+        this.data = data.duplicate();
+
+        if (addRef) {
+            this.data.retain();
+        }
+    }
+
+    public int getDataLength() {
+        if (data != null) {
+            return data.readableBytes();
+        }
+        return 0;
     }
 
 }

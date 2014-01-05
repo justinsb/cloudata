@@ -11,7 +11,7 @@ public class ScsiResponse extends IscsiResponse {
     private ResponseCode responseCode = ResponseCode.CompletedAtTarget;
     private ScsiStatus status = ScsiStatus.Good;
 
-    public ByteBuf data;
+    private ByteBuf data;
 
     @Override
     public void encode(ByteBuf buf) {
@@ -81,6 +81,14 @@ public class ScsiResponse extends IscsiResponse {
         // this.flagHasStatus = true;
         this.responseCode = responseCode;
         this.status = status;
+    }
+
+    @Override
+    protected void deallocate() {
+        if (data != null) {
+            data.release();
+            data = null;
+        }
     }
 
 }

@@ -62,4 +62,9 @@ public class ScsiSynchronizeCacheRequest extends ScsiCommandRequest {
         });
     }
 
+    @Override
+    public String toString() {
+        return "ScsiSynchronizeCacheRequest [lba=" + lba + ", blockCount=" + blockCount + "]";
+    }
+
 }

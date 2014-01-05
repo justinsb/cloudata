@@ -162,6 +162,7 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
 
                 @Override
                 public void onFailure(Throwable t) {
+                    log.error("Error during write", t);
                     future.setException(t);
                 }
             });
@@ -226,8 +227,8 @@ public class ScsiWriteRequest extends ScsiCommandRequest {
     }
 
     @Override
-    public void close() {
-        super.close();
+    protected void deallocate() {
+        super.deallocate();
 
         this.buffer.release();
     }

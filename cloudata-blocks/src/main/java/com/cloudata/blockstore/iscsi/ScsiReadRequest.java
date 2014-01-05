@@ -3,12 +3,16 @@ package com.cloudata.blockstore.iscsi;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 public class ScsiReadRequest extends ScsiCommandRequest {
+    private static final Logger log = LoggerFactory.getLogger(ScsiReadRequest.class);
 
     public static final byte SCSI_CODE_READ_16 = (byte) 0x88;
 
@@ -63,11 +67,11 @@ public class ScsiReadRequest extends ScsiCommandRequest {
 
                 response.setStatus((byte) 0);
 
-                response.data = data;
+                response.setData(data, false);
 
                 int dataLength = 0;
-                if (response.data != null) {
-                    dataLength = response.data.readableBytes();
+                if (data != null) {
+                    dataLength = data.readableBytes();
                     assert dataLength == length;
                 }
 
@@ -80,6 +84,7 @@ public class ScsiReadRequest extends ScsiCommandRequest {
 
             @Override
             public void onFailure(Throwable t) {
+                log.warn("Error during read", t);
                 opFuture.setException(t);
             }
         });

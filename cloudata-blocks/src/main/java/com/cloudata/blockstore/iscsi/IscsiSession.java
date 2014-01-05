@@ -66,6 +66,7 @@ public class IscsiSession {
     }
 
     public int getBlockSize() {
+        // TODO: We will probably run better with 4K blocks, but QEMU doesn't support them (?)
         return 512;
     }
 

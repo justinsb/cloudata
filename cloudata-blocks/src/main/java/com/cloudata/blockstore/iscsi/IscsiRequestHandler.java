@@ -30,23 +30,23 @@ public class IscsiRequestHandler extends SimpleChannelInboundHandler<IscsiReques
             log.debug("Executing command: {}", msg);
 
             future = msg.start();
+            msg.retain();
         } catch (Exception e) {
             log.warn("Error starting command: " + msg, e);
-            msg.close();
-            return;
+            throw e;
         }
 
         Futures.addCallback(future, new FutureCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
                 log.debug("Finished processing command: " + msg);
-                msg.close();
+                msg.release();
             }
 
             @Override
             public void onFailure(Throwable t) {
                 log.warn("Error processing command: " + msg, t);
-                msg.close();
+                msg.release();
             }
         });
     }
