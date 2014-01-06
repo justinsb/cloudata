@@ -35,7 +35,7 @@ public class AppendCommand implements RedisCommand {
         }
 
         ResponseEntry entry = response.getEntry(0);
-        Value newValue = Value.deserialize(entry.getValue());
+        Value newValue = Value.fromRawBytes(entry.getValue());
 
         return IntegerRedisResponse.valueOf(newValue.sizeAsBytes());
     }

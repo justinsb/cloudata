@@ -20,7 +20,7 @@ public class AppendOperation extends KeyValueOperationBase {
 
     @Override
     public Value doAction(Value oldValue) {
-        Value appendValue = Value.deserialize(entry.getValue().asReadOnlyByteBuffer());
+        Value appendValue = Value.fromRawBytes(entry.getValue());
 
         ResponseEntry.Builder eb = response.addEntryBuilder();
         eb.setKey(entry.getKey());
