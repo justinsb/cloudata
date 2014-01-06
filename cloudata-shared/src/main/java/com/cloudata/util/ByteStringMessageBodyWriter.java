@@ -5,14 +5,18 @@ import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.MessageBodyWriter;
+import javax.ws.rs.ext.Provider;
 
 import com.google.protobuf.ByteString;
 
+@Provider
+@Singleton
 @Produces({ "application/octet-stream", "*/*" })
 public final class ByteStringMessageBodyWriter implements MessageBodyWriter<ByteString> {
 

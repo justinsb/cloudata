@@ -106,7 +106,7 @@ public class KeyValueEndpoint {
                 ActionResponse response = stateMachine.doActionSync(operation);
                 if (response.getEntryCount() != 0) {
                     ResponseEntry entry = response.getEntry(0);
-                    ret = Value.deserialize(entry.getValue()).asBytes();
+                    ret = entry.getValue();
                 } else {
                     ret = null;
                 }
