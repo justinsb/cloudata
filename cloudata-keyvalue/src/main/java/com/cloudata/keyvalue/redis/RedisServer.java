@@ -3,8 +3,9 @@ package com.cloudata.keyvalue.redis;
 import org.robotninjas.barge.RaftException;
 
 import com.cloudata.btree.Keyspace;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
 import com.cloudata.keyvalue.KeyValueStateMachine;
-import com.cloudata.keyvalue.operation.KeyOperation;
+import com.cloudata.keyvalue.operation.KeyValueOperation;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
@@ -21,7 +22,7 @@ public class RedisServer {
         this.storeId = storeId;
     }
 
-    public <V> V doAction(KeyOperation<V> operation) throws RedisException {
+    public ActionResponse doAction(KeyValueOperation operation) throws RedisException {
         try {
             return stateMachine.doActionSync(operation);
         } catch (InterruptedException e) {

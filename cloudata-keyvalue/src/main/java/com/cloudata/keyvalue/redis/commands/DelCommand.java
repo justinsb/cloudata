@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue.redis.commands;
 
+import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry;
 import com.cloudata.keyvalue.operation.DeleteOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
@@ -18,12 +20,16 @@ public class DelCommand implements RedisCommand {
         for (int i = 1; i < command.getArgc(); i++) {
             ByteString key = command.getByteString(i);
 
-            ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
+            // ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
 
-            DeleteOperation operation = DeleteOperation.build(server.getStoreId(), qualifiedKey);
-            Integer deleted = server.doAction(operation);
+            DeleteOperation operation = DeleteOperation.build(server.getStoreId(), session.getKeyspace(), key);
+            ActionResponse response = server.doAction(operation);
 
-            count += deleted.intValue();
+            for (ResponseEntry entry : response.getEntryList()) {
+                if (entry.getChanged()) {
+                    count++;
+                }
+            }
         }
 
         return IntegerRedisResponse.valueOf(count);

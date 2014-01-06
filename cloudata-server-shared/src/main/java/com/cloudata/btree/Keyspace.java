@@ -48,19 +48,11 @@ public class Keyspace {
         return keyspaceId;
     }
 
-    public ByteString mapToKey(ByteString key) {
-        return keyspaceIdPrefix.concat(key);
-    }
-
     public static Keyspace user(int keyspaceId) {
         if (keyspaceId > SYSTEM_START) {
             throw new IllegalArgumentException();
         }
         return new Keyspace(keyspaceId);
-    }
-
-    public ByteString mapToKey(byte[] key) {
-        return mapToKey(ByteString.copyFrom(key));
     }
 
     public static Keyspace system(int i) {
@@ -99,4 +91,11 @@ public class Keyspace {
         return mapToKey(ByteString.copyFrom(key));
     }
 
+    public ByteString mapToKey(byte[] key) {
+        return mapToKey(ByteString.copyFrom(key));
+    }
+
+    public ByteString mapToKey(ByteString key) {
+        return keyspaceIdPrefix.concat(key);
+    }
 }

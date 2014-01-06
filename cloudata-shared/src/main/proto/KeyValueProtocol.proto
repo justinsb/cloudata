@@ -6,38 +6,47 @@ service KeyValueService {
   rpc Execute (KeyValueRequest) returns (KeyValueResponse);
 }
 
-message Entry {
+message ResponseEntry {
 	optional bytes key = 1;
 	optional bytes value = 2;
+	optional bool changed = 3;
 }
 
-
-message KeyValueRequest {
+message KeyValueAction {
 	optional uint64 store_id = 1;
-	optional uint32 space_id = 2;
-	optional CommandAction action = 3;
+	optional uint32 keyspace_id = 2;
+	optional ActionType action = 3;
 	optional bytes key = 4;
 	optional bytes value = 5;
-
-	repeated bytes keys = 6;
-
+	
+	repeated KeyValueAction children = 6;
+	
 	optional bool if_not_exists = 10;
 	optional bytes if_value = 11;
 }
 
-message KeyValueResponse {
-	optional bool success = 1;
-	optional bytes value = 2;
-	optional uint32 row_count = 3;
-	
-	repeated bytes key = 4;
-	repeated Entry entry = 5;
-}
-
-enum CommandAction {
+enum ActionType {
 	GET = 1;
 	SET = 2;
 	DELETE = 3;
 	LIST_KEYS_WITH_PREFIX = 4;
 	LIST_ENTRIES_WITH_PREFIX = 5;
+	APPEND = 6;
+	INCREMENT = 7;
+	COMPOUND = 8;
 }
+
+message KeyValueRequest {
+	optional KeyValueAction action = 1;
+}
+
+message ActionResponse {
+	repeated ResponseEntry entry = 1;
+	
+	repeated ActionResponse children = 2;
+}
+
+message KeyValueResponse {
+	optional ActionResponse action_response = 1;
+}
+

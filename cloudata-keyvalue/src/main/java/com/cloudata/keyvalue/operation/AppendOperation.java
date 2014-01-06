@@ -1,62 +1,49 @@
 package com.cloudata.keyvalue.operation;
 
-import java.nio.ByteBuffer;
-
-import com.cloudata.keyvalue.KeyValueLog.KvAction;
-import com.cloudata.keyvalue.KeyValueLog.KvEntry;
+import com.cloudata.btree.Keyspace;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionType;
+import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry;
 import com.cloudata.values.Value;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 
-public class AppendOperation implements KeyOperation<Integer> {
+public class AppendOperation extends KeyValueOperationBase {
 
-    private int newLength;
-    final KvEntry entry;
+    public AppendOperation(KeyValueAction entry) {
+        super(entry);
 
-    public AppendOperation(KvEntry entry) {
-        Preconditions.checkState(entry.getAction() == KvAction.APPEND);
+        Preconditions.checkState(entry.getAction() == ActionType.APPEND);
         Preconditions.checkState(!entry.getIfNotExists());
         Preconditions.checkState(!entry.hasIfValue());
-
-        this.entry = entry;
     }
 
     @Override
     public Value doAction(Value oldValue) {
         Value appendValue = Value.deserialize(entry.getValue().asReadOnlyByteBuffer());
 
+        ResponseEntry.Builder eb = response.addEntryBuilder();
+        eb.setKey(entry.getKey());
+
+        Value newValue;
         if (oldValue == null) {
-            this.newLength = entry.getValue().size();
-            return appendValue;
+            newValue = appendValue;
         } else {
-            Value appended = oldValue.concat(appendValue.asBytes());
-
-            this.newLength = appended.sizeAsBytes();
-            return appended;
+            newValue = oldValue.concat(appendValue.asBytes());
         }
+        eb.setValue(ByteString.copyFrom(newValue.asBytes()));
+        eb.setChanged(true);
+
+        return newValue;
     }
 
-    @Override
-    public KvEntry serialize() {
-        return entry;
-    }
-
-    @Override
-    public Integer getResult() {
-        return newLength;
-    }
-
-    @Override
-    public ByteBuffer getKey() {
-        return entry.getKey().asReadOnlyByteBuffer();
-    }
-
-    public static AppendOperation build(long storeId, ByteString qualifiedKey, Value value) {
-        KvEntry.Builder b = KvEntry.newBuilder();
-        b.setAction(KvAction.APPEND);
+    public static AppendOperation build(long storeId, Keyspace keyspace, ByteString key, Value value) {
+        KeyValueAction.Builder b = KeyValueAction.newBuilder();
+        b.setAction(ActionType.APPEND);
         b.setStoreId(storeId);
-        b.setKey(qualifiedKey);
-        b.setValue(ByteString.copyFrom(value.serialize()));
+        b.setKeyspaceId(keyspace.getKeyspaceId());
+        b.setKey(key);
+        b.setValue(ByteString.copyFrom(value.asBytes()));
         return new AppendOperation(b.build());
     }
 }

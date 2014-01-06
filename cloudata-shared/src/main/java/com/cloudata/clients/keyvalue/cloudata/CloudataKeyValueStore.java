@@ -12,10 +12,13 @@ import com.cloudata.clients.keyvalue.IfVersion;
 import com.cloudata.clients.keyvalue.KeyValueEntry;
 import com.cloudata.clients.keyvalue.KeyValueStore;
 import com.cloudata.clients.keyvalue.Modifier;
-import com.cloudata.keyvalue.KeyValueProtocol;
-import com.cloudata.keyvalue.KeyValueProtocol.CommandAction;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionType;
+import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
+import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction.Builder;
 import com.cloudata.keyvalue.KeyValueProtocol.KeyValueRequest;
 import com.cloudata.keyvalue.KeyValueProtocol.KeyValueResponse;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry;
 import com.google.common.base.Function;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
@@ -36,12 +39,20 @@ public class CloudataKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public Iterator<ByteString> listKeysWithPrefix(int space, ByteString prefix) {
-        KeyValueRequest.Builder b = buildCommand(CommandAction.LIST_KEYS_WITH_PREFIX, space, prefix, null);
+    public Iterator<ByteString> listKeysWithPrefix(int keyspaceId, ByteString prefix) {
+        KeyValueRequest.Builder b = buildCommand(ActionType.LIST_KEYS_WITH_PREFIX, keyspaceId, prefix, null);
 
         KeyValueResponse response = executeSync(b);
 
-        return response.getKeyList().iterator();
+        return Iterators.transform(response.getActionResponse().getEntryList().iterator(),
+                new Function<ResponseEntry, ByteString>() {
+
+                    @Override
+                    public ByteString apply(ResponseEntry entry) {
+                        return entry.getKey();
+                    }
+
+                });
     }
 
     private KeyValueResponse executeSync(KeyValueRequest.Builder b) {
@@ -57,16 +68,16 @@ public class CloudataKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public Iterator<KeyValueEntry> listEntriesWithPrefix(final int space, ByteString prefix) {
-        KeyValueRequest.Builder b = buildCommand(CommandAction.LIST_ENTRIES_WITH_PREFIX, space, prefix, null);
+    public Iterator<KeyValueEntry> listEntriesWithPrefix(final int keyspaceId, ByteString prefix) {
+        KeyValueRequest.Builder b = buildCommand(ActionType.LIST_ENTRIES_WITH_PREFIX, keyspaceId, prefix, null);
 
         KeyValueResponse response = executeSync(b);
 
-        return Iterators.transform(response.getEntryList().iterator(),
-                new Function<KeyValueProtocol.Entry, KeyValueEntry>() {
+        return Iterators.transform(response.getActionResponse().getEntryList().iterator(),
+                new Function<ResponseEntry, KeyValueEntry>() {
 
                     @Override
-                    public KeyValueEntry apply(KeyValueProtocol.Entry entry) {
+                    public KeyValueEntry apply(ResponseEntry entry) {
                         return new KeyValueEntry(entry.getKey(), entry.getValue());
                     }
 
@@ -74,46 +85,53 @@ public class CloudataKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public ByteString read(int space, ByteString key) throws IOException {
-        KeyValueRequest.Builder b = buildCommand(CommandAction.GET, space, key, null);
+    public ByteString read(int keyspaceId, ByteString key) throws IOException {
+        KeyValueRequest.Builder b = buildCommand(ActionType.GET, keyspaceId, key, null);
 
         KeyValueResponse response = executeSync(b);
 
-        if (response.hasValue()) {
-            return response.getValue();
+        ActionResponse actionResponse = response.getActionResponse();
+        if (actionResponse.getEntryCount() != 0) {
+            assert actionResponse.getEntryCount() == 1;
+
+            ResponseEntry entry = actionResponse.getEntry(0);
+            assert entry.hasValue();
+            return entry.getValue();
         }
 
         return null;
     }
 
     @Override
-    public boolean delete(int space, ByteString key, Modifier... modifiers) throws IOException {
-        KeyValueRequest.Builder b = buildCommand(CommandAction.DELETE, space, key, null, modifiers);
+    public boolean delete(int keyspaceId, ByteString key, Modifier... modifiers) throws IOException {
+        KeyValueRequest.Builder b = buildCommand(ActionType.DELETE, keyspaceId, key, null, modifiers);
 
         KeyValueResponse response = executeSync(b);
-
-        return response.getSuccess();
+        int changes = countChanges(response.getActionResponse());
+        return changes != 0;
     }
 
-    private KeyValueRequest.Builder buildCommand(CommandAction action, int space, ByteString key, ByteString value,
+    private KeyValueRequest.Builder buildCommand(ActionType action, int keyspaceId, ByteString key, ByteString value,
             Modifier... modifiers) {
         KeyValueRequest.Builder b = KeyValueRequest.newBuilder();
-        b.setStoreId(storeId);
-        b.setSpaceId(space);
-        b.setAction(action);
-        b.setKey(key);
+        Builder ab = b.getActionBuilder();
+
+        ab.setStoreId(storeId);
+        ab.setKeyspaceId(keyspaceId);
+        ab.setKey(key);
+        ab.setAction(action);
         if (value != null) {
-            b.setValue(value);
+            ab.setValue(value);
         }
 
         if (modifiers != null) {
             for (Modifier modifier : modifiers) {
                 if (modifier == IfNotExists.INSTANCE) {
-                    b.setIfNotExists(true);
+                    ab.setIfNotExists(true);
                 } else if (modifier instanceof IfVersion) {
                     IfVersion ifVersion = (IfVersion) modifier;
 
-                    b.setIfValue((ByteString) ifVersion.version);
+                    ab.setIfValue((ByteString) ifVersion.version);
                 } else {
                     throw new IllegalArgumentException();
                 }
@@ -124,25 +142,26 @@ public class CloudataKeyValueStore implements KeyValueStore {
     }
 
     @Override
-    public boolean putSync(int space, ByteString key, ByteString value, Modifier... modifiers) {
+    public boolean putSync(int keyspaceId, ByteString key, ByteString value, Modifier... modifiers) {
         try {
-            return putAsync(space, key, value, modifiers).get();
+            return putAsync(keyspaceId, key, value, modifiers).get();
         } catch (Exception e) {
             throw Throwables.propagate(e);
         }
     }
 
     @Override
-    public ListenableFuture<Boolean> putAsync(final int space, final ByteString key, final ByteString value,
+    public ListenableFuture<Boolean> putAsync(final int keyspaceId, final ByteString key, final ByteString value,
             final Modifier... modifiers) {
-        KeyValueRequest.Builder b = buildCommand(CommandAction.SET, space, key, value, modifiers);
+        KeyValueRequest.Builder b = buildCommand(ActionType.SET, keyspaceId, key, value, modifiers);
 
         ListenableFuture<KeyValueResponse> responseFuture = client.execute(b.build());
         return Futures.transform(responseFuture, new Function<KeyValueResponse, Boolean>() {
 
             @Override
             public Boolean apply(KeyValueResponse response) {
-                return response.getSuccess();
+                int changes = countChanges(response.getActionResponse());
+                return changes != 0;
             }
 
         });
@@ -151,22 +170,48 @@ public class CloudataKeyValueStore implements KeyValueStore {
     @Override
     public ListenableFuture<Integer> delete(int keyspaceId, List<ByteString> keys) {
         KeyValueRequest.Builder b = KeyValueRequest.newBuilder();
-        b.setStoreId(storeId);
-        b.setSpaceId(keyspaceId);
-        b.setAction(CommandAction.DELETE);
-        b.addAllKeys(keys);
+
+        KeyValueAction.Builder cb = b.getActionBuilder();
+        cb.setStoreId(storeId);
+        cb.setKeyspaceId(keyspaceId);
+        cb.setAction(ActionType.COMPOUND);
+
+        for (ByteString key : keys) {
+            KeyValueAction.Builder ab = cb.addChildrenBuilder();
+            ab.setStoreId(storeId);
+            ab.setKeyspaceId(keyspaceId);
+            ab.setAction(ActionType.DELETE);
+            ab.setKey(key);
+        }
 
         ListenableFuture<KeyValueResponse> responseFuture = client.execute(b.build());
         return Futures.transform(responseFuture, new Function<KeyValueResponse, Integer>() {
             @Override
             public Integer apply(KeyValueResponse response) {
-                if (!response.hasRowCount()) {
-                    return null;
-                }
-                return response.getRowCount();
+                int changes = countChanges(response.getActionResponse());
+                return changes;
             }
 
         });
     }
 
+    private int countChanges(ActionResponse response) {
+        int changed = 0;
+
+        if (response.getChildrenCount() != 0) {
+            for (ActionResponse child : response.getChildrenList()) {
+                changed += countChanges(child);
+            }
+        }
+
+        if (response.getEntryCount() != 0) {
+            for (ResponseEntry entry : response.getEntryList()) {
+                if (entry.getChanged()) {
+                    changed++;
+                }
+            }
+        }
+
+        return changed;
+    }
 }

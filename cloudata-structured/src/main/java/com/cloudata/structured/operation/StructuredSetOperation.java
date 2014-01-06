@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.Keyspace;
+import com.cloudata.btree.Transaction;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.btree.operation.ComplexOperation;
 import com.cloudata.btree.operation.SimpleSetOperation;
@@ -47,7 +48,9 @@ public class StructuredSetOperation implements StructuredOperation<Void>, Comple
     }
 
     @Override
-    public void doAction(Btree btree, WriteTransaction txn) {
+    public void doAction(Btree btree, Transaction transaction) {
+        WriteTransaction txn = (WriteTransaction) transaction;
+
         Keyspace keyspace = store.ensureKeyspace(txn, keyspaceName);
 
         ByteString qualifiedKey = keyspace.mapToKey(key);
@@ -64,6 +67,11 @@ public class StructuredSetOperation implements StructuredOperation<Void>, Comple
         }
 
         store.ensureKeys(txn, keyspace, keys);
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
     }
 
 }

@@ -37,4 +37,9 @@ public class ReadOnlyTransaction extends Transaction {
         return snapshotTransactionId;
     }
 
+    @Override
+    public boolean isReadOnly() {
+        return true;
+    }
+
 }

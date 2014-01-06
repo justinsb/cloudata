@@ -10,9 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.PageStore.PageRecord;
-import com.cloudata.btree.operation.BtreeOperation;
-import com.cloudata.btree.operation.ComplexOperation;
-import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -176,17 +173,6 @@ public class WriteTransaction extends Transaction {
         this.transactionId = transactionId;
     }
 
-    public <V> void doAction(Btree btree, BtreeOperation<V> operation) {
-        if (operation instanceof RowOperation) {
-            RowOperation<V> rowOperation = (RowOperation<V>) operation;
-            getRootPage(btree, true).doAction(this, rowOperation.getKey(), rowOperation);
-        } else if (operation instanceof ComplexOperation) {
-            ((ComplexOperation) operation).doAction(btree, this);
-        } else {
-            throw new UnsupportedOperationException();
-        }
-    }
-
     int createdPageCount;
 
     private SpaceMapEntry spaceMapEntry;
@@ -239,6 +225,11 @@ public class WriteTransaction extends Transaction {
 
     public List<SpaceMapEntry> getAllocated() {
         return allocated;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
     }
 
 }

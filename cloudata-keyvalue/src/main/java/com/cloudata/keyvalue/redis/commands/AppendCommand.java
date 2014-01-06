@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue.redis.commands;
 
+import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry;
 import com.cloudata.keyvalue.operation.AppendOperation;
 import com.cloudata.keyvalue.redis.RedisException;
 import com.cloudata.keyvalue.redis.RedisRequest;
@@ -20,13 +22,21 @@ public class AppendCommand implements RedisCommand {
         }
 
         ByteString key = command.getByteString(1);
-        ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
+        // ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
 
         ByteString value = command.getByteString(2);
 
-        AppendOperation operation = AppendOperation.build(server.getStoreId(), qualifiedKey, Value.fromRawBytes(value));
-        Number ret = server.doAction(operation);
+        AppendOperation operation = AppendOperation.build(server.getStoreId(), session.getKeyspace(), key,
+                Value.fromRawBytes(value));
+        ActionResponse response = server.doAction(operation);
 
-        return IntegerRedisResponse.valueOf(ret.longValue());
+        if (response.getEntryCount() != 1) {
+            throw new IllegalStateException();
+        }
+
+        ResponseEntry entry = response.getEntry(0);
+        Value newValue = Value.deserialize(entry.getValue());
+
+        return IntegerRedisResponse.valueOf(newValue.sizeAsBytes());
     }
 }

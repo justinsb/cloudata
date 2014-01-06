@@ -14,7 +14,7 @@ import com.cloudata.btree.MmapPageStore;
 import com.cloudata.btree.PageStore;
 import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.btree.WriteTransaction;
-import com.cloudata.keyvalue.operation.KeyOperation;
+import com.cloudata.keyvalue.operation.KeyValueOperation;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
@@ -33,10 +33,16 @@ public class KeyValueStore {
         this.btree = new Btree(pageStore, uniqueKeys);
     }
 
-    public void doAction(KeyOperation<?> operation) {
-        try (WriteTransaction txn = btree.beginReadWrite()) {
-            txn.doAction(btree, operation);
-            txn.commit();
+    public void doAction(KeyValueOperation operation) {
+        if (operation.isReadOnly()) {
+            try (ReadOnlyTransaction txn = btree.beginReadOnly()) {
+                txn.doAction(btree, operation);
+            }
+        } else {
+            try (WriteTransaction txn = btree.beginReadWrite()) {
+                txn.doAction(btree, operation);
+                txn.commit();
+            }
         }
     }
 

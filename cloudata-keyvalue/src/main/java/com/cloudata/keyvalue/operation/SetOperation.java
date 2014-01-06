@@ -1,33 +1,26 @@
 package com.cloudata.keyvalue.operation;
 
-import java.nio.ByteBuffer;
-
-import com.cloudata.keyvalue.KeyValueLog;
-import com.cloudata.keyvalue.KeyValueLog.KvAction;
-import com.cloudata.keyvalue.KeyValueLog.KvEntry;
+import com.cloudata.btree.Keyspace;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionType;
+import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry.Builder;
 import com.cloudata.values.Value;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 
-public class SetOperation implements KeyOperation<Integer> {
+public class SetOperation extends KeyValueOperationBase {
 
-    private final KvEntry entry;
+    public SetOperation(KeyValueAction entry) {
+        super(entry);
 
-    int addCount;
-
-    public SetOperation(KeyValueLog.KvEntry entry) {
-        Preconditions.checkArgument(entry.getAction() == KvAction.SET);
-
-        this.entry = entry;
-    }
-
-    @Override
-    public KvEntry serialize() {
-        return entry;
+        Preconditions.checkArgument(entry.getAction() == ActionType.SET);
     }
 
     @Override
     public Value doAction(Value oldValue) {
+        Builder eb = response.addEntryBuilder();
+        eb.setKey(entry.getKey());
+
         if (entry.getIfNotExists()) {
             if (oldValue != null) {
                 // Don't change
@@ -42,27 +35,19 @@ public class SetOperation implements KeyOperation<Integer> {
             }
         }
 
-        Value newValue = Value.deserialize(entry.getValue().asReadOnlyByteBuffer());
-        addCount++;
+        eb.setChanged(true);
+
+        Value newValue = Value.fromRawBytes(entry.getValue());
         return newValue;
     }
 
-    @Override
-    public Integer getResult() {
-        return addCount;
-    }
-
-    @Override
-    public ByteBuffer getKey() {
-        return entry.getKey().asReadOnlyByteBuffer();
-    }
-
-    public static SetOperation build(long storeId, ByteString qualifiedKey, Value value) {
-        KvEntry.Builder b = KvEntry.newBuilder();
-        b.setAction(KvAction.SET);
+    public static SetOperation build(long storeId, Keyspace keyspace, ByteString key, Value value) {
+        KeyValueAction.Builder b = KeyValueAction.newBuilder();
+        b.setAction(ActionType.SET);
         b.setStoreId(storeId);
-        b.setKey(qualifiedKey);
-        b.setValue(ByteString.copyFrom(value.serialize()));
+        b.setKeyspaceId(keyspace.getKeyspaceId());
+        b.setKey(key);
+        b.setValue(ByteString.copyFrom(value.asBytes()));
         return new SetOperation(b.build());
     }
 

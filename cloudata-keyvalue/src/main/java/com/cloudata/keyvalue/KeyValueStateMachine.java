@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
@@ -19,18 +20,20 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.keyvalue.KeyValueLog.KvEntry;
-import com.cloudata.keyvalue.operation.AppendOperation;
-import com.cloudata.keyvalue.operation.DeleteOperation;
-import com.cloudata.keyvalue.operation.IncrementOperation;
-import com.cloudata.keyvalue.operation.KeyOperation;
-import com.cloudata.keyvalue.operation.SetOperation;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
+import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
+import com.cloudata.keyvalue.operation.KeyValueOperation;
+import com.cloudata.keyvalue.operation.KeyValueOperations;
 import com.cloudata.values.Value;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -41,7 +44,10 @@ public class KeyValueStateMachine implements StateMachine {
     private File baseDir;
     final LoadingCache<Long, KeyValueStore> keyValueStoreCache;
 
-    public KeyValueStateMachine() {
+    private final ListeningExecutorService executor;
+
+    public KeyValueStateMachine(ListeningExecutorService executor) {
+        this.executor = executor;
         KeyValueStoreCacheLoader loader = new KeyValueStoreCacheLoader();
         this.keyValueStoreCache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
@@ -65,7 +71,7 @@ public class KeyValueStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public <V> V doActionSync(KeyOperation<V> operation) throws InterruptedException, RaftException {
+    public ActionResponse doActionSync(KeyValueOperation operation) throws InterruptedException, RaftException {
         try {
             return doActionAsync(operation).get();
         } catch (ExecutionException e) {
@@ -80,12 +86,38 @@ public class KeyValueStateMachine implements StateMachine {
         }
     }
 
-    public <V> ListenableFuture<V> doActionAsync(KeyOperation<V> operation) throws RaftException {
-        KvEntry entry = operation.serialize();
+    public ListenableFuture<ActionResponse> doActionAsync(final KeyValueOperation operation) throws RaftException {
+        if (operation.isReadOnly()) {
+            return executor.submit(new Callable<ActionResponse>() {
+
+                @Override
+                public ActionResponse call() throws Exception {
+                    // TODO: Need to check that we are the leader!!
+
+                    long storeId = operation.getStoreId();
+
+                    KeyValueStore keyValueStore = getKeyValueStore(storeId);
+
+                    keyValueStore.doAction(operation);
+
+                    return operation.getResult();
+                }
+            });
+        }
+
+        KeyValueAction entry = operation.serialize();
 
         log.debug("Proposing operation {}", entry.getAction());
 
-        return (ListenableFuture<V>) raft.commitAsync(entry.toByteArray());
+        return Futures.transform(raft.commitAsync(entry.toByteArray()), new Function<Object, ActionResponse>() {
+
+            @Override
+            public ActionResponse apply(Object input) {
+                Preconditions.checkArgument(input instanceof ActionResponse);
+                return (ActionResponse) input;
+            }
+
+        });
     }
 
     @Override
@@ -93,37 +125,14 @@ public class KeyValueStateMachine implements StateMachine {
         // TODO: We need to prevent repetition during replay
         // (we need idempotency)
         try {
-            KvEntry entry = KvEntry.parseFrom(ByteString.copyFrom(op));
+            KeyValueAction entry = KeyValueAction.parseFrom(ByteString.copyFrom(op));
             log.debug("Committing operation {}", entry.getAction());
 
             long storeId = entry.getStoreId();
 
             KeyValueStore keyValueStore = getKeyValueStore(storeId);
 
-            KeyOperation<?> operation;
-
-            switch (entry.getAction()) {
-
-            case APPEND:
-                operation = new AppendOperation(entry);
-                break;
-
-            case DELETE:
-                operation = new DeleteOperation(entry);
-                break;
-
-            case INCREMENT: {
-                operation = new IncrementOperation(entry);
-                break;
-            }
-
-            case SET:
-                operation = new SetOperation(entry);
-                break;
-
-            default:
-                throw new UnsupportedOperationException();
-            }
+            KeyValueOperation operation = KeyValueOperations.build(entry);
 
             keyValueStore.doAction(operation);
 
@@ -168,11 +177,13 @@ public class KeyValueStateMachine implements StateMachine {
         }
     }
 
+    // This should also really be an operation, but is special-cased for speed
     public Value get(long storeId, Keyspace keyspace, ByteString key) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
+    // This function should really be an operation, but we want to support streaming
     public BtreeQuery scan(long storeId, Keyspace keyspace, ByteString keyPrefix) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
         boolean stripKeyspace = true;

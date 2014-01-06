@@ -40,14 +40,14 @@ public class BtreeQuery {
 
     }
 
-    public KeyValueResultset execute() {
+    public KeyValueResultset buildCursor() {
         ReadOnlyTransaction txn = null;
         KeyValueResultset cursor = null;
 
         try {
             txn = btree.beginReadOnly();
 
-            cursor = new KeyValueResultset(txn);
+            cursor = new KeyValueResultset(txn, true);
             txn = null;
         } finally {
             if (txn != null) {
@@ -58,11 +58,17 @@ public class BtreeQuery {
         return cursor;
     }
 
-    public class KeyValueResultset implements AutoCloseable {
-        private final ReadOnlyTransaction txn;
+    public KeyValueResultset buildCursor(Transaction txn) {
+        return new KeyValueResultset(txn, false);
+    }
 
-        public KeyValueResultset(ReadOnlyTransaction txn) {
+    public class KeyValueResultset implements AutoCloseable {
+        private final Transaction txn;
+        private final boolean closeTransaction;
+
+        public KeyValueResultset(Transaction txn, boolean closeTransaction) {
             this.txn = txn;
+            this.closeTransaction = closeTransaction;
         }
 
         public void walk(EntryListener entryListener) {
@@ -74,7 +80,9 @@ public class BtreeQuery {
 
         @Override
         public void close() {
-            txn.close();
+            if (closeTransaction) {
+                txn.close();
+            }
         }
 
     }

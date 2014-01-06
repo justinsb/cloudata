@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.servlet.DispatcherType;
 
@@ -24,6 +25,8 @@ import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
@@ -65,7 +68,8 @@ public class KeyValueServer {
         logDir.mkdirs();
         stateDir.mkdirs();
 
-        KeyValueStateMachine stateMachine = new KeyValueStateMachine();
+        ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+        KeyValueStateMachine stateMachine = new KeyValueStateMachine(executor);
 
         ClusterConfig config = ClusterConfig.from(local, peers);
         this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(stateMachine);

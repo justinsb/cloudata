@@ -32,4 +32,9 @@ public class SimpleDeleteOperation implements RowOperation<Integer> {
     public ByteBuffer getKey() {
         return key.asReadOnlyByteBuffer();
     }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
 }

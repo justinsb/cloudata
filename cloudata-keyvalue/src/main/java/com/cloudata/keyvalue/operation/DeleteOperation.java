@@ -1,26 +1,32 @@
 package com.cloudata.keyvalue.operation;
 
-import java.nio.ByteBuffer;
-
-import com.cloudata.keyvalue.KeyValueLog.KvAction;
-import com.cloudata.keyvalue.KeyValueLog.KvEntry;
+import com.cloudata.btree.Keyspace;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionType;
+import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry;
 import com.cloudata.values.Value;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 
-public class DeleteOperation implements KeyOperation<Integer> {
+public class DeleteOperation extends KeyValueOperationBase {
 
-    private final KvEntry entry;
+    public DeleteOperation(KeyValueAction entry) {
+        super(entry);
 
-    public DeleteOperation(KvEntry entry) {
-        Preconditions.checkState(entry.getAction() == KvAction.DELETE);
-        this.entry = entry;
+        Preconditions.checkState(entry.getAction() == ActionType.DELETE);
+        Preconditions.checkArgument(!entry.getIfNotExists());
+        Preconditions.checkArgument(!entry.hasValue());
     }
-
-    private int deleteCount;
 
     @Override
     public Value doAction(Value oldValue) {
+        if (oldValue == null) {
+            return oldValue; // No change
+        }
+
+        ResponseEntry.Builder eb = response.addEntryBuilder();
+        eb.setKey(entry.getKey());
+
         if (entry.hasIfValue()) {
             boolean match = true;
             if (oldValue == null) {
@@ -36,32 +42,19 @@ public class DeleteOperation implements KeyOperation<Integer> {
         }
 
         if (oldValue != null) {
-            deleteCount++;
+            eb.setChanged(true);
         }
+
         return null; // Delete the value
     }
 
-    @Override
-    public Integer getResult() {
-        return deleteCount;
-    }
-
-    @Override
-    public ByteBuffer getKey() {
-        return entry.getKey().asReadOnlyByteBuffer();
-    }
-
-    public static DeleteOperation build(long storeId, ByteString qualifiedKey) {
-        KvEntry.Builder b = KvEntry.newBuilder();
+    public static DeleteOperation build(long storeId, Keyspace keyspace, ByteString key) {
+        KeyValueAction.Builder b = KeyValueAction.newBuilder();
         b.setStoreId(storeId);
-        b.setAction(KvAction.DELETE);
-        b.setKey(qualifiedKey);
+        b.setKeyspaceId(keyspace.getKeyspaceId());
+        b.setKey(key);
+        b.setAction(ActionType.DELETE);
         return new DeleteOperation(b.build());
-    }
-
-    @Override
-    public KvEntry serialize() {
-        return entry;
     }
 
 }

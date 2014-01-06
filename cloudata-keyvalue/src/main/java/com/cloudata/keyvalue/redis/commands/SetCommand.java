@@ -20,11 +20,12 @@ public class SetCommand implements RedisCommand {
         }
 
         ByteString key = command.getByteString(1);
-        ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
+        // ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
 
         ByteString value = command.getByteString(2);
 
-        SetOperation operation = SetOperation.build(server.getStoreId(), qualifiedKey, Value.fromRawBytes(value));
+        SetOperation operation = SetOperation.build(server.getStoreId(), session.getKeyspace(), key,
+                Value.fromRawBytes(value));
         server.doAction(operation);
 
         return StatusRedisResponse.OK;

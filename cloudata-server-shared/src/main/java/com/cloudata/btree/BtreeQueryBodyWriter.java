@@ -87,7 +87,7 @@ public final class BtreeQueryBodyWriter implements MessageBodyWriter<BtreeQuery>
                 }
             };
         }
-        try (BtreeQuery.KeyValueResultset cursor = query.execute()) {
+        try (BtreeQuery.KeyValueResultset cursor = query.buildCursor()) {
             cursor.walk(entryListener);
         }
 

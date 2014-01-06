@@ -2,7 +2,7 @@ package com.cloudata.structured.operation;
 
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.btree.WriteTransaction;
+import com.cloudata.btree.Transaction;
 import com.cloudata.btree.operation.ComplexOperation;
 import com.cloudata.btree.operation.SimpleDeleteOperation;
 import com.cloudata.structured.StructuredProto.LogAction;
@@ -39,7 +39,7 @@ public class StructuredDeleteOperation implements StructuredOperation<Integer>, 
     }
 
     @Override
-    public void doAction(Btree btree, WriteTransaction txn) {
+    public void doAction(Btree btree, Transaction txn) {
         Keyspace keyspace = store.findKeyspace(txn, keyspaceName);
         if (keyspace != null) {
             ByteString qualifiedKey = keyspace.mapToKey(key);
@@ -49,5 +49,10 @@ public class StructuredDeleteOperation implements StructuredOperation<Integer>, 
             txn.doAction(btree, op);
             deleteCount += op.getResult();
         }
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
     }
 }

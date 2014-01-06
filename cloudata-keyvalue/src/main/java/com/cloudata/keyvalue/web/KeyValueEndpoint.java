@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.nio.ByteBuffer;
 
 import javax.inject.Inject;
 import javax.ws.rs.DELETE;
@@ -25,7 +24,9 @@ import org.robotninjas.barge.Replica;
 
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.keyvalue.KeyValueLog.KvAction;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
+import com.cloudata.keyvalue.KeyValueProtocol.ActionType;
+import com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry;
 import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.operation.DeleteOperation;
 import com.cloudata.keyvalue.operation.IncrementOperation;
@@ -47,17 +48,16 @@ public class KeyValueEndpoint {
     @GET
     @Path("{key}")
     // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    public Response get(@PathParam("key") String key) throws IOException {
-        byte[] k = BaseEncoding.base16().decode(key);
+    public Response get(@PathParam("key") String keyString) throws IOException, InterruptedException, RaftException {
+        ByteString key = ByteString.copyFrom(BaseEncoding.base16().decode(keyString));
 
-        Value v = stateMachine.get(storeId, getKeyspace(), ByteString.copyFrom(k));
+        Value value = stateMachine.get(storeId, getKeyspace(), key);
 
-        if (v == null) {
+        if (value == null) {
             return Response.status(Status.NOT_FOUND).build();
         }
 
-        ByteBuffer data = v.asBytes();
-        return Response.ok(data).build();
+        return Response.ok(value.asBytes()).build();
     }
 
     @GET
@@ -76,19 +76,18 @@ public class KeyValueEndpoint {
     @POST
     @Path("{key}")
     // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    public Response post(@PathParam("key") String key, @QueryParam("action") String actionString,
+    public Response post(@PathParam("key") String keyString, @QueryParam("action") String actionString,
             InputStream valueStream) throws IOException {
         try {
-            ByteString k = ByteString.copyFrom(BaseEncoding.base16().decode(key));
+            ByteString key = ByteString.copyFrom(BaseEncoding.base16().decode(keyString));
             byte[] v = ByteStreams.toByteArray(valueStream);
 
             Keyspace keyspace = getKeyspace();
-            ByteString qualifiedKey = keyspace.mapToKey(k);
-            KvAction action = KvAction.SET;
+            ActionType action = ActionType.SET;
 
             if (actionString != null) {
                 actionString = actionString.toUpperCase();
-                action = KvAction.valueOf(actionString);
+                action = ActionType.valueOf(actionString);
             }
 
             Object ret;
@@ -96,16 +95,21 @@ public class KeyValueEndpoint {
             switch (action) {
             case SET: {
                 Value value = Value.fromRawBytes(v);
-                SetOperation operation = SetOperation.build(storeId, qualifiedKey, value);
+                SetOperation operation = SetOperation.build(storeId, keyspace, key, value);
                 stateMachine.doActionSync(operation);
                 ret = null;
                 break;
             }
 
             case INCREMENT: {
-                IncrementOperation operation = IncrementOperation.build(storeId, qualifiedKey, 1);
-                Long newValue = stateMachine.doActionSync(operation);
-                ret = Value.fromLong(newValue).asBytes();
+                IncrementOperation operation = IncrementOperation.build(storeId, keyspace, key, 1);
+                ActionResponse response = stateMachine.doActionSync(operation);
+                if (response.getEntryCount() != 0) {
+                    ResponseEntry entry = response.getEntry(0);
+                    ret = Value.deserialize(entry.getValue()).asBytes();
+                } else {
+                    ret = null;
+                }
                 break;
             }
 
@@ -131,14 +135,13 @@ public class KeyValueEndpoint {
 
     @DELETE
     @Path("{key}")
-    public Response delete(@PathParam("key") String key) throws IOException {
+    public Response delete(@PathParam("key") String keyString) throws IOException {
         try {
-            ByteString k = ByteString.copyFrom(BaseEncoding.base16().decode(key));
+            ByteString key = ByteString.copyFrom(BaseEncoding.base16().decode(keyString));
 
             Keyspace keyspace = getKeyspace();
-            ByteString qualifiedKey = keyspace.mapToKey(k);
 
-            stateMachine.doActionSync(DeleteOperation.build(storeId, qualifiedKey));
+            stateMachine.doActionSync(DeleteOperation.build(storeId, keyspace, key));
 
             return Response.noContent().build();
         } catch (InterruptedException e) {

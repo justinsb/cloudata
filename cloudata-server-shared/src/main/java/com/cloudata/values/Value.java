@@ -164,6 +164,10 @@ public abstract class Value implements Cloneable {
 
     public abstract int sizeAsBytes();
 
+    public static Value deserialize(ByteString b) {
+        return deserialize(b.asReadOnlyByteBuffer());
+    }
+
     public static Value deserialize(ByteBuffer buffer) {
         byte type = buffer.get(buffer.position());
 
@@ -189,7 +193,12 @@ public abstract class Value implements Cloneable {
         return buffer.duplicate();
     }
 
+    public ByteString serializeToByteString() {
+        return ByteString.copyFrom(serialize());
+    }
+
     public JsonObject asJsonObject() {
         throw new UnsupportedOperationException();
     }
+
 }

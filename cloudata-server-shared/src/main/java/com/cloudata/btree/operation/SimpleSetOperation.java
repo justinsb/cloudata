@@ -29,4 +29,9 @@ public class SimpleSetOperation implements RowOperation<Void> {
     public ByteBuffer getKey() {
         return key.asReadOnlyByteBuffer();
     }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
 }

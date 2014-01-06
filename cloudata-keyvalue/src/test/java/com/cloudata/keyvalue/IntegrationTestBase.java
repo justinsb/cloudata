@@ -42,7 +42,7 @@ public class IntegrationTestBase {
         }
 
         // TODO: Remove the need for a sleep here
-        Thread.sleep(5000);
+        Thread.sleep(2000);
     }
 
     @AfterClass
