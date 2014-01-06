@@ -16,6 +16,7 @@ import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.keyvalue.operation.KeyOperation;
 import com.cloudata.values.Value;
+import com.google.protobuf.ByteString;
 
 public class KeyValueStore {
 
@@ -45,8 +46,8 @@ public class KeyValueStore {
         }
     }
 
-    public BtreeQuery buildQuery(Keyspace keyspace, boolean stripKeyspace) {
-        return new BtreeQuery(btree, keyspace, stripKeyspace);
+    public BtreeQuery buildQuery(Keyspace keyspace, boolean stripKeyspace, ByteString keyPrefix) {
+        return new BtreeQuery(btree, keyspace, stripKeyspace, keyPrefix);
     }
 
 }

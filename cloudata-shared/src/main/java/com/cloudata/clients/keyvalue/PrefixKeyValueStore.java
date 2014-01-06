@@ -2,9 +2,11 @@ package com.cloudata.clients.keyvalue;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 
@@ -86,6 +88,15 @@ public class PrefixKeyValueStore implements KeyValueStore {
     public ListenableFuture<Boolean> putAsync(int space, ByteString key, ByteString value, Modifier... modifiers) {
         ByteString keyWithPrefix = prefix.concat(key);
         return inner.putAsync(space, keyWithPrefix, value, modifiers);
+    }
+
+    @Override
+    public ListenableFuture<Integer> delete(int keyspaceId, List<ByteString> keys) {
+        List<ByteString> keysWithPrefix = Lists.newArrayList();
+        for (ByteString key : keys) {
+            keysWithPrefix.add(prefix.concat(key));
+        }
+        return inner.delete(keyspaceId, keysWithPrefix);
     }
 
 }

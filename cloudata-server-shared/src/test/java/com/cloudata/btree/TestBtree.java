@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.cloudata.TestUtils;
-import com.cloudata.btree.operation.SetOperation;
+import com.cloudata.btree.operation.SimpleSetOperation;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
@@ -36,7 +36,7 @@ public class TestBtree {
     private void put(Btree btree, byte[] key, byte[] valueBytes) {
         try (WriteTransaction txn = btree.beginReadWrite()) {
             Value value = Value.fromRawBytes(valueBytes);
-            SetOperation operation = new SetOperation(ByteString.copyFrom(key), value);
+            SimpleSetOperation operation = new SimpleSetOperation(ByteString.copyFrom(key), value);
             txn.doAction(btree, operation);
             txn.commit();
         }

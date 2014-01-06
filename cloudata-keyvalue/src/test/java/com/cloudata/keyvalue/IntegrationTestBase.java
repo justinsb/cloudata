@@ -35,13 +35,14 @@ public class IntegrationTestBase {
 
             File baseDir = new File(TEMPDIR, "" + i);
             SocketAddress redisAddress = new InetSocketAddress(6379 + i + 1);
-            SERVERS[i] = new KeyValueServer(baseDir, local, members, httpPort, redisAddress);
+            SocketAddress protobufAddress = new InetSocketAddress(2000 + i + 1);
+            SERVERS[i] = new KeyValueServer(baseDir, local, members, httpPort, redisAddress, protobufAddress);
 
             SERVERS[i].start();
         }
 
         // TODO: Remove the need for a sleep here
-        Thread.sleep(1000);
+        Thread.sleep(5000);
     }
 
     @AfterClass

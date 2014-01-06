@@ -68,16 +68,7 @@ public class Keyspace {
     }
 
     public boolean contains(ByteBuffer buffer) {
-        if (buffer.remaining() < keyspaceIdPrefix.size()) {
-            return false;
-        }
-        for (int i = 0; i < keyspaceIdPrefix.size(); i++) {
-            if (buffer.get(buffer.position() + i) != keyspaceIdPrefix.byteAt(i)) {
-                // log.debug("Mismatch: {} vs {}", Hex.forDebug(buffer), Hex.forDebug(keyspaceIdPrefix));
-                return false;
-            }
-        }
-        return true;
+        return ByteBuffers.startsWith(buffer, keyspaceIdPrefix);
     }
 
     public boolean keyIsAfter(ByteBuffer key) {

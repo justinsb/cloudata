@@ -17,7 +17,7 @@ import com.cloudata.btree.PageStore;
 import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.btree.Transaction;
 import com.cloudata.btree.WriteTransaction;
-import com.cloudata.btree.operation.SetOperation;
+import com.cloudata.btree.operation.SimpleSetOperation;
 import com.cloudata.structured.StructuredProto.KeyspaceData;
 import com.cloudata.structured.operation.StructuredOperation;
 import com.cloudata.values.Value;
@@ -139,10 +139,10 @@ public class StructuredStore {
                 long id = nextId++;
 
                 Value idValue = Value.fromLong(id);
-                txn.doAction(btree, new SetOperation(key, idValue));
+                txn.doAction(btree, new SimpleSetOperation(key, idValue));
 
                 Value stringValue = Value.fromRawBytes(s.getBytes(Charsets.UTF_8));
-                txn.doAction(btree, new SetOperation(ID_TO_NAME.mapToKey(encode(id)), stringValue));
+                txn.doAction(btree, new SimpleSetOperation(ID_TO_NAME.mapToKey(encode(id)), stringValue));
             }
         }
     }
@@ -199,13 +199,13 @@ public class StructuredStore {
             long id = nextId++;
 
             Value idValue = Value.fromLong(id);
-            txn.doAction(btree, new SetOperation(key, idValue));
+            txn.doAction(btree, new SimpleSetOperation(key, idValue));
 
             KeyspaceData.Builder b = KeyspaceData.newBuilder();
             b.setId(id);
             b.setName(keyspaceName);
             Value stringValue = Value.fromRawBytes(b.build().toByteString());
-            txn.doAction(btree, new SetOperation(KEYSPACE_ID_TO_NAME.mapToKey(encode(id)), stringValue));
+            txn.doAction(btree, new SimpleSetOperation(KEYSPACE_ID_TO_NAME.mapToKey(encode(id)), stringValue));
 
             return Keyspace.user(Ints.checkedCast(id));
         } else {

@@ -131,6 +131,22 @@ public abstract class Value implements Cloneable {
         return new RawBytesValue(appended);
     }
 
+    public Value concat(ByteBuffer appendValue) {
+        appendValue = appendValue.duplicate();
+
+        ByteBuffer old = asBytes();
+
+        int n = old.remaining() + appendValue.remaining();
+
+        ByteBuffer appended = ByteBuffer.allocate(1 + n);
+        appended.put(FORMAT_RAW);
+        appended.put(old.duplicate());
+        appended.put(appendValue);
+        appended.flip();
+
+        return new RawBytesValue(appended);
+    }
+
     public static Value fromLong(long v) {
         ByteBuffer b = ByteBuffer.allocate(9);
         b.put(FORMAT_INT64);

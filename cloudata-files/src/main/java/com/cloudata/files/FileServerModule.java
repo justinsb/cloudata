@@ -5,7 +5,7 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 import com.cloudata.clients.keyvalue.KeyValueStore;
-import com.cloudata.clients.keyvalue.RedisKeyValueStore;
+import com.cloudata.clients.keyvalue.redis.RedisKeyValueStore;
 import com.cloudata.files.blobs.BlobCache;
 import com.cloudata.files.blobs.BlobStore;
 import com.cloudata.files.blobs.LocalBlobStore;

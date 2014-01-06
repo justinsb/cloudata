@@ -12,6 +12,10 @@ public class RedisServer {
     final KeyValueStateMachine stateMachine;
     final long storeId;
 
+    public long getStoreId() {
+        return storeId;
+    }
+
     public RedisServer(KeyValueStateMachine stateMachine, long storeId) {
         this.stateMachine = stateMachine;
         this.storeId = storeId;
@@ -19,7 +23,7 @@ public class RedisServer {
 
     public <V> V doAction(KeyOperation<V> operation) throws RedisException {
         try {
-            return stateMachine.doAction(storeId, operation);
+            return stateMachine.doActionSync(operation);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RedisException("Interrupted during processing", e);

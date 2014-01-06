@@ -27,7 +27,7 @@ public class IncrByCommand implements RedisCommand {
         ByteString key = command.getByteString(1);
         ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
 
-        IncrementOperation operation = new IncrementOperation(qualifiedKey, deltaLong);
+        IncrementOperation operation = IncrementOperation.build(server.getStoreId(), qualifiedKey, deltaLong);
         Long v = server.doAction(operation);
         return new IntegerRedisResponse(v);
     }

@@ -1,8 +1,11 @@
-package com.cloudata.clients.keyvalue;
+package com.cloudata.clients.keyvalue.redis;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import com.cloudata.clients.keyvalue.KeyValueService;
+import com.cloudata.clients.keyvalue.KeyValueStore;
+import com.cloudata.clients.keyvalue.PrefixKeyValueStore;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 

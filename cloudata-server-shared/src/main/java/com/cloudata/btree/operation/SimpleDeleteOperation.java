@@ -5,24 +5,27 @@ import java.nio.ByteBuffer;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
-public class SetOperation implements RowOperation<Void> {
+public class SimpleDeleteOperation implements RowOperation<Integer> {
 
     protected final ByteString key;
-    protected final Value newValue;
 
-    public SetOperation(ByteString key, Value newValue) {
+    int deleteCount;
+
+    public SimpleDeleteOperation(ByteString key) {
         this.key = key;
-        this.newValue = newValue;
     }
 
     @Override
     public Value doAction(Value oldValue) {
-        return newValue;
+        if (oldValue != null) {
+            deleteCount++;
+        }
+        return null; // Delete the value
     }
 
     @Override
-    public Void getResult() {
-        return null;
+    public Integer getResult() {
+        return deleteCount;
     }
 
     @Override

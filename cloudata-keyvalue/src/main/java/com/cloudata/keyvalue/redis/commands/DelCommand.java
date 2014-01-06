@@ -20,7 +20,7 @@ public class DelCommand implements RedisCommand {
 
             ByteString qualifiedKey = session.getKeyspace().mapToKey(key);
 
-            DeleteOperation operation = new DeleteOperation(qualifiedKey);
+            DeleteOperation operation = DeleteOperation.build(server.getStoreId(), qualifiedKey);
             Integer deleted = server.doAction(operation);
 
             count += deleted.intValue();

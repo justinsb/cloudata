@@ -2,29 +2,34 @@ package com.cloudata.keyvalue.operation;
 
 import java.nio.ByteBuffer;
 
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
-import com.cloudata.keyvalue.KeyValueProto.KvEntry;
+import com.cloudata.keyvalue.KeyValueLog.KvAction;
+import com.cloudata.keyvalue.KeyValueLog.KvEntry;
 import com.cloudata.values.Value;
+import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 
 public class AppendOperation implements KeyOperation<Integer> {
 
-    final ByteString appendValue;
     private int newLength;
-    private final ByteString key;
+    final KvEntry entry;
 
-    public AppendOperation(ByteString key, ByteString appendValue) {
-        this.key = key;
-        this.appendValue = appendValue;
+    public AppendOperation(KvEntry entry) {
+        Preconditions.checkState(entry.getAction() == KvAction.APPEND);
+        Preconditions.checkState(!entry.getIfNotExists());
+        Preconditions.checkState(!entry.hasIfValue());
+
+        this.entry = entry;
     }
 
     @Override
     public Value doAction(Value oldValue) {
+        Value appendValue = Value.deserialize(entry.getValue().asReadOnlyByteBuffer());
+
         if (oldValue == null) {
-            this.newLength = appendValue.size();
-            return Value.fromRawBytes(appendValue);
+            this.newLength = entry.getValue().size();
+            return appendValue;
         } else {
-            Value appended = oldValue.concat(appendValue);
+            Value appended = oldValue.concat(appendValue.asBytes());
 
             this.newLength = appended.sizeAsBytes();
             return appended;
@@ -32,12 +37,8 @@ public class AppendOperation implements KeyOperation<Integer> {
     }
 
     @Override
-    public KvEntry.Builder serialize() {
-        KvEntry.Builder b = KvEntry.newBuilder();
-        b.setAction(KvAction.APPEND);
-        b.setKey(key);
-        b.setValue(appendValue);
-        return b;
+    public KvEntry serialize() {
+        return entry;
     }
 
     @Override
@@ -47,7 +48,15 @@ public class AppendOperation implements KeyOperation<Integer> {
 
     @Override
     public ByteBuffer getKey() {
-        return key.asReadOnlyByteBuffer();
+        return entry.getKey().asReadOnlyByteBuffer();
     }
 
+    public static AppendOperation build(long storeId, ByteString qualifiedKey, Value value) {
+        KvEntry.Builder b = KvEntry.newBuilder();
+        b.setAction(KvAction.APPEND);
+        b.setStoreId(storeId);
+        b.setKey(qualifiedKey);
+        b.setValue(ByteString.copyFrom(value.serialize()));
+        return new AppendOperation(b.build());
+    }
 }

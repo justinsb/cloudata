@@ -108,4 +108,16 @@ public class ByteBuffers {
 
         return s;
     }
+
+    public static boolean startsWith(ByteBuffer buffer, ByteString prefix) {
+        if (buffer.remaining() < prefix.size()) {
+            return false;
+        }
+        for (int i = 0; i < prefix.size(); i++) {
+            if (buffer.get(buffer.position() + i) != prefix.byteAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

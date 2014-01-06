@@ -9,6 +9,8 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import org.robotninjas.barge.NoLeaderException;
+import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.StateMachine;
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.keyvalue.KeyValueProto.KvEntry;
+import com.cloudata.keyvalue.KeyValueLog.KvEntry;
 import com.cloudata.keyvalue.operation.AppendOperation;
 import com.cloudata.keyvalue.operation.DeleteOperation;
 import com.cloudata.keyvalue.operation.IncrementOperation;
@@ -28,6 +30,7 @@ import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -62,13 +65,27 @@ public class KeyValueStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public <V> V doAction(long storeId, KeyOperation<V> operation) throws InterruptedException, RaftException {
-        KvEntry.Builder entry = operation.serialize();
-        entry.setStoreId(storeId);
+    public <V> V doActionSync(KeyOperation<V> operation) throws InterruptedException, RaftException {
+        try {
+            return doActionAsync(operation).get();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof NotLeaderException) {
+                throw (NotLeaderException) cause;
+            }
+            if (cause instanceof NoLeaderException) {
+                throw (NoLeaderException) cause;
+            }
+            throw new RaftException(e.getCause());
+        }
+    }
+
+    public <V> ListenableFuture<V> doActionAsync(KeyOperation<V> operation) throws RaftException {
+        KvEntry entry = operation.serialize();
 
         log.debug("Proposing operation {}", entry.getAction());
 
-        return (V) raft.commit(entry.build().toByteArray());
+        return (ListenableFuture<V>) raft.commitAsync(entry.toByteArray());
     }
 
     @Override
@@ -81,9 +98,6 @@ public class KeyValueStateMachine implements StateMachine {
 
             long storeId = entry.getStoreId();
 
-            ByteString key = entry.getKey();
-            ByteString value = entry.getValue();
-
             KeyValueStore keyValueStore = getKeyValueStore(storeId);
 
             KeyOperation<?> operation;
@@ -91,24 +105,20 @@ public class KeyValueStateMachine implements StateMachine {
             switch (entry.getAction()) {
 
             case APPEND:
-                operation = new AppendOperation(key, value);
+                operation = new AppendOperation(entry);
                 break;
 
             case DELETE:
-                operation = new DeleteOperation(key);
+                operation = new DeleteOperation(entry);
                 break;
 
             case INCREMENT: {
-                long delta = 1;
-                if (entry.hasIncrementBy()) {
-                    delta = entry.getIncrementBy();
-                }
-                operation = new IncrementOperation(key, delta);
+                operation = new IncrementOperation(entry);
                 break;
             }
 
             case SET:
-                operation = new SetOperation(key, Value.deserialize(entry.getValue().asReadOnlyByteBuffer()));
+                operation = new SetOperation(entry);
                 break;
 
             default:
@@ -163,9 +173,10 @@ public class KeyValueStateMachine implements StateMachine {
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
 
-    public BtreeQuery scan(long storeId, Keyspace keyspace) {
+    public BtreeQuery scan(long storeId, Keyspace keyspace, ByteString keyPrefix) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
-        return keyValueStore.buildQuery(keyspace, true);
+        boolean stripKeyspace = true;
+        return keyValueStore.buildQuery(keyspace, stripKeyspace, keyPrefix);
     }
 
 }

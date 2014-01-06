@@ -24,7 +24,7 @@ public class SetCommand implements RedisCommand {
 
         ByteString value = command.getByteString(2);
 
-        SetOperation operation = new SetOperation(qualifiedKey, Value.fromRawBytes(value));
+        SetOperation operation = SetOperation.build(server.getStoreId(), qualifiedKey, Value.fromRawBytes(value));
         server.doAction(operation);
 
         return StatusRedisResponse.OK;

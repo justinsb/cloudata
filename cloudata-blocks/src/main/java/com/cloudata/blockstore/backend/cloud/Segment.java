@@ -639,7 +639,7 @@ public class Segment {
 
                                     Modifier modifier;
                                     if (currentKeyValueVersion == null) {
-                                        modifier = new IfNotExists();
+                                        modifier = IfNotExists.INSTANCE;
                                     } else {
                                         modifier = new IfVersion(currentKeyValueVersion);
                                     }

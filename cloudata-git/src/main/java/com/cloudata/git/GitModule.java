@@ -8,7 +8,7 @@ import org.jclouds.providers.Providers;
 import com.cloudata.auth.AuthenticationManager;
 import com.cloudata.clients.keyvalue.KeyValuePath;
 import com.cloudata.clients.keyvalue.KeyValueStore;
-import com.cloudata.clients.keyvalue.RedisKeyValueStore;
+import com.cloudata.clients.keyvalue.redis.RedisKeyValueStore;
 import com.cloudata.git.jgit.CloudGitRepositoryStore;
 import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.git.services.JCloudsAuthenticationManager;

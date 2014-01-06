@@ -25,7 +25,7 @@ import org.robotninjas.barge.Replica;
 
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.keyvalue.KeyValueProto.KvAction;
+import com.cloudata.keyvalue.KeyValueLog.KvAction;
 import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.operation.DeleteOperation;
 import com.cloudata.keyvalue.operation.IncrementOperation;
@@ -63,7 +63,7 @@ public class KeyValueEndpoint {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response query() throws IOException {
-        BtreeQuery query = stateMachine.scan(storeId, getKeyspace());
+        BtreeQuery query = stateMachine.scan(storeId, getKeyspace(), null);
 
         query.setFormat(MediaType.APPLICATION_OCTET_STREAM_TYPE);
         return Response.ok(query).build();
@@ -96,15 +96,15 @@ public class KeyValueEndpoint {
             switch (action) {
             case SET: {
                 Value value = Value.fromRawBytes(v);
-                SetOperation operation = new SetOperation(qualifiedKey, value);
-                stateMachine.doAction(storeId, operation);
+                SetOperation operation = SetOperation.build(storeId, qualifiedKey, value);
+                stateMachine.doActionSync(operation);
                 ret = null;
                 break;
             }
 
             case INCREMENT: {
-                IncrementOperation operation = new IncrementOperation(qualifiedKey, 1);
-                Long newValue = stateMachine.doAction(storeId, operation);
+                IncrementOperation operation = IncrementOperation.build(storeId, qualifiedKey, 1);
+                Long newValue = stateMachine.doActionSync(operation);
                 ret = Value.fromLong(newValue).asBytes();
                 break;
             }
@@ -138,7 +138,7 @@ public class KeyValueEndpoint {
             Keyspace keyspace = getKeyspace();
             ByteString qualifiedKey = keyspace.mapToKey(k);
 
-            stateMachine.doAction(storeId, new DeleteOperation(qualifiedKey));
+            stateMachine.doActionSync(DeleteOperation.build(storeId, qualifiedKey));
 
             return Response.noContent().build();
         } catch (InterruptedException e) {

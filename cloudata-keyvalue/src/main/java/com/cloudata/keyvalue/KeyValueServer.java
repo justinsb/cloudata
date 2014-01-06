@@ -17,6 +17,8 @@ import org.robotninjas.barge.Replica;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.protobuf.KeyValueProtobufEndpoint;
+import com.cloudata.keyvalue.protobuf.ProtobufServer;
 import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
@@ -25,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
+import com.google.protobuf.Service;
 
 public class KeyValueServer {
     private static final Logger log = LoggerFactory.getLogger(KeyValueServer.class);
@@ -37,14 +40,18 @@ public class KeyValueServer {
     private final SocketAddress redisSocketAddress;
     private RedisEndpoint redisEndpoint;
     private Server jetty;
+    private final SocketAddress protobufSocketAddress;
+
+    private ProtobufServer protobufServer;
 
     public KeyValueServer(File baseDir, Replica local, List<Replica> peers, int httpPort,
-            SocketAddress redisSocketAddress) {
+            SocketAddress redisSocketAddress, SocketAddress protobufSocketAddress) {
         this.baseDir = baseDir;
         this.local = local;
         this.peers = peers;
         this.httpPort = httpPort;
         this.redisSocketAddress = redisSocketAddress;
+        this.protobufSocketAddress = protobufSocketAddress;
     }
 
     public synchronized void start() throws Exception {
@@ -95,6 +102,17 @@ public class KeyValueServer {
             this.redisEndpoint = new RedisEndpoint(redisSocketAddress, redisServer);
             this.redisEndpoint.start();
         }
+
+        if (protobufSocketAddress != null) {
+            this.protobufServer = new ProtobufServer(protobufSocketAddress);
+
+            KeyValueProtobufEndpoint endpoint = injector.getInstance(KeyValueProtobufEndpoint.class);
+            Service service = KeyValueProtocol.KeyValueService.newReflectiveService(endpoint);
+
+            protobufServer.addService(service);
+
+            this.protobufServer.start();
+        }
     }
 
     public String getHttpUrl() {
@@ -112,9 +130,12 @@ public class KeyValueServer {
         File baseDir = new File(args[0]);
         int httpPort = (9990 + port);
         int redisPort = 6379 + port;
+        int protobufPort = 2000 + port;
 
         SocketAddress redisSocketAddress = new InetSocketAddress(redisPort);
-        final KeyValueServer server = new KeyValueServer(baseDir, local, members, httpPort, redisSocketAddress);
+        SocketAddress protobufSocketAddress = new InetSocketAddress(protobufPort);
+        final KeyValueServer server = new KeyValueServer(baseDir, local, members, httpPort, redisSocketAddress,
+                protobufSocketAddress);
         server.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -145,6 +166,15 @@ public class KeyValueServer {
             redisEndpoint = null;
         }
 
+        if (protobufServer != null) {
+            try {
+                protobufServer.stop();
+            } catch (Exception e) {
+                throw Throwables.propagate(e);
+            }
+            protobufServer = null;
+        }
+
         if (raft != null) {
             raft.stopAsync().awaitTerminated();
             raft = null;
@@ -153,6 +183,10 @@ public class KeyValueServer {
 
     public SocketAddress getRedisSocketAddress() {
         return redisSocketAddress;
+    }
+
+    public SocketAddress getProtobufSocketAddress() {
+        return protobufSocketAddress;
     }
 
 }

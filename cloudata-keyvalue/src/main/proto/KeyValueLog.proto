@@ -6,6 +6,9 @@ message KvEntry {
 	optional bytes key = 3;
 	optional bytes value = 4;
 	optional int64 increment_by = 5;
+	
+	optional bytes if_value = 10;
+	optional bool if_not_exists = 11;
 }
 
 enum KvAction {

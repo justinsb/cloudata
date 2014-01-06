@@ -7,7 +7,7 @@ import com.cloudata.btree.Btree;
 import com.cloudata.btree.Keyspace;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.btree.operation.ComplexOperation;
-import com.cloudata.btree.operation.SetOperation;
+import com.cloudata.btree.operation.SimpleSetOperation;
 import com.cloudata.structured.StructuredProto.LogAction;
 import com.cloudata.structured.StructuredProto.LogEntry;
 import com.cloudata.structured.StructuredStore;
@@ -53,7 +53,7 @@ public class StructuredSetOperation implements StructuredOperation<Void>, Comple
         ByteString qualifiedKey = keyspace.mapToKey(key);
 
         // Set the value
-        txn.doAction(btree, new SetOperation(qualifiedKey, newValue));
+        txn.doAction(btree, new SimpleSetOperation(qualifiedKey, newValue));
 
         // Update the key dictionary
         JsonObject json = newValue.asJsonObject();

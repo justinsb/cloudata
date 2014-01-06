@@ -8,6 +8,7 @@ import com.cloudata.keyvalue.redis.RedisSession;
 import com.cloudata.keyvalue.redis.response.ErrorRedisReponse;
 import com.cloudata.keyvalue.redis.response.IntegerRedisResponse;
 import com.cloudata.keyvalue.redis.response.RedisResponse;
+import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
 public class AppendCommand implements RedisCommand {
@@ -23,7 +24,7 @@ public class AppendCommand implements RedisCommand {
 
         ByteString value = command.getByteString(2);
 
-        AppendOperation operation = new AppendOperation(qualifiedKey, value);
+        AppendOperation operation = AppendOperation.build(server.getStoreId(), qualifiedKey, Value.fromRawBytes(value));
         Number ret = server.doAction(operation);
 
         return IntegerRedisResponse.valueOf(ret.longValue());

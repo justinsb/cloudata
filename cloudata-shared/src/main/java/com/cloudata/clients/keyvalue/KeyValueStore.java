@@ -2,6 +2,7 @@ package com.cloudata.clients.keyvalue;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
@@ -18,4 +19,6 @@ public interface KeyValueStore {
     ListenableFuture<Boolean> putAsync(int space, ByteString key, ByteString value, Modifier... modifiers);
 
     boolean putSync(int space, ByteString key, ByteString value, Modifier... modifiers) throws IOException;
+
+    ListenableFuture<Integer> delete(int keyspaceId, List<ByteString> keys);
 }

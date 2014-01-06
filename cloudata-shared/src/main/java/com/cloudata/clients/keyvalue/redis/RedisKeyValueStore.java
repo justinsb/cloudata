@@ -1,4 +1,4 @@
-package com.cloudata.clients.keyvalue;
+package com.cloudata.clients.keyvalue.redis;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -16,6 +16,11 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
+import com.cloudata.clients.keyvalue.IfNotExists;
+import com.cloudata.clients.keyvalue.IfVersion;
+import com.cloudata.clients.keyvalue.KeyValueEntry;
+import com.cloudata.clients.keyvalue.KeyValueStore;
+import com.cloudata.clients.keyvalue.Modifier;
 import com.cloudata.pool.Pool;
 import com.cloudata.pool.Pooled;
 import com.cloudata.pool.SimplePool;
@@ -325,6 +330,33 @@ public class RedisKeyValueStore implements KeyValueStore {
                 return putSync(space, key, value, modifiers);
             }
 
+        });
+    }
+
+    @Override
+    public ListenableFuture<Integer> delete(final int keyspaceId, List<ByteString> keys) {
+        final byte[][] keyBytes = new byte[keys.size()][];
+        for (int i = 0; i < keys.size(); i++) {
+            keyBytes[i] = keys.get(i).toByteArray();
+        }
+
+        return executor.submit(new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                try (Pooled<RedisClient> lease = clientPool.borrow()) {
+                    Jedis client = lease.get().getClient();
+
+                    if (client.getDB().intValue() != keyspaceId) {
+                        client.select(keyspaceId);
+                    }
+
+                    Long deleted = client.del(keyBytes);
+                    if (deleted == null) {
+                        return null;
+                    }
+                    return deleted.intValue();
+                }
+            }
         });
     }
 
