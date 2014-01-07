@@ -21,8 +21,8 @@ public class BranchPage extends Page {
 
     Mutable mutable;
 
-    public BranchPage(Page parent, int pageNumber, ByteBuffer buffer) {
-        super(parent, pageNumber, buffer);
+    public BranchPage(Btree btree, Page parent, int pageNumber, ByteBuffer buffer) {
+        super(btree, parent, pageNumber, buffer);
     }
 
     static class Mutable {
@@ -144,7 +144,7 @@ public class BranchPage extends Page {
 
                 int pageNumber = entry.pageNumber;
 
-                Page childPage = txn.getPage(page, pageNumber);
+                Page childPage = txn.getPage(page.btree, page, pageNumber);
 
                 boolean keepGoing = childPage.walk(txn, from, listener);
                 if (!keepGoing) {
@@ -166,7 +166,7 @@ public class BranchPage extends Page {
                 }
 
                 ByteBuffer oldKey = entry.key;
-                Page childPage = txn.getPage(page, pageNumber);
+                Page childPage = txn.getPage(page.btree, page, pageNumber);
 
                 ByteBuffer newKey = childPage.getKeyLbound();
                 entries.set(i, new Entry(newKey, pageNumber));
@@ -363,7 +363,7 @@ public class BranchPage extends Page {
         while (pos < n) {
             int pageNumber = getPageNumber(pos);
 
-            Page page = txn.getPage(this, pageNumber);
+            Page page = txn.getPage(btree, this, pageNumber);
             boolean keepGoing = page.walk(txn, from, listener);
             if (!keepGoing) {
                 return false;
@@ -421,7 +421,7 @@ public class BranchPage extends Page {
 
         int pageNumber = getPageNumber(pos);
 
-        Page childPage = txn.getPage(this, pageNumber);
+        Page childPage = txn.getPage(btree, this, pageNumber);
 
         ByteBuffer oldLbound = childPage.getKeyLbound();
 
@@ -491,12 +491,12 @@ public class BranchPage extends Page {
         }
     }
 
-    public static BranchPage createNew(Page parent, int pageNumber, Page childPage) {
+    public static BranchPage createNew(Btree btree, Page parent, int pageNumber, Page childPage) {
         ByteBuffer empty = ByteBuffer.allocate(6);
         empty.putShort((short) 0);
         empty.flip();
 
-        BranchPage page = new BranchPage(parent, pageNumber, empty);
+        BranchPage page = new BranchPage(btree, parent, pageNumber, empty);
         page.getMutable().setChildren(childPage);
 
         return page;

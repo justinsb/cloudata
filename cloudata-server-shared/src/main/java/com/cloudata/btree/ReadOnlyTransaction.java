@@ -9,16 +9,16 @@ public class ReadOnlyTransaction extends Transaction {
     final int rootPageId;
     final long snapshotTransactionId;
 
-    public ReadOnlyTransaction(PageStore pageStore, int rootPageId, long snapshotTransactionId) {
-        super(pageStore, null);
+    public ReadOnlyTransaction(Database db, int rootPageId, long snapshotTransactionId) {
+        super(db, null);
         this.rootPageId = rootPageId;
         this.snapshotTransactionId = snapshotTransactionId;
     }
 
     @Override
-    public Page getPage(Page parent, int pageNumber) {
+    public Page getPage(Btree btree, Page parent, int pageNumber) {
         // TODO: Should we have a small cache?
-        return pageStore.fetchPage(parent, pageNumber).page;
+        return db.pageStore.fetchPage(btree, parent, pageNumber).page;
     }
 
     @Override
@@ -30,7 +30,7 @@ public class ReadOnlyTransaction extends Transaction {
             throw new IllegalStateException();
         }
 
-        return getPage(null, rootPageId);
+        return getPage(btree, null, rootPageId);
     }
 
     public long getSnapshotTransactionId() {

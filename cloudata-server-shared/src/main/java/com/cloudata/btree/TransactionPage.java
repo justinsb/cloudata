@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.freemap.SpaceMapEntry;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 public class TransactionPage extends Page {
@@ -149,15 +150,15 @@ public class TransactionPage extends Page {
 
     Mutable mutable;
 
-    TransactionPage(Page parent, int pageNumber, ByteBuffer buffer) {
-        super(parent, pageNumber, buffer);
+    TransactionPage(Btree btree, Page parent, int pageNumber, ByteBuffer buffer) {
+        super(btree, parent, pageNumber, buffer);
 
-        if (parent != null) {
-            throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument(btree == null);
+        Preconditions.checkArgument(parent == null);
     }
 
-    int getPreviousTransactionPageId() {
+    public int getPreviousTransactionPageId() {
+        Preconditions.checkState(mutable == null);
         assert mutable == null;
         return buffer.getInt(OFFSET_PREVIOUS_TRANSACTION_PAGE_ID);
     }
@@ -173,7 +174,7 @@ public class TransactionPage extends Page {
         empty.putShort(OFFSET_FORMAT_VERSION, VERSION_1);
         empty.putLong(OFFSET_TRANSACTION_ID, transactionId);
 
-        return new TransactionPage(null, pageNumber, empty);
+        return new TransactionPage(null, null, pageNumber, empty);
     }
 
     @Override

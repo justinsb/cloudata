@@ -45,9 +45,9 @@ public class TestBtree {
     private Btree buildBtree() throws IOException {
         File data = new File(folder.getRoot(), UUID.randomUUID().toString());
         boolean uniqueKeys = true;
-        PageStore pageStore = MmapPageStore.build(data, uniqueKeys);
-
-        Btree btree = new Btree(pageStore, uniqueKeys);
+        PageStore pageStore = MmapPageStore.build(data);
+        Database db = new Database(pageStore);
+        Btree btree = new Btree(db, uniqueKeys);
         return btree;
     }
 

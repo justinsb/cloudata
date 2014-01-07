@@ -8,11 +8,14 @@ import java.util.List;
 import com.cloudata.btree.operation.RowOperation;
 
 public abstract class Page {
+    protected final Btree btree;
     protected final Page parent;
+
     protected final ByteBuffer buffer;
     private final int originalPageNumber;
 
-    protected Page(Page parent, int pageNumber, ByteBuffer buffer) {
+    protected Page(Btree btree, Page parent, int pageNumber, ByteBuffer buffer) {
+        this.btree = btree;
         this.parent = parent;
         this.originalPageNumber = pageNumber;
         this.buffer = buffer;
@@ -53,6 +56,10 @@ public abstract class Page {
         PrintStream ps = new PrintStream(baos);
         dump(ps);
         return new String(baos.toByteArray());
+    }
+
+    public Btree getBtree() {
+        return btree;
     }
 
 }

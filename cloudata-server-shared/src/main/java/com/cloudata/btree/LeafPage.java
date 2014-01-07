@@ -44,9 +44,9 @@ public class LeafPage extends Page {
 
     final boolean uniqueKeys;
 
-    public LeafPage(Page parent, int pageNumber, ByteBuffer buffer, boolean uniqueKeys) {
-        super(parent, pageNumber, buffer);
-        this.uniqueKeys = uniqueKeys;
+    public LeafPage(Btree btree, Page parent, int pageNumber, ByteBuffer buffer) {
+        super(btree, parent, pageNumber, buffer);
+        this.uniqueKeys = btree.isUniqueKeys();
     }
 
     static class Mutable {
@@ -56,6 +56,8 @@ public class LeafPage extends Page {
         final List<Entry> entries;
         int totalKeySize;
         int totalValueSize;
+
+        final Btree btree;
 
         int firstGTE(ByteBuffer find) {
             int n = getEntryCount();
@@ -146,6 +148,7 @@ public class LeafPage extends Page {
         }
 
         Mutable(LeafPage page) {
+            this.btree = page.btree;
             this.uniqueKeys = page.uniqueKeys;
             int n = page.getEntryCount();
 
@@ -189,7 +192,7 @@ public class LeafPage extends Page {
                         target = original;
                     } else {
                         int pageNumber = transaction.assignPageNumber();
-                        target = LeafPage.createNew(original.parent, pageNumber, uniqueKeys);
+                        target = LeafPage.createNew(btree, original.parent, pageNumber);
                         extraPages.add(target);
                     }
 
@@ -517,7 +520,7 @@ public class LeafPage extends Page {
         return PAGE_TYPE;
     }
 
-    public static LeafPage createNew(Page parent, int pageNumber, boolean uniqueKeys) {
+    public static LeafPage createNew(Btree btree, Page parent, int pageNumber) {
         // TODO: Reuse a shared buffer?
         ByteBuffer empty = ByteBuffer.allocate(6);
         empty.putShort((short) 0);
@@ -526,7 +529,7 @@ public class LeafPage extends Page {
 
         empty.flip();
 
-        return new LeafPage(parent, pageNumber, empty, uniqueKeys);
+        return new LeafPage(btree, parent, pageNumber, empty);
     }
 
     @Override

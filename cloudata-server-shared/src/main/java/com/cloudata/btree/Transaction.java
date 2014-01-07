@@ -15,18 +15,18 @@ import com.google.common.base.Preconditions;
 public abstract class Transaction implements AutoCloseable {
     private static final Logger log = LoggerFactory.getLogger(Transaction.class);
 
-    final PageStore pageStore;
+    final Database db;
 
     private final Lock lock;
 
     boolean releasedLock;
 
-    public Transaction(PageStore pageStore, Lock lock) {
-        this.pageStore = pageStore;
+    public Transaction(Database db, Lock lock) {
+        this.db = db;
         this.lock = lock;
     }
 
-    public abstract Page getPage(Page parent, int pageNumber);
+    public abstract Page getPage(Btree btree, Page parent, int pageNumber);
 
     public void walk(Btree btree, ByteBuffer from, EntryListener listener) {
         Page rootPage = getRootPage(btree, false);
@@ -81,7 +81,7 @@ public abstract class Transaction implements AutoCloseable {
     public void close() {
         unlock();
 
-        pageStore.finished(this);
+        db.transactionTracker.finished(this);
     }
 
     protected void unlock() {

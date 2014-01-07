@@ -6,12 +6,12 @@ import java.util.List;
 
 import com.cloudata.btree.EntryListener;
 import com.cloudata.btree.Page;
-import com.cloudata.btree.PageStore;
-import com.cloudata.btree.PageStore.PageRecord;
+import com.cloudata.btree.PageRecord;
 import com.cloudata.btree.Transaction;
 import com.cloudata.btree.TransactionPage;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.btree.operation.RowOperation;
+import com.google.common.base.Preconditions;
 
 public class FreeSpaceMap {
 
@@ -62,10 +62,10 @@ public class FreeSpaceMap {
         return fsm;
     }
 
-    public SpaceMapEntry writeSnapshot(PageStore pageStore) {
+    public SnapshotPage buildSnapshotPage() {
         ByteBuffer empty = ByteBuffer.allocate(0);
-        SnapshotPage page = new SnapshotPage(null, Integer.MIN_VALUE, empty);
-        return pageStore.writePage(page);
+        SnapshotPage page = new SnapshotPage(Integer.MIN_VALUE, empty);
+        return page;
     }
 
     public int allocate(int size) {
@@ -104,8 +104,8 @@ public class FreeSpaceMap {
     // }
 
     public class SnapshotPage extends Page {
-        protected SnapshotPage(Page parent, int pageNumber, ByteBuffer buffer) {
-            super(parent, pageNumber, buffer);
+        protected SnapshotPage(int pageNumber, ByteBuffer buffer) {
+            super(null, null, pageNumber, buffer);
         }
 
         RangeTree deserialize() {

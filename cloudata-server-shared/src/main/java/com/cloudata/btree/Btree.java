@@ -9,24 +9,24 @@ import org.slf4j.LoggerFactory;
 public class Btree {
     private static final Logger log = LoggerFactory.getLogger(Btree.class);
 
-    final PageStore pageStore;
+    final Database db;
     final boolean uniqueKeys;
 
     final Lock writeLock = new ReentrantLock();
 
-    public Btree(PageStore pageStore, boolean uniqueKeys) {
-        this.pageStore = pageStore;
+    public Btree(Database db, boolean uniqueKeys) {
+        this.db = db;
         this.uniqueKeys = uniqueKeys;
     }
 
     public WriteTransaction beginReadWrite() {
         writeLock.lock();
-        WriteTransaction txn = pageStore.beginReadWriteTransaction(writeLock);
+        WriteTransaction txn = db.transactionTracker.beginReadWriteTransaction(writeLock);
         return txn;
     }
 
     public ReadOnlyTransaction beginReadOnly() {
-        ReadOnlyTransaction txn = pageStore.beginReadOnlyTransaction();
+        ReadOnlyTransaction txn = db.transactionTracker.beginReadOnlyTransaction();
         return txn;
     }
 

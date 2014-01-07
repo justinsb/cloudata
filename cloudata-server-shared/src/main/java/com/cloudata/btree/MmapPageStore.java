@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
-import java.util.Collections;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.freemap.FreeSpaceMap;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.cloudata.util.Mmap;
-import com.google.common.collect.Lists;
 
 public class MmapPageStore extends PageStore {
 
@@ -21,88 +18,15 @@ public class MmapPageStore extends PageStore {
 
     final MappedByteBuffer buffer;
 
-    final boolean uniqueKeys;
-
-    final FreeSpaceMap freeSpaceMap;
-
-    final List<SpaceMapEntry> deferredReclaim;
-
     private static final int ALIGNMENT = 256;
 
-    private static final int HEADER_SIZE = 16384;
-
-    private static final int MASTERPAGE_SLOTS = 8;
-
-    private static final boolean DUMP_PAGES = false;
-
-    private MmapPageStore(MappedByteBuffer buffer, boolean uniqueKeys) {
+    private MmapPageStore(MappedByteBuffer buffer) {
         this.buffer = buffer;
-        this.uniqueKeys = uniqueKeys;
-        this.deferredReclaim = Lists.newArrayList();
-
-        MasterPage latest = null;
-        for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
-            int position = i * MasterPage.SIZE;
-            MasterPage metadataPage = new MasterPage(buffer, position);
-            if (latest == null) {
-                latest = metadataPage;
-            } else if (latest.getTransactionId() < metadataPage.getTransactionId()) {
-                latest = metadataPage;
-            }
-        }
-
-        this.nextTransactionId = latest.getTransactionId() + 1;
-        setCurrent(latest.getRoot(), latest.getTransactionId(), latest.getTransactionPageId());
-
-        this.freeSpaceMap = recoverFreeSpaceMap(latest);
 
         this.buffer.position(HEADER_SIZE);
     }
 
-    private FreeSpaceMap recoverFreeSpaceMap(MasterPage latest) {
-        int transactionPageId = latest.getTransactionPageId();
-        List<PageRecord> history = Lists.newArrayList();
-        PageRecord fsmSnapshot = null;
-
-        // Walk the list of transactions backwards until we find a FSM snapshot
-        if (transactionPageId != 0) {
-            PageRecord current = fetchPage(null, transactionPageId);
-
-            while (true) {
-                TransactionPage transactionPage = (TransactionPage) current.page;
-                history.add(current);
-                if (transactionPage.getFreeSpaceSnapshotId() != 0) {
-                    fsmSnapshot = fetchPage(null, transactionPage.getFreeSpaceSnapshotId());
-                    break;
-                }
-
-                int previousTransactionPageId = transactionPage.getPreviousTransactionPageId();
-                if (previousTransactionPageId == 0) {
-                    break;
-                }
-                PageRecord previous = fetchPage(null, previousTransactionPageId);
-                assert (previous != null);
-                current = previous;
-            }
-
-            Collections.reverse(history);
-        }
-
-        FreeSpaceMap fsm;
-        if (fsmSnapshot == null) {
-            fsm = FreeSpaceMap.createEmpty(HEADER_SIZE / ALIGNMENT, this.buffer.limit() / ALIGNMENT);
-        } else {
-            fsm = FreeSpaceMap.createFromSnapshot(fsmSnapshot);
-        }
-
-        for (PageRecord txnRecord : history) {
-            fsm.replay(txnRecord);
-        }
-
-        return fsm;
-    }
-
-    public static MmapPageStore build(File data, boolean uniqueKeys) throws IOException {
+    public static MmapPageStore build(File data) throws IOException {
         if (!data.exists()) {
             long size = 1024L * 1024L * 64L;
             MappedByteBuffer mmap = Mmap.mmapFile(data, size);
@@ -112,17 +36,17 @@ public class MmapPageStore extends PageStore {
                 MasterPage.create(mmap, 0, 0, 0);
             }
 
-            return new MmapPageStore(mmap, uniqueKeys);
+            return new MmapPageStore(mmap);
         } else {
             long size = data.length();
             MappedByteBuffer mmap = Mmap.mmapFile(data, size);
 
-            return new MmapPageStore(mmap, uniqueKeys);
+            return new MmapPageStore(mmap);
         }
     }
 
     @Override
-    public PageRecord fetchPage(Page parent, int pageNumber) {
+    public PageRecord fetchPage(Btree btree, Page parent, int pageNumber) {
         int offset = pageNumber * ALIGNMENT;
 
         PageHeader header = new PageHeader(buffer, offset);
@@ -139,41 +63,13 @@ public class MmapPageStore extends PageStore {
             space = new SpaceMapEntry(pageNumber, slots);
         }
 
-        Page page;
-
-        switch (header.getPageType()) {
-        case BranchPage.PAGE_TYPE:
-            page = new BranchPage(parent, pageNumber, header.getPageSlice());
-            break;
-
-        case LeafPage.PAGE_TYPE:
-            page = new LeafPage(parent, pageNumber, header.getPageSlice(), uniqueKeys);
-            break;
-
-        case TransactionPage.PAGE_TYPE:
-            page = new TransactionPage(parent, pageNumber, header.getPageSlice());
-            break;
-
-        default:
-            throw new IllegalStateException();
-        }
-
-        if (log.isDebugEnabled()) {
-            log.debug("Fetched page {}: {}", pageNumber, page);
-        }
-
-        if (DUMP_PAGES) {
-            synchronized (System.out) {
-                page.dump(System.out);
-                System.out.flush();
-            }
-        }
+        Page page = buildPage(btree, parent, pageNumber, header.getPageType(), header.getPageSlice());
 
         return new PageRecord(page, space);
     }
 
     @Override
-    public SpaceMapEntry writePage(Page page) {
+    SpaceMapEntry writePage(TransactionTracker tracker, Page page) {
         int dataSize = page.getSerializedSize();
 
         int totalSize = dataSize + PageHeader.HEADER_SIZE;
@@ -190,14 +86,8 @@ public class MmapPageStore extends PageStore {
             if ((totalSize % ALIGNMENT) != 0) {
                 allocateSlots++;
             }
-            int allocated = freeSpaceMap.allocate(allocateSlots);
-            if (allocated < 0) {
-                // TODO: Grow database
-                throw new IllegalStateException();
-            }
-
-            position = allocated * ALIGNMENT;
-            allocation = new SpaceMapEntry(allocated, allocateSlots);
+            allocation = tracker.allocate(allocateSlots);
+            position = allocation.start * ALIGNMENT;
         }
 
         // if (totalSize > buffer.remaining()) {
@@ -235,50 +125,32 @@ public class MmapPageStore extends PageStore {
     }
 
     @Override
-    public SpaceMapEntry commitTransaction(TransactionPage transactionPage) {
-        // Shouldn't need to be synchronized, but harmless...
-        synchronized (this) {
-            transactionPage.setPreviousTransactionPageId(currentTransactionPage);
+    protected ByteBuffer readDirect(int offset, int length) {
+        assert (offset + length) < HEADER_SIZE;
 
-            if (deferredReclaim.size() > 64) {
-                freeSpaceMap.reclaimAll(deferredReclaim);
-
-                SpaceMapEntry fsmPageId = freeSpaceMap.writeSnapshot(this);
-                transactionPage.setFreeSpaceSnapshotId(fsmPageId.getPageId());
-
-                deferredReclaim.clear();
-            }
-
-            long transactionId = transactionPage.getTransactionId();
-
-            SpaceMapEntry transactionPageId = writePage(transactionPage);
-
-            int newRootPage = transactionPage.getRootPageId();
-
-            int slot = (int) (transactionId % MASTERPAGE_SLOTS);
-
-            int position = slot * MasterPage.SIZE;
-
-            ByteBuffer mmap = this.buffer.duplicate();
-            mmap.position(position);
-
-            MasterPage.create(mmap, newRootPage, transactionPageId.getPageId(), transactionId);
-
-            log.info("Committing transaction {}.  New root={}", transactionId, newRootPage);
-
-            setCurrent(newRootPage, transactionId, transactionPageId.getPageId());
-
-            return transactionPageId;
-        }
+        ByteBuffer mmap = this.buffer.duplicate();
+        mmap.position(offset);
+        mmap.limit(offset + length);
+        return mmap.slice();
     }
 
     @Override
-    protected void reclaim(WriteTransaction txn, SpaceMapEntry txnSpace) {
-        synchronized (this) {
-            deferredReclaim.addAll(txn.getFreed());
-            // TODO: Any reason not to release the transaction at the same time?
-            deferredReclaim.add(txnSpace);
-        }
+    protected void writeDirect(int offset, ByteBuffer src) {
+        assert (offset + src.remaining()) < HEADER_SIZE;
+
+        ByteBuffer mmap = this.buffer.duplicate();
+        mmap.position(offset);
+        mmap.put(src);
+    }
+
+    @Override
+    public FreeSpaceMap createEmptyFreeSpaceMap() {
+        return FreeSpaceMap.createEmpty(HEADER_SIZE / ALIGNMENT, this.buffer.limit() / ALIGNMENT);
+    }
+
+    @Override
+    protected void sync() {
+        this.buffer.force();
     }
 
 }

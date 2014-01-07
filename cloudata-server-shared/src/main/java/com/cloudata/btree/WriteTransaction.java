@@ -9,7 +9,6 @@ import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.btree.PageStore.PageRecord;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -52,13 +51,13 @@ public class WriteTransaction extends Transaction {
         }
     }
 
-    public WriteTransaction(PageStore pageStore, Lock lock, int rootPageId) {
-        super(pageStore, lock);
+    public WriteTransaction(Database db, Lock lock, int rootPageId) {
+        super(db, lock);
         this.rootPageId = rootPageId;
     }
 
     @Override
-    public Page getPage(Page parent, int pageNumber) {
+    public Page getPage(Btree btree, Page parent, int pageNumber) {
         TrackedPage trackedPage = trackedPages.get(pageNumber);
         if (trackedPage == null) {
             TrackedPage trackedParent = null;
@@ -68,7 +67,7 @@ public class WriteTransaction extends Transaction {
                     throw new IllegalStateException();
                 }
             }
-            PageRecord pageRecord = pageStore.fetchPage(parent, pageNumber);
+            PageRecord pageRecord = db.pageStore.fetchPage(btree, parent, pageNumber);
             trackedPage = new TrackedPage(pageRecord.space, pageRecord.page, trackedParent, pageNumber);
             trackedPages.put(pageNumber, trackedPage);
         }
@@ -110,7 +109,7 @@ public class WriteTransaction extends Transaction {
                     } else {
                         int branchPageNumber = assignPageNumber();
 
-                        parentPage = BranchPage.createNew(null, branchPageNumber, page);
+                        parentPage = BranchPage.createNew(page.getBtree(), null, branchPageNumber, page);
 
                         trackedPage.parent = new TrackedPage(null, parentPage, null, branchPageNumber);
                         trackedPage.parent.dirtyCount++;
@@ -125,7 +124,7 @@ public class WriteTransaction extends Transaction {
                     }
                 }
 
-                SpaceMapEntry newEntry = pageStore.writePage(page);
+                SpaceMapEntry newEntry = db.pageStore.writePage(db.transactionTracker, page);
                 // page.changePageNumber(newPageNumber);
                 allocated.add(newEntry);
 
@@ -160,7 +159,7 @@ public class WriteTransaction extends Transaction {
 
         assert newRootPage != null;
 
-        long transactionId = pageStore.assignTransactionId();
+        long transactionId = db.transactionTracker.assignTransactionId();
         TransactionPage transactionPage = TransactionPage.createNew(assignPageNumber(), transactionId);
         transactionPage.setRootPageId(newRootPage);
         transactionPage.addToFreed(freed);
@@ -168,7 +167,7 @@ public class WriteTransaction extends Transaction {
 
         log.info("Freed pages: {}", Joiner.on(",").join(freed));
 
-        this.spaceMapEntry = pageStore.commitTransaction(transactionPage);
+        this.spaceMapEntry = db.transactionTracker.commitTransaction(transactionPage);
 
         this.transactionId = transactionId;
     }
@@ -206,13 +205,13 @@ public class WriteTransaction extends Transaction {
             }
             int pageNumber = assignPageNumber();
 
-            LeafPage newPage = LeafPage.createNew(null, pageNumber, btree.isUniqueKeys());
+            LeafPage newPage = LeafPage.createNew(btree, null, pageNumber);
             createNewPage(null, pageNumber, newPage);
 
             rootPageId = pageNumber;
         }
 
-        return getPage(null, rootPageId);
+        return getPage(btree, null, rootPageId);
     }
 
     public List<SpaceMapEntry> getFreed() {

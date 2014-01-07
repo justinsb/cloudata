@@ -1,57 +1,82 @@
 package com.cloudata.btree;
 
-import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.locks.Lock;
+import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.freemap.FreeSpaceMap;
 import com.cloudata.freemap.SpaceMapEntry;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Queues;
 
 public abstract class PageStore {
 
     private static final Logger log = LoggerFactory.getLogger(PageStore.class);
 
-    protected int currentTransactionPage;
-    private int currentRootPage;
-    private long currentTransactionId;
+    private static final boolean DUMP_PAGES = false;
 
-    private final List<ReadOnlyTransaction> readTransactions = Lists.newArrayList();
-    private WriteTransaction writeTransaction;
+    public static final int PAGENUMBER_MASTER = 0;
 
-    static class CleanupQueueEntry {
-        final WriteTransaction transaction;
-        final SpaceMapEntry space;
-        final long transactionId;
+    protected static final int HEADER_SIZE = 16384;
+    protected static final int MASTERPAGE_SLOTS = 8;
 
-        public CleanupQueueEntry(WriteTransaction transaction, SpaceMapEntry space) {
-            this.transaction = transaction;
-            this.transactionId = transaction.getTransactionId();
-            assert this.transactionId != 0;
-            this.space = space;
+    MasterPage findLatestMasterPage() {
+        ByteBuffer buffer = readDirect(0, HEADER_SIZE);
+
+        MasterPage latest = null;
+        for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
+            int position = i * MasterPage.SIZE;
+            MasterPage metadataPage = new MasterPage(buffer, position);
+            if (latest == null) {
+                latest = metadataPage;
+            } else if (latest.getTransactionId() < metadataPage.getTransactionId()) {
+                latest = metadataPage;
+            }
         }
+
+        return latest;
     }
 
-    final Queue<CleanupQueueEntry> writeTransactionCleanupQueue;
+    protected abstract ByteBuffer readDirect(int offset, int length);
 
-    public static class PageRecord {
-        public final Page page;
-        public final SpaceMapEntry space;
+    protected abstract void writeDirect(int offset, ByteBuffer src);
 
-        public PageRecord(Page page, SpaceMapEntry space) {
-            this.page = page;
-            this.space = space;
+    abstract FreeSpaceMap createEmptyFreeSpaceMap();
+
+    abstract PageRecord fetchPage(Btree btree, Page parent, int pageNumber);
+
+    protected Page buildPage(Btree btree, Page parent, int pageNumber, byte pageType, ByteBuffer pageBuffer) {
+        Page page;
+
+        switch (pageType) {
+        case BranchPage.PAGE_TYPE:
+            page = new BranchPage(btree, parent, pageNumber, pageBuffer);
+            break;
+
+        case LeafPage.PAGE_TYPE:
+            page = new LeafPage(btree, parent, pageNumber, pageBuffer);
+            break;
+
+        case TransactionPage.PAGE_TYPE:
+            page = new TransactionPage(btree, parent, pageNumber, pageBuffer);
+            break;
+
+        default:
+            throw new IllegalStateException();
         }
-    }
 
-    protected PageStore() {
-        writeTransactionCleanupQueue = Queues.newArrayDeque();
-    }
+        if (log.isDebugEnabled()) {
+            log.debug("Fetched page {}: {}", pageNumber, page);
+        }
 
-    public abstract PageRecord fetchPage(Page parent, int pageNumber);
+        if (DUMP_PAGES) {
+            synchronized (System.out) {
+                page.dump(System.out);
+                System.out.flush();
+            }
+        }
+
+        return page;
+    }
 
     /**
      * Writes the page to the PageStore (disk, usually)
@@ -59,86 +84,20 @@ public abstract class PageStore {
      * @param page
      * @return the new page number
      */
-    public abstract SpaceMapEntry writePage(Page page);
+    abstract SpaceMapEntry writePage(TransactionTracker tracker, Page page);
 
-    public abstract SpaceMapEntry commitTransaction(TransactionPage transaction);
+    void writeMasterPage(TransactionPage transactionPage, int transactionPageId) {
+        long transactionId = transactionPage.getTransactionId();
+        int newRootPage = transactionPage.getRootPageId();
 
-    protected long nextTransactionId;
+        int slot = (int) (transactionId % MASTERPAGE_SLOTS);
 
-    public long assignTransactionId() {
-        return nextTransactionId++;
+        ByteBuffer mmap = ByteBuffer.allocate(MasterPage.SIZE);
+        MasterPage.create(mmap, newRootPage, transactionPageId, transactionId);
+
+        int position = slot * MasterPage.SIZE;
+        writeDirect(position, mmap);
     }
 
-    public ReadOnlyTransaction beginReadOnlyTransaction() {
-        synchronized (this) {
-            log.info("Starting new read-only transaction with root page: {}", currentRootPage);
-            ReadOnlyTransaction txn = new ReadOnlyTransaction(this, currentRootPage, currentTransactionId);
-            readTransactions.add(txn);
-            return txn;
-        }
-    }
-
-    protected void setCurrent(int rootPage, long transactionId, int transactionPageId) {
-        synchronized (this) {
-            this.currentRootPage = rootPage;
-            this.currentTransactionId = transactionId;
-            this.currentTransactionPage = rootPage;
-        }
-    }
-
-    public WriteTransaction beginReadWriteTransaction(Lock writeLock) {
-        synchronized (this) {
-            if (writeTransaction != null) {
-                throw new IllegalStateException();
-            }
-
-            log.info("Starting new read-write transaction with root page: {}", currentRootPage);
-            writeTransaction = new WriteTransaction(this, writeLock, currentRootPage);
-            return writeTransaction;
-        }
-    }
-
-    public void finished(Transaction transaction) {
-        synchronized (this) {
-            boolean wasRead = false;
-
-            if (transaction == this.writeTransaction) {
-                if (writeTransaction.getTransactionId() != 0) {
-                    writeTransactionCleanupQueue.add(new CleanupQueueEntry(writeTransaction, writeTransaction
-                            .getTransactionSpaceMapEntry()));
-                } else {
-                    // Transaction rollback...
-                    if (!writeTransaction.getAllocated().isEmpty()) {
-                        throw new UnsupportedOperationException();
-                    }
-                }
-                this.writeTransaction = null;
-            } else {
-                if (!readTransactions.remove(transaction)) {
-                    throw new IllegalStateException();
-                }
-                wasRead = true;
-            }
-
-            if (!writeTransactionCleanupQueue.isEmpty()) {
-                long keepTransaction = Long.MAX_VALUE;
-                for (ReadOnlyTransaction readTransaction : readTransactions) {
-                    keepTransaction = Math.min(readTransaction.getSnapshotTransactionId(), keepTransaction);
-                }
-
-                while (!writeTransactionCleanupQueue.isEmpty()) {
-                    CleanupQueueEntry cleanupQueueEntry = writeTransactionCleanupQueue.peek();
-                    if (cleanupQueueEntry.transactionId >= keepTransaction) {
-                        break;
-                    }
-
-                    cleanupQueueEntry = writeTransactionCleanupQueue.remove();
-                    reclaim(cleanupQueueEntry.transaction, cleanupQueueEntry.space);
-                }
-            }
-
-        }
-    }
-
-    protected abstract void reclaim(WriteTransaction cleanup, SpaceMapEntry txnSpace);
+    protected abstract void sync();
 }

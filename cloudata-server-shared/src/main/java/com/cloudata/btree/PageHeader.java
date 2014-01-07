@@ -1,5 +1,7 @@
 package com.cloudata.btree;
 
+import io.netty.buffer.ByteBuf;
+
 import java.nio.ByteBuffer;
 
 import org.slf4j.Logger;
@@ -27,6 +29,11 @@ public class PageHeader {
         return pageType;
     }
 
+    public static byte getPageType(ByteBuf buf) {
+        byte pageType = buf.getByte(buf.readerIndex() + OFFSET_TYPE);
+        return pageType;
+    }
+
     public ByteBuffer getPageSlice() {
         int length = buffer.getInt(offset + OFFSET_LENGTH);
 
@@ -51,6 +58,11 @@ public class PageHeader {
 
     public int getDataSize() {
         int length = buffer.getInt(offset + OFFSET_LENGTH);
+        return length;
+    }
+
+    public static int getDataSize(ByteBuf buf) {
+        int length = buf.getInt(buf.readerIndex() + OFFSET_LENGTH);
         return length;
     }
 
