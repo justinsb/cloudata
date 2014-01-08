@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.freemap.FreeSpaceMap;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.cloudata.util.Mmap;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public class MmapPageStore extends PageStore {
-
     private static final Logger log = LoggerFactory.getLogger(MmapPageStore.class);
 
     final MappedByteBuffer buffer;
@@ -46,7 +47,7 @@ public class MmapPageStore extends PageStore {
     }
 
     @Override
-    public PageRecord fetchPage(Btree btree, Page parent, int pageNumber) {
+    public ListenableFuture<PageRecord> fetchPage(Btree btree, Page parent, int pageNumber) {
         int offset = pageNumber * ALIGNMENT;
 
         PageHeader header = new PageHeader(buffer, offset);
@@ -65,11 +66,11 @@ public class MmapPageStore extends PageStore {
 
         Page page = buildPage(btree, parent, pageNumber, header.getPageType(), header.getPageSlice());
 
-        return new PageRecord(page, space);
+        return Futures.immediateFuture(new PageRecord(page, space, null));
     }
 
     @Override
-    SpaceMapEntry writePage(TransactionTracker tracker, Page page) {
+    ListenableFuture<SpaceMapEntry> writePage(TransactionTracker tracker, Page page) {
         int dataSize = page.getSerializedSize();
 
         int totalSize = dataSize + PageHeader.HEADER_SIZE;
@@ -121,26 +122,28 @@ public class MmapPageStore extends PageStore {
         // buffer.position(buffer.position() + totalSize + padding);
         // assert (buffer.position() % ALIGNMENT) == 0;
 
-        return allocation;
+        return Futures.immediateFuture(allocation);
     }
 
     @Override
-    protected ByteBuffer readDirect(int offset, int length) {
-        assert (offset + length) < HEADER_SIZE;
+    protected ListenableFuture<ByteBuffer> readDirect(int offset, int length) {
+        assert (offset + length) <= HEADER_SIZE;
 
         ByteBuffer mmap = this.buffer.duplicate();
         mmap.position(offset);
         mmap.limit(offset + length);
-        return mmap.slice();
+        return Futures.immediateFuture(mmap.slice());
     }
 
     @Override
-    protected void writeDirect(int offset, ByteBuffer src) {
-        assert (offset + src.remaining()) < HEADER_SIZE;
+    protected ListenableFuture<Void> writeDirect(int offset, ByteBuffer src) {
+        assert (offset + src.remaining()) <= HEADER_SIZE;
 
         ByteBuffer mmap = this.buffer.duplicate();
         mmap.position(offset);
         mmap.put(src);
+
+        return Futures.immediateFuture(null);
     }
 
     @Override
@@ -151,6 +154,16 @@ public class MmapPageStore extends PageStore {
     @Override
     protected void sync() {
         this.buffer.force();
+    }
+
+    @Override
+    public void debugDump(StringBuilder sb) {
+        sb.append(this.toString());
+    }
+
+    @Override
+    public String toString() {
+        return "MmapPageStore [buffer=" + buffer + "]";
     }
 
 }

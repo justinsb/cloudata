@@ -31,9 +31,12 @@ public class TestBtree {
         for (int i = 1; i <= 10000; i++) {
             put(btree, key, bytes);
         }
+
+        System.out.println(btree.getDb().getPageStore().debugDump());
+        Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
     }
 
-    private void put(Btree btree, byte[] key, byte[] valueBytes) {
+    private void put(Btree btree, byte[] key, byte[] valueBytes) throws IOException {
         try (WriteTransaction txn = btree.beginReadWrite()) {
             Value value = Value.fromRawBytes(valueBytes);
             SimpleSetOperation operation = new SimpleSetOperation(ByteString.copyFrom(key), value);
@@ -45,8 +48,7 @@ public class TestBtree {
     private Btree buildBtree() throws IOException {
         File data = new File(folder.getRoot(), UUID.randomUUID().toString());
         boolean uniqueKeys = true;
-        PageStore pageStore = MmapPageStore.build(data);
-        Database db = new Database(pageStore);
+        Database db = Database.build(data);
         Btree btree = new Btree(db, uniqueKeys);
         return btree;
     }
@@ -69,6 +71,9 @@ public class TestBtree {
             byte[] expected = buildBytes(i * 1000);
             Assert.assertArrayEquals(expected, actual);
         }
+
+        System.out.println(btree.getDb().getPageStore().debugDump());
+        Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
     }
 
     private byte[] get(Btree btree, byte[] key) {
@@ -100,5 +105,8 @@ public class TestBtree {
             byte[] expected = buildBytes(i * 10000);
             Assert.assertArrayEquals(expected, actual);
         }
+
+        System.out.println(btree.getDb().getPageStore().debugDump());
+        Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
     }
 }

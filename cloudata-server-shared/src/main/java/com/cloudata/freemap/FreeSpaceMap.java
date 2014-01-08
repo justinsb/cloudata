@@ -4,6 +4,9 @@ import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudata.btree.EntryListener;
 import com.cloudata.btree.Page;
 import com.cloudata.btree.PageRecord;
@@ -11,9 +14,9 @@ import com.cloudata.btree.Transaction;
 import com.cloudata.btree.TransactionPage;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.btree.operation.RowOperation;
-import com.google.common.base.Preconditions;
 
 public class FreeSpaceMap {
+    private static final Logger log = LoggerFactory.getLogger(FreeSpaceMap.class);
 
     public static final byte PAGE_TYPE = 'F';
 
@@ -73,6 +76,8 @@ public class FreeSpaceMap {
     }
 
     public void reclaimAll(List<SpaceMapEntry> entries) {
+        log.info("FreeSpaceMap: reclaimAll: {}", entries);
+
         freeRanges.releaseAll(entries);
     }
 

@@ -34,4 +34,8 @@ public class Btree {
         return uniqueKeys;
     }
 
+    public Database getDb() {
+        return db;
+    }
+
 }

@@ -10,10 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.Database;
 import com.cloudata.btree.EntryListener;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.btree.MmapPageStore;
-import com.cloudata.btree.PageStore;
 import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.btree.Transaction;
 import com.cloudata.btree.WriteTransaction;
@@ -39,14 +38,14 @@ public class StructuredStore {
 
     public StructuredStore(File dir, boolean uniqueKeys) throws IOException {
         File data = new File(dir, "data");
-        PageStore pageStore = MmapPageStore.build(data, uniqueKeys);
+        Database db = Database.build(data);
 
         log.warn("Building new btree @{}", dir);
 
-        this.btree = new Btree(pageStore, uniqueKeys);
+        this.btree = new Btree(db, uniqueKeys);
     }
 
-    public void doAction(StructuredOperation<?> operation) {
+    public void doAction(StructuredOperation<?> operation) throws IOException {
         try (WriteTransaction txn = btree.beginReadWrite()) {
             txn.doAction(btree, operation);
             txn.commit();

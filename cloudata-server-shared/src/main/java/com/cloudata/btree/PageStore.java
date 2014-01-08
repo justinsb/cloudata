@@ -1,12 +1,17 @@
 package com.cloudata.btree;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.freemap.FreeSpaceMap;
 import com.cloudata.freemap.SpaceMapEntry;
+import com.google.common.base.Optional;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 
 public abstract class PageStore {
 
@@ -19,8 +24,8 @@ public abstract class PageStore {
     protected static final int HEADER_SIZE = 16384;
     protected static final int MASTERPAGE_SLOTS = 8;
 
-    MasterPage findLatestMasterPage() {
-        ByteBuffer buffer = readDirect(0, HEADER_SIZE);
+    MasterPage findLatestMasterPage() throws IOException {
+        ByteBuffer buffer = Futures.get(readDirect(0, HEADER_SIZE), IOException.class);
 
         MasterPage latest = null;
         for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
@@ -36,13 +41,13 @@ public abstract class PageStore {
         return latest;
     }
 
-    protected abstract ByteBuffer readDirect(int offset, int length);
+    protected abstract ListenableFuture<ByteBuffer> readDirect(int offset, int length);
 
-    protected abstract void writeDirect(int offset, ByteBuffer src);
+    protected abstract ListenableFuture<Void> writeDirect(int offset, ByteBuffer src);
 
     abstract FreeSpaceMap createEmptyFreeSpaceMap();
 
-    abstract PageRecord fetchPage(Btree btree, Page parent, int pageNumber);
+    abstract ListenableFuture<PageRecord> fetchPage(Btree btree, Page parent, int pageNumber);
 
     protected Page buildPage(Btree btree, Page parent, int pageNumber, byte pageType, ByteBuffer pageBuffer) {
         Page page;
@@ -84,9 +89,9 @@ public abstract class PageStore {
      * @param page
      * @return the new page number
      */
-    abstract SpaceMapEntry writePage(TransactionTracker tracker, Page page);
+    abstract ListenableFuture<SpaceMapEntry> writePage(TransactionTracker tracker, Page page);
 
-    void writeMasterPage(TransactionPage transactionPage, int transactionPageId) {
+    ListenableFuture<Void> writeMasterPage(TransactionPage transactionPage, int transactionPageId) {
         long transactionId = transactionPage.getTransactionId();
         int newRootPage = transactionPage.getRootPageId();
 
@@ -96,8 +101,23 @@ public abstract class PageStore {
         MasterPage.create(mmap, newRootPage, transactionPageId, transactionId);
 
         int position = slot * MasterPage.SIZE;
-        writeDirect(position, mmap);
+        return writeDirect(position, mmap);
     }
 
-    protected abstract void sync();
+    protected abstract void sync() throws IOException;
+
+    public void reclaimAll(List<SpaceMapEntry> reclaimList) {
+    }
+
+    public abstract void debugDump(StringBuilder sb);
+
+    public String debugDump() {
+        StringBuilder sb = new StringBuilder();
+        debugDump(sb);
+        return sb.toString();
+    }
+
+    public Optional<Boolean> debugIsIdle() {
+        return Optional.absent();
+    }
 }

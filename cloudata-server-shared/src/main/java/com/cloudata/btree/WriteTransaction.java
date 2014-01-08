@@ -1,5 +1,6 @@
 package com.cloudata.btree;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -11,9 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import com.google.common.util.concurrent.Futures;
 
 public class WriteTransaction extends Transaction {
     private static final Logger log = LoggerFactory.getLogger(WriteTransaction.class);
@@ -27,21 +30,30 @@ public class WriteTransaction extends Transaction {
 
     private long transactionId;
 
+    private boolean committed;
+
+    public boolean isCommitted() {
+        return committed;
+    }
+
     public long getTransactionId() {
         return transactionId;
     }
 
     static class TrackedPage {
-        final Page page;
+        private final PageRecord pageRecord;
+        private final Page page;
         TrackedPage parent;
         final int originalPageNumber;
 
         int dirtyCount;
         final SpaceMapEntry originalFsmEntry;
 
-        public TrackedPage(SpaceMapEntry originalFsmEntry, Page page, TrackedPage parent, int originalPageNumber) {
+        private TrackedPage(SpaceMapEntry originalFsmEntry, PageRecord pageRecord, Page page, TrackedPage parent,
+                int originalPageNumber) {
             this.originalFsmEntry = originalFsmEntry;
             this.page = page;
+            this.pageRecord = pageRecord;
             this.parent = parent;
             this.originalPageNumber = originalPageNumber;
 
@@ -49,6 +61,26 @@ public class WriteTransaction extends Transaction {
                 parent.dirtyCount++;
             }
         }
+
+        public static TrackedPage forExisting(PageRecord pageRecord, TrackedPage parent) {
+            return new TrackedPage(pageRecord.space, pageRecord, pageRecord.page, parent,
+                    pageRecord.page.getPageNumber());
+        }
+
+        public static TrackedPage forNew(Page page, TrackedPage parent) {
+            return new TrackedPage(null, null, page, parent, -1);
+        }
+
+        public void close() {
+            if (pageRecord != null) {
+                pageRecord.release();
+            }
+        }
+
+        public Page getPage() {
+            return this.page;
+        }
+
     }
 
     public WriteTransaction(Database db, Lock lock, int rootPageId) {
@@ -67,14 +99,21 @@ public class WriteTransaction extends Transaction {
                     throw new IllegalStateException();
                 }
             }
-            PageRecord pageRecord = db.pageStore.fetchPage(btree, parent, pageNumber);
-            trackedPage = new TrackedPage(pageRecord.space, pageRecord.page, trackedParent, pageNumber);
+            PageRecord pageRecord;
+            try {
+                pageRecord = Futures.get(db.pageStore.fetchPage(btree, parent, pageNumber), IOException.class);
+            } catch (IOException e) {
+                throw Throwables.propagate(e);
+            }
+            assert pageRecord.refCnt() == 1;
+
+            trackedPage = TrackedPage.forExisting(pageRecord, trackedParent);
             trackedPages.put(pageNumber, trackedPage);
         }
-        return trackedPage.page;
+        return trackedPage.getPage();
     }
 
-    public void commit() {
+    public void commit() throws IOException {
         Queue<TrackedPage> ready = Queues.newArrayDeque();
 
         for (Entry<Integer, TrackedPage> entry : trackedPages.entrySet()) {
@@ -96,35 +135,38 @@ public class WriteTransaction extends Transaction {
         while (!ready.isEmpty()) {
             TrackedPage trackedPage = ready.remove();
 
-            Page page = trackedPage.page;
+            Page page = trackedPage.getPage();
 
             if (page.isDirty()) {
                 SpaceMapEntry originalFsmEntry = trackedPage.originalFsmEntry;
-                int oldPageNumber = trackedPage.page.getPageNumber();
+                int oldPageNumber = trackedPage.getPage().getPageNumber();
 
                 if (page.shouldSplit()) {
                     BranchPage parentPage;
                     if (trackedPage.parent != null) {
-                        parentPage = (BranchPage) trackedPage.parent.page;
+                        parentPage = (BranchPage) trackedPage.parent.getPage();
                     } else {
                         int branchPageNumber = assignPageNumber();
 
                         parentPage = BranchPage.createNew(page.getBtree(), null, branchPageNumber, page);
 
-                        trackedPage.parent = new TrackedPage(null, parentPage, null, branchPageNumber);
+                        trackedPage.parent = TrackedPage.forNew(parentPage, null);
                         trackedPage.parent.dirtyCount++;
                     }
 
                     List<Page> extraPages = parentPage.splitChild(this, oldPageNumber, page);
 
                     for (Page extraPage : extraPages) {
-                        TrackedPage tracked = new TrackedPage(null, extraPage, trackedPage.parent,
-                                extraPage.getPageNumber());
+                        TrackedPage tracked = TrackedPage.forNew(extraPage, trackedPage.parent);
                         ready.add(tracked);
                     }
                 }
 
-                SpaceMapEntry newEntry = db.pageStore.writePage(db.transactionTracker, page);
+                // TODO: Any benefit to writing in parallel?
+                // TODO: And if not, should we simplify page store to just be synchronous for writes?? (I think reads
+                // need to be async because of joining behaviour)
+                SpaceMapEntry newEntry = Futures.get(db.pageStore.writePage(db.transactionTracker, page),
+                        IOException.class);
                 // page.changePageNumber(newPageNumber);
                 allocated.add(newEntry);
 
@@ -132,7 +174,7 @@ public class WriteTransaction extends Transaction {
                 log.info("Wrote page @{} {}", newPageNumber, page);
 
                 if (trackedPage.parent != null) {
-                    BranchPage parentPage = (BranchPage) trackedPage.parent.page;
+                    BranchPage parentPage = (BranchPage) trackedPage.parent.getPage();
 
                     parentPage.renumberChild(oldPageNumber, newPageNumber);
                 } else {
@@ -170,6 +212,7 @@ public class WriteTransaction extends Transaction {
         this.spaceMapEntry = db.transactionTracker.commitTransaction(transactionPage);
 
         this.transactionId = transactionId;
+        this.committed = true;
     }
 
     int createdPageCount;
@@ -192,8 +235,7 @@ public class WriteTransaction extends Transaction {
             }
         }
 
-        SpaceMapEntry spaceMapEntry = null;
-        TrackedPage trackedPage = new TrackedPage(spaceMapEntry, newPage, trackedParent, pageNumber);
+        TrackedPage trackedPage = TrackedPage.forNew(newPage, trackedParent);
         trackedPages.put(pageNumber, trackedPage);
     }
 
@@ -229,6 +271,21 @@ public class WriteTransaction extends Transaction {
     @Override
     public boolean isReadOnly() {
         return false;
+    }
+
+    @Override
+    public void close() {
+        for (TrackedPage trackedPage : trackedPages.values()) {
+            trackedPage.close();
+        }
+
+        if (!isCommitted()) {
+            db.transactionTracker.freeSpaceMap.reclaimAll(allocated);
+            db.pageStore.reclaimAll(allocated);
+
+            allocated.clear();
+        }
+        super.close();
     }
 
 }

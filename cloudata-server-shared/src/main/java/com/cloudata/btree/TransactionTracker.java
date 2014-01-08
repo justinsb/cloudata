@@ -1,5 +1,6 @@
 package com.cloudata.btree;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
@@ -13,6 +14,7 @@ import com.cloudata.freemap.FreeSpaceMap.SnapshotPage;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
+import com.google.common.util.concurrent.Futures;
 
 public class TransactionTracker {
 
@@ -50,7 +52,7 @@ public class TransactionTracker {
         return nextTransactionId++;
     }
 
-    TransactionTracker(Database db, MasterPage latest) {
+    TransactionTracker(Database db, MasterPage latest) throws IOException {
         this.db = db;
         this.writeTransactionCleanupQueue = Queues.newArrayDeque();
 
@@ -62,20 +64,19 @@ public class TransactionTracker {
         setCurrent(latest.getRoot(), latest.getTransactionId(), latest.getTransactionPageId());
     }
 
-    private static FreeSpaceMap recoverFreeSpaceMap(PageStore pageStore, MasterPage latest) {
+    private static FreeSpaceMap recoverFreeSpaceMap(PageStore pageStore, MasterPage latest) throws IOException {
         int transactionPageId = latest.getTransactionPageId();
         List<PageRecord> history = Lists.newArrayList();
         PageRecord fsmSnapshot = null;
 
         // Walk the list of transactions backwards until we find a FSM snapshot
         if (transactionPageId != 0) {
-            PageRecord current = pageStore.fetchPage(null, null, transactionPageId);
-
+            PageRecord current = fetchPageSync(pageStore, null, null, transactionPageId);
             while (true) {
                 TransactionPage transactionPage = (TransactionPage) current.page;
                 history.add(current);
                 if (transactionPage.getFreeSpaceSnapshotId() != 0) {
-                    fsmSnapshot = pageStore.fetchPage(null, null, transactionPage.getFreeSpaceSnapshotId());
+                    fsmSnapshot = fetchPageSync(pageStore, null, null, transactionPage.getFreeSpaceSnapshotId());
                     break;
                 }
 
@@ -83,7 +84,7 @@ public class TransactionTracker {
                 if (previousTransactionPageId == 0) {
                     break;
                 }
-                PageRecord previous = pageStore.fetchPage(null, null, previousTransactionPageId);
+                PageRecord previous = fetchPageSync(pageStore, null, null, previousTransactionPageId);
                 assert (previous != null);
                 current = previous;
             }
@@ -103,6 +104,11 @@ public class TransactionTracker {
         }
 
         return fsm;
+    }
+
+    private static PageRecord fetchPageSync(PageStore pageStore, Btree btree, Page parent, int pageNumber)
+            throws IOException {
+        return Futures.get(pageStore.fetchPage(btree, parent, pageNumber), IOException.class);
     }
 
     SpaceMapEntry allocate(int allocateSlots) {
@@ -149,13 +155,13 @@ public class TransactionTracker {
             boolean wasRead = false;
 
             if (transaction == this.writeTransaction) {
-                if (writeTransaction.getTransactionId() != 0) {
+                if (writeTransaction.isCommitted()) {
                     writeTransactionCleanupQueue.add(new CleanupQueueEntry(writeTransaction, writeTransaction
                             .getTransactionSpaceMapEntry()));
                 } else {
                     // Transaction rollback...
                     if (!writeTransaction.getAllocated().isEmpty()) {
-                        throw new UnsupportedOperationException();
+                        throw new UnsupportedOperationException("Rollback is not yet supported");
                     }
                 }
                 this.writeTransaction = null;
@@ -188,13 +194,15 @@ public class TransactionTracker {
 
     protected void reclaim(WriteTransaction txn, SpaceMapEntry txnSpace) {
         synchronized (this) {
+            db.pageStore.reclaimAll(txn.getFreed());
+
             deferredReclaim.addAll(txn.getFreed());
             // TODO: Any reason not to release the transaction at the same time?
             deferredReclaim.add(txnSpace);
         }
     }
 
-    SpaceMapEntry commitTransaction(TransactionPage transactionPage) {
+    SpaceMapEntry commitTransaction(TransactionPage transactionPage) throws IOException {
         // Shouldn't need to be synchronized (only one concurrent write transaction is allowed), but harmless...
         synchronized (this) {
             PageStore pageStore = db.pageStore;
@@ -203,23 +211,27 @@ public class TransactionTracker {
 
             if (deferredReclaim.size() > 64) {
                 freeSpaceMap.reclaimAll(deferredReclaim);
+                db.pageStore.reclaimAll(deferredReclaim);
 
                 SnapshotPage page = freeSpaceMap.buildSnapshotPage();
-                SpaceMapEntry fsmPageId = pageStore.writePage(this, page);
+                SpaceMapEntry fsmPageId = writePageSync(page);
                 transactionPage.setFreeSpaceSnapshotId(fsmPageId.getPageId());
+
+                log.warn("TODO: Handle transaction commit errors with Free Space Map");
 
                 deferredReclaim.clear();
             }
 
             long transactionId = transactionPage.getTransactionId();
 
-            SpaceMapEntry transactionPageId = pageStore.writePage(this, transactionPage);
+            SpaceMapEntry transactionPageId = writePageSync(transactionPage);
 
             int newRootPage = transactionPage.getRootPageId();
 
             pageStore.sync();
 
-            pageStore.writeMasterPage(transactionPage, transactionPageId.getPageId());
+            Futures.get(pageStore.writeMasterPage(transactionPage, transactionPageId.getPageId()), IOException.class);
+
             log.info("Committing transaction {}.  New root={}", transactionId, transactionPage.getRootPageId());
 
             pageStore.sync();
@@ -228,6 +240,10 @@ public class TransactionTracker {
 
             return transactionPageId;
         }
+    }
+
+    private SpaceMapEntry writePageSync(Page page) throws IOException {
+        return Futures.get(db.pageStore.writePage(this, page), IOException.class);
     }
 
 }

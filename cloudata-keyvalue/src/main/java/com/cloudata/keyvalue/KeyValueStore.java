@@ -9,9 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.Database;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.btree.MmapPageStore;
-import com.cloudata.btree.PageStore;
 import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.btree.WriteTransaction;
 import com.cloudata.keyvalue.operation.KeyValueOperation;
@@ -26,14 +25,14 @@ public class KeyValueStore {
 
     public KeyValueStore(File dir, boolean uniqueKeys) throws IOException {
         File data = new File(dir, "data");
-        PageStore pageStore = MmapPageStore.build(data, uniqueKeys);
+        Database db = Database.build(data);
 
         log.warn("Building new btree @{}", dir);
 
-        this.btree = new Btree(pageStore, uniqueKeys);
+        this.btree = new Btree(db, uniqueKeys);
     }
 
-    public void doAction(KeyValueOperation operation) {
+    public void doAction(KeyValueOperation operation) throws IOException {
         if (operation.isReadOnly()) {
             try (ReadOnlyTransaction txn = btree.beginReadOnly()) {
                 txn.doAction(btree, operation);

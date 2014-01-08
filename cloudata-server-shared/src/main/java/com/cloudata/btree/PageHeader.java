@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 public class PageHeader {
     private static final Logger log = LoggerFactory.getLogger(PageHeader.class);
 
-    final static int HEADER_SIZE = 16;
+    public final static int HEADER_SIZE = 16;
 
     private static final int OFFSET_TYPE = 0;
     private static final int OFFSET_LENGTH = 4;
