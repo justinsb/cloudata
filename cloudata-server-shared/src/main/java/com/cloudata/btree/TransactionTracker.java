@@ -214,6 +214,9 @@ public class TransactionTracker {
                 db.pageStore.reclaimAll(deferredReclaim);
 
                 SnapshotPage page = freeSpaceMap.buildSnapshotPage();
+
+                // ICK: We are likely to write the new snapshot in a newly reclaimed page
+                // but... if we need to rollback, we're in trouble...
                 SpaceMapEntry fsmPageId = writePageSync(page);
                 transactionPage.setFreeSpaceSnapshotId(fsmPageId.getPageId());
 
