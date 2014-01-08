@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 
-import com.cloudata.btree.BackingFile;
+import com.cloudata.btree.io.BackingFile;
 import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;

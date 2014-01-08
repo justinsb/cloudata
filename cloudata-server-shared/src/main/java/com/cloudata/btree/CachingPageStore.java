@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.caching.CacheEntry;
 import com.cloudata.btree.caching.PageCache;
+import com.cloudata.btree.io.BackingFile;
+import com.cloudata.btree.io.NioBackingFile;
 import com.cloudata.freemap.FreeSpaceMap;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.base.Function;
@@ -46,7 +48,7 @@ public class CachingPageStore extends PageStore {
                 raf.setLength(size);
             }
 
-            BackingFile backingFile = new BackingFile(file);
+            BackingFile backingFile = new NioBackingFile(file);
 
             for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
                 long position = i * MasterPage.SIZE;
@@ -59,7 +61,7 @@ public class CachingPageStore extends PageStore {
         }
 
         {
-            BackingFile backingFile = new BackingFile(file);
+            BackingFile backingFile = new NioBackingFile(file);
 
             // The Guava cache is great, but can evict entries immediately. It isn't really meant for our use case :-)
             // We need a better cache - e.g. one that doesn't throw away referenced buffers
@@ -190,9 +192,9 @@ public class CachingPageStore extends PageStore {
             }
         }
 
-        // Note that we pass the ByteBuf, which takes care of refcounting it for us
-        assert backing.readableBytes() == totalSize;
-        ListenableFuture<Void> writeFuture = backingFile.write(backing, position);
+        assert nioBuffer.remaining() == totalSize;
+
+        ListenableFuture<Void> writeFuture = backingFile.write(nioBuffer, position);
 
         ListenableFuture<SpaceMapEntry> entry = Futures.transform(writeFuture, new Function<Void, SpaceMapEntry>() {
             @Override
