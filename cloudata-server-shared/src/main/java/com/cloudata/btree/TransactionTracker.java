@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.freemap.FreeSpaceMap;
-import com.cloudata.freemap.FreeSpaceMap.SnapshotPage;
+import com.cloudata.freemap.FreeSpaceMap.SnapshotWritingPage;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
@@ -65,49 +65,65 @@ public class TransactionTracker {
     }
 
     private static FreeSpaceMap recoverFreeSpaceMap(PageStore pageStore, MasterPage latest) throws IOException {
-        int transactionPageId = latest.getTransactionPageId();
-        List<PageRecord> history = Lists.newArrayList();
-        PageRecord fsmSnapshot = null;
+        // TODO: We could create a 'system transaction'
+        List<PageRecord> freeList = Lists.newArrayList();
 
-        // Walk the list of transactions backwards until we find a FSM snapshot
-        if (transactionPageId != 0) {
-            PageRecord current = fetchPageSync(pageStore, null, null, transactionPageId);
-            while (true) {
-                TransactionPage transactionPage = (TransactionPage) current.page;
-                history.add(current);
-                if (transactionPage.getFreeSpaceSnapshotId() != 0) {
-                    fsmSnapshot = fetchPageSync(pageStore, null, null, transactionPage.getFreeSpaceSnapshotId());
-                    break;
+        try {
+            int transactionPageId = latest.getTransactionPageId();
+            List<PageRecord> history = Lists.newArrayList();
+
+            PageRecord fsmSnapshot = null;
+
+            // Walk the list of transactions backwards until we find a FSM snapshot
+            if (transactionPageId != 0) {
+                PageRecord current = getSystemPage(pageStore, transactionPageId);
+                freeList.add(current);
+
+                while (true) {
+                    TransactionPage transactionPage = (TransactionPage) current.page;
+                    history.add(current);
+                    if (transactionPage.getFreeSpaceSnapshotId() != 0) {
+                        fsmSnapshot = getSystemPage(pageStore, transactionPage.getFreeSpaceSnapshotId());
+                        assert fsmSnapshot != null;
+                        freeList.add(fsmSnapshot);
+                        break;
+                    }
+
+                    int previousTransactionPageId = transactionPage.getPreviousTransactionPageId();
+                    if (previousTransactionPageId == 0) {
+                        break;
+                    }
+                    PageRecord previous = getSystemPage(pageStore, previousTransactionPageId);
+                    assert (previous != null);
+                    freeList.add(previous);
+                    current = previous;
                 }
 
-                int previousTransactionPageId = transactionPage.getPreviousTransactionPageId();
-                if (previousTransactionPageId == 0) {
-                    break;
-                }
-                PageRecord previous = fetchPageSync(pageStore, null, null, previousTransactionPageId);
-                assert (previous != null);
-                current = previous;
+                Collections.reverse(history);
             }
 
-            Collections.reverse(history);
-        }
+            FreeSpaceMap fsm;
+            if (fsmSnapshot == null) {
+                fsm = pageStore.createEmptyFreeSpaceMap();
+            } else {
+                fsm = FreeSpaceMap.createFromSnapshot(fsmSnapshot);
+            }
 
-        FreeSpaceMap fsm;
-        if (fsmSnapshot == null) {
-            fsm = pageStore.createEmptyFreeSpaceMap();
-        } else {
-            fsm = FreeSpaceMap.createFromSnapshot(fsmSnapshot);
-        }
+            for (PageRecord txnRecord : history) {
+                fsm.replay(txnRecord);
+            }
 
-        for (PageRecord txnRecord : history) {
-            fsm.replay(txnRecord);
+            return fsm;
+        } finally {
+            for (PageRecord pr : freeList) {
+                pr.release();
+            }
         }
-
-        return fsm;
     }
 
-    private static PageRecord fetchPageSync(PageStore pageStore, Btree btree, Page parent, int pageNumber)
-            throws IOException {
+    private static PageRecord getSystemPage(PageStore pageStore, int pageNumber) throws IOException {
+        Btree btree = null;
+        Page parent = null;
         return Futures.get(pageStore.fetchPage(btree, parent, pageNumber), IOException.class);
     }
 
@@ -213,12 +229,14 @@ public class TransactionTracker {
                 freeSpaceMap.reclaimAll(deferredReclaim);
                 db.pageStore.reclaimAll(deferredReclaim);
 
-                SnapshotPage page = freeSpaceMap.buildSnapshotPage();
+                SnapshotWritingPage page = freeSpaceMap.buildSnapshotPageForWrite();
 
                 // ICK: We are likely to write the new snapshot in a newly reclaimed page
                 // but... if we need to rollback, we're in trouble...
                 SpaceMapEntry fsmPageId = writePageSync(page);
                 transactionPage.setFreeSpaceSnapshotId(fsmPageId.getPageId());
+
+                log.info("Wrote FSM snapshot page @{}", fsmPageId.getPageId());
 
                 log.warn("TODO: Handle transaction commit errors with Free Space Map");
 
@@ -249,4 +267,18 @@ public class TransactionTracker {
         return Futures.get(db.pageStore.writePage(this, page), IOException.class);
     }
 
+    public void close() {
+        synchronized (this) {
+            if (writeTransaction != null) {
+                writeTransaction.close();
+
+                writeTransaction = null;
+            }
+
+            for (ReadOnlyTransaction txn : readTransactions) {
+                txn.close();
+            }
+            readTransactions.clear();
+        }
+    }
 }

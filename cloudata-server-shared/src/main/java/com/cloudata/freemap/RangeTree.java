@@ -239,4 +239,24 @@ public class RangeTree {
         return rangeTree;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        synchronized (tree) {
+            Iterator<Range> it = tree.iterator();
+            while (it.hasNext()) {
+                Range range = it.next();
+                sb.append("[");
+                sb.append(range.start);
+                sb.append(",");
+                sb.append(range.end);
+                sb.append(")");
+                sb.append(",");
+            }
+        }
+
+        return sb.toString();
+    }
+
 }

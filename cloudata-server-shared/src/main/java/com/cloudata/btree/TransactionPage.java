@@ -322,4 +322,12 @@ public class TransactionPage extends Page {
 
     }
 
+    @Override
+    public String toString() {
+        return "TransactionPage [getTransactionId()=" + getTransactionId() + ", getPreviousTransactionPageId()="
+                + getPreviousTransactionPageId() + ", getRootPageId()=" + getRootPageId() + ", getFreedCount()="
+                + getFreedCount() + ", getAllocatedCount()=" + getAllocatedCount() + ", getFreeSpaceSnapshotId()="
+                + getFreeSpaceSnapshotId() + "]";
+    }
+
 }

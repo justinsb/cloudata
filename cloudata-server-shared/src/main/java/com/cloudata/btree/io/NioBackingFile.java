@@ -78,6 +78,8 @@ public class NioBackingFile implements BackingFile {
 
     private void read(ByteBuffer dest, final int destStart, final long filePosition,
             final SettableFuture<ByteBuffer> future) {
+        assert dest.remaining() != 0;
+
         try {
             fileChannel.read(dest, filePosition, dest, new CompletionHandler<Integer, ByteBuffer>() {
                 @Override
@@ -143,6 +145,7 @@ public class NioBackingFile implements BackingFile {
     // }
 
     private void write(ByteBuffer src, final long position, final SettableFuture<Void> future) {
+        assert src.remaining() != 0;
         try {
             fileChannel.write(src, position, src, new CompletionHandler<Integer, ByteBuffer>() {
                 @Override
@@ -180,6 +183,12 @@ public class NioBackingFile implements BackingFile {
     @Override
     public void close() throws IOException {
         fileChannel.close();
+    }
+
+    @Override
+    public int getBlockSize() {
+        // No alignment required
+        return 1;
     }
 
 }

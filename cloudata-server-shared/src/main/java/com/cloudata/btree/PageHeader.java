@@ -66,4 +66,9 @@ public class PageHeader {
         return length;
     }
 
+    @Override
+    public String toString() {
+        return "PageHeader [pageType()=" + getPageType() + ", dataSize()=" + getDataSize() + "]";
+    }
+
 }

@@ -5,6 +5,7 @@ import static com.cloudata.TestUtils.buildBytes;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Random;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -23,7 +24,8 @@ public class TestBtree {
 
     @Test
     public void testSpaceReclamation() throws Exception {
-        Btree btree = buildBtree();
+        byte[] keyBytes = randomBytes(16);
+        Btree btree = buildBtree(keyBytes);
 
         byte[] key = "A".getBytes();
         byte[] bytes = TestUtils.buildBytes(30000);
@@ -36,6 +38,14 @@ public class TestBtree {
         Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
     }
 
+    static final Random random = new Random();
+
+    private static byte[] randomBytes(int length) {
+        byte[] bytes = new byte[length];
+        random.nextBytes(bytes);
+        return bytes;
+    }
+
     private void put(Btree btree, byte[] key, byte[] valueBytes) throws IOException {
         try (WriteTransaction txn = btree.beginReadWrite()) {
             Value value = Value.fromRawBytes(valueBytes);
@@ -45,17 +55,22 @@ public class TestBtree {
         }
     }
 
-    private Btree buildBtree() throws IOException {
-        File data = new File(folder.getRoot(), UUID.randomUUID().toString());
+    private Btree buildBtree(byte[] keyBytes) throws IOException {
+        File file = new File(folder.getRoot(), UUID.randomUUID().toString());
+        return buildBtree(keyBytes, file);
+    }
+
+    private Btree buildBtree(byte[] keyBytes, File file) throws IOException {
         boolean uniqueKeys = true;
-        Database db = Database.build(data);
+        Database db = Database.build(file, keyBytes);
         Btree btree = new Btree(db, uniqueKeys);
         return btree;
     }
 
     @Test
     public void testPageSplit() throws Exception {
-        Btree btree = buildBtree();
+        byte[] keyBytes = randomBytes(16);
+        Btree btree = buildBtree(keyBytes);
 
         int n = 30;
 
@@ -89,7 +104,8 @@ public class TestBtree {
 
     @Test
     public void testHugeValues() throws Exception {
-        Btree btree = buildBtree();
+        byte[] keyBytes = randomBytes(16);
+        Btree btree = buildBtree(keyBytes);
 
         int n = 30;
 
@@ -108,5 +124,97 @@ public class TestBtree {
 
         System.out.println(btree.getDb().getPageStore().debugDump());
         Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
+    }
+
+    @Test(expected = IOException.class)
+    public void testWrongKey() throws Exception {
+        byte[] keyBytes = randomBytes(16);
+        File file = new File(folder.getRoot(), UUID.randomUUID().toString());
+
+        {
+            Database db = Database.build(file, keyBytes);
+            boolean uniqueKeys = true;
+            Btree btree = new Btree(db, uniqueKeys);
+
+            simplePut(btree, 100);
+
+            simpleRead(btree, 100);
+
+            Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
+            db.close();
+        }
+
+        keyBytes = randomBytes(16);
+        {
+            Database db = Database.build(file, keyBytes);
+            boolean uniqueKeys = true;
+
+            // Should throw
+            Btree btree = new Btree(db, uniqueKeys);
+
+            simpleRead(btree, 100);
+
+            Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
+            db.close();
+        }
+    }
+
+    @Test
+    public void testSimple() throws Exception {
+        byte[] keyBytes = randomBytes(16);
+        File file = new File(folder.getRoot(), UUID.randomUUID().toString());
+
+        Database db = Database.build(file, keyBytes);
+        boolean uniqueKeys = true;
+        Btree btree = new Btree(db, uniqueKeys);
+
+        simplePut(btree, 100);
+
+        simpleRead(btree, 100);
+
+        Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
+        db.close();
+    }
+
+    @Test
+    public void testOpenAndClose() throws Exception {
+        byte[] keyBytes = randomBytes(16);
+        File file = new File(folder.getRoot(), UUID.randomUUID().toString());
+
+        for (int i = 0; i < 3; i++) {
+            Database db = Database.build(file, keyBytes);
+            boolean uniqueKeys = true;
+            Btree btree = new Btree(db, uniqueKeys);
+
+            if (i == 0) {
+                simplePut(btree, 100);
+            }
+
+            simpleRead(btree, 100);
+
+            System.out.println(btree.getDb().getPageStore().debugDump());
+            System.out.flush();
+
+            Assert.assertTrue(btree.getDb().getPageStore().debugIsIdle().or(true));
+            db.close();
+        }
+
+    }
+
+    private void simplePut(Btree btree, int n) throws IOException {
+        for (int i = 1; i <= n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] value = buildBytes(i);
+            put(btree, key, value);
+        }
+    }
+
+    private void simpleRead(Btree btree, int n) {
+        for (int i = 1; i <= n; i++) {
+            byte[] key = Integer.toString(i).getBytes();
+            byte[] actual = get(btree, key);
+            byte[] expected = buildBytes(i);
+            Assert.assertArrayEquals(expected, actual);
+        }
     }
 }

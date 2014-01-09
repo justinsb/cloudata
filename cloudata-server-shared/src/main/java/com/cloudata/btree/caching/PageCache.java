@@ -127,4 +127,9 @@ public class PageCache {
         }
         return true;
     }
+
+    public void close() {
+        cache.invalidateAll();
+        // TODO: Close pool?
+    }
 }

@@ -18,8 +18,6 @@ import com.cloudata.btree.operation.RowOperation;
 public class FreeSpaceMap {
     private static final Logger log = LoggerFactory.getLogger(FreeSpaceMap.class);
 
-    public static final byte PAGE_TYPE = 'F';
-
     final RangeTree freeRanges;
 
     private FreeSpaceMap(int start, int end) {
@@ -65,9 +63,9 @@ public class FreeSpaceMap {
         return fsm;
     }
 
-    public SnapshotPage buildSnapshotPage() {
+    public SnapshotWritingPage buildSnapshotPageForWrite() {
         ByteBuffer empty = ByteBuffer.allocate(0);
-        SnapshotPage page = new SnapshotPage(Integer.MIN_VALUE, empty);
+        SnapshotWritingPage page = new SnapshotWritingPage(Integer.MIN_VALUE, empty);
         return page;
     }
 
@@ -108,13 +106,10 @@ public class FreeSpaceMap {
     // freemap.add(pageNumber, slots);
     // }
 
-    public class SnapshotPage extends Page {
-        protected SnapshotPage(int pageNumber, ByteBuffer buffer) {
-            super(null, null, pageNumber, buffer);
-        }
+    public class SnapshotWritingPage extends Page {
 
-        RangeTree deserialize() {
-            return RangeTree.deserialize(buffer);
+        protected SnapshotWritingPage(int pageNumber, ByteBuffer buffer) {
+            super(null, null, pageNumber, buffer);
         }
 
         @Override
@@ -159,6 +154,68 @@ public class FreeSpaceMap {
 
         @Override
         public byte getPageType() {
+            return SnapshotPage.PAGE_TYPE;
+        }
+
+        @Override
+        public void dump(PrintStream os) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<Page> split(WriteTransaction txn) {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public boolean shouldSplit() {
+            return false;
+        }
+    }
+
+    public static class SnapshotPage extends Page {
+        public static final byte PAGE_TYPE = 'F';
+
+        public SnapshotPage(int pageNumber, ByteBuffer buffer) {
+            super(null, null, pageNumber, buffer);
+        }
+
+        RangeTree deserialize() {
+            return RangeTree.deserialize(buffer);
+        }
+
+        @Override
+        public int getSerializedSize() {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public void write(ByteBuffer dest) {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public boolean walk(Transaction txn, ByteBuffer from, EntryListener listener) {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public <V> void doAction(Transaction txn, ByteBuffer key, RowOperation<V> operation) {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public ByteBuffer getKeyLbound() {
+            throw new IllegalStateException();
+        }
+
+        @Override
+        public boolean isDirty() {
+            return false;
+        }
+
+        @Override
+        public byte getPageType() {
             return PAGE_TYPE;
         }
 
@@ -176,6 +233,11 @@ public class FreeSpaceMap {
         public boolean shouldSplit() {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "FreeSpaceMap [freeRanges=" + freeRanges + "]";
     }
 
 }

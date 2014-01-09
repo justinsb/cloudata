@@ -38,7 +38,7 @@ public class StructuredStore {
 
     public StructuredStore(File dir, boolean uniqueKeys) throws IOException {
         File data = new File(dir, "data");
-        Database db = Database.build(data);
+        Database db = Database.build(data, null);
 
         log.warn("Building new btree @{}", dir);
 

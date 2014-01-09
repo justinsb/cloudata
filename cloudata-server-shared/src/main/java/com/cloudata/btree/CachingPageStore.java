@@ -2,9 +2,7 @@ package com.cloudata.btree;
 
 import io.netty.buffer.ByteBuf;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -14,11 +12,11 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.btree.caching.CacheEntry;
 import com.cloudata.btree.caching.PageCache;
 import com.cloudata.btree.io.BackingFile;
-import com.cloudata.btree.io.NioBackingFile;
 import com.cloudata.freemap.FreeSpaceMap;
 import com.cloudata.freemap.SpaceMapEntry;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
@@ -36,40 +34,52 @@ public class CachingPageStore extends PageStore {
 
     final PageCache cache;
 
-    public CachingPageStore(BackingFile backingFile, int cacheSize) {
+    public CachingPageStore(BackingFile backingFile, int cacheSize) throws IOException {
         this.backingFile = backingFile;
         this.cache = new PageCache(cacheSize);
+
+        Preconditions.checkArgument((ALIGNMENT % backingFile.getBlockSize()) == 0);
+
+        readHeader();
     }
 
-    public static CachingPageStore build(File file) throws IOException {
-        if (!file.exists()) {
-            long size = 1024L * 1024L * 64L;
-            try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-                raf.setLength(size);
-            }
+    @Override
+    public void close() throws IOException {
+        cache.close();
+        backingFile.close();
+    }
 
-            BackingFile backingFile = new NioBackingFile(file);
+    public static CachingPageStore open(BackingFile backingFile) throws IOException {
+        // The Guava cache is great, but can evict entries immediately. It isn't really meant for our use case :-)
+        // We need a better cache - e.g. one that doesn't throw away referenced buffers
+        log.warn("We need a better cache!");
+        int cacheSize = 64 * 1024 * 1024;
 
-            for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
-                long position = i * MasterPage.SIZE;
+        return new CachingPageStore(backingFile, cacheSize);
+    }
 
-                ByteBuffer mmap = ByteBuffer.allocate(MasterPage.SIZE);
-                MasterPage.create(mmap, 0, 0, 0);
-                backingFile.write(mmap, position);
-            }
-            backingFile.close();
-        }
-
+    public static void createNew(BackingFile backingFile) throws IOException {
         {
-            BackingFile backingFile = new NioBackingFile(file);
-
-            // The Guava cache is great, but can evict entries immediately. It isn't really meant for our use case :-)
-            // We need a better cache - e.g. one that doesn't throw away referenced buffers
-            log.warn("We need a better cache!");
-            int cacheSize = 64 * 1024 * 1024;
-
-            return new CachingPageStore(backingFile, cacheSize);
+            ByteBuffer header = buildHeader();
+            assert header.remaining() == MASTERPAGE_HEADER_SIZE;
+            Futures.get(backingFile.write(header, 0), IOException.class);
         }
+
+        assert MASTERPAGE_SLOT_SIZE > MasterPage.SIZE;
+
+        for (int i = 0; i < MASTERPAGE_SLOTS; i++) {
+            int position = MASTERPAGE_HEADER_SIZE + (i * MASTERPAGE_SLOT_SIZE);
+
+            ByteBuffer mmap = ByteBuffer.allocate(MASTERPAGE_SLOT_SIZE);
+            assert mmap.position() == 0;
+            MasterPage.create(mmap, 0, 0, 0);
+            mmap.position(MASTERPAGE_SLOT_SIZE);
+            mmap.flip();
+            assert mmap.remaining() == MASTERPAGE_SLOT_SIZE;
+            Futures.get(backingFile.write(mmap, position), IOException.class);
+        }
+
+        backingFile.sync();
     }
 
     @Override
@@ -78,13 +88,18 @@ public class CachingPageStore extends PageStore {
     }
 
     ListenableFuture<PageRecord> fetchPage(final Btree btree, final Page parent, final int pageNumber, int length) {
-        int readLength;
+        final int readLength;
         final boolean guessedLength;
         if (length < 0) {
             readLength = GUESS_LENGTH;
             guessedLength = true;
         } else {
-            readLength = length;
+            int padding = length % ALIGNMENT;
+            if (padding != 0) {
+                padding = ALIGNMENT - padding;
+            }
+
+            readLength = length + padding;
             guessedLength = false;
         }
 
@@ -147,12 +162,15 @@ public class CachingPageStore extends PageStore {
         return ret;
     }
 
+    static final byte[] ZERO = new byte[ALIGNMENT];
+
     @Override
     ListenableFuture<SpaceMapEntry> writePage(TransactionTracker tracker, Page page) {
         int dataSize = page.getSerializedSize();
 
         int totalSize = dataSize + PageHeader.HEADER_SIZE;
 
+        int paddedSize;
         int position;
         final SpaceMapEntry allocation;
         {
@@ -160,6 +178,8 @@ public class CachingPageStore extends PageStore {
             if ((totalSize % ALIGNMENT) != 0) {
                 allocateSlots++;
             }
+            paddedSize = allocateSlots * ALIGNMENT;
+
             allocation = tracker.allocate(allocateSlots);
             position = allocation.start * ALIGNMENT;
         }
@@ -167,19 +187,20 @@ public class CachingPageStore extends PageStore {
         assert (position % ALIGNMENT) == 0;
 
         final int pageNumber = allocation.start;
-        final CacheEntry cacheEntry = cache.allocate(pageNumber, totalSize, false, true);
+        final CacheEntry cacheEntry = cache.allocate(pageNumber, paddedSize, false, true);
 
         final ByteBuf backing = cacheEntry.getBuffer();
         backing.retain();
 
-        backing.writerIndex(backing.writerIndex() + totalSize);
+        backing.writerIndex(backing.writerIndex() + paddedSize);
         ByteBuffer nioBuffer = backing.nioBuffer();
 
         {
             ByteBuffer writeBuffer = nioBuffer.duplicate();
             assert writeBuffer.position() == 0;
-            assert writeBuffer.limit() == totalSize;
+            assert writeBuffer.limit() == paddedSize;
             PageHeader.write(writeBuffer, page.getPageType(), dataSize);
+            assert writeBuffer.position() == PageHeader.HEADER_SIZE;
 
             writeBuffer.limit(writeBuffer.position() + dataSize);
             writeBuffer = writeBuffer.slice();
@@ -190,11 +211,19 @@ public class CachingPageStore extends PageStore {
             if ((pos2 - pos1) != dataSize) {
                 throw new IllegalStateException();
             }
+
+            if (paddedSize != totalSize) {
+                writeBuffer = nioBuffer.duplicate();
+                writeBuffer.position(PageHeader.HEADER_SIZE + dataSize);
+                writeBuffer.put(ZERO, 0, paddedSize - totalSize);
+                assert writeBuffer.position() == writeBuffer.limit();
+            }
         }
 
-        assert nioBuffer.remaining() == totalSize;
+        assert nioBuffer.remaining() == paddedSize;
 
-        ListenableFuture<Void> writeFuture = backingFile.write(nioBuffer, position);
+        // Read-only because we are keeping it in the cache!
+        ListenableFuture<Void> writeFuture = backingFile.write(nioBuffer.asReadOnlyBuffer(), position);
 
         ListenableFuture<SpaceMapEntry> entry = Futures.transform(writeFuture, new Function<Void, SpaceMapEntry>() {
             @Override
