@@ -18,6 +18,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.cloudata</groupId>
+			<artifactId>cloudata-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.jclouds.provider</groupId>
 			<artifactId>cloudfiles-us</artifactId>
 			<version>${jclouds.version}</version>
