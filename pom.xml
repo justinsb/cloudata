@@ -9,6 +9,10 @@
 
 	<packaging>pom</packaging>
 
+	<properties>
+		<netty.version>4.0.13.Final</netty.version>
+	</properties>
+
 	<modules>
 		<module>cloudata-shared</module>
 		<module>cloudata-server-shared</module>
@@ -39,6 +43,12 @@
 				<groupId>redis.clients</groupId>
 				<artifactId>jedis</artifactId>
 				<version>2.2.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>io.netty</groupId>
+				<artifactId>netty-all</artifactId>
+				<version>${netty.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

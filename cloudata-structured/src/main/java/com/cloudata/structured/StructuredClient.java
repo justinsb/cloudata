@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.CloseableClientResponse;
 import com.cloudata.clients.StreamingRecordsetBase;
 import com.cloudata.structured.sql.value.ValueHolder;
 import com.cloudata.util.ByteStringMessageBodyWriter;
@@ -176,7 +177,7 @@ public class StructuredClient {
         private final ByteString keyspace;
 
         public KeyValueJsonRecordset(ByteString keyspace, ClientResponse response) {
-            super(response);
+            super(new CloseableClientResponse(response));
             this.keyspace = keyspace;
 
             InputStream is = response.getEntityInputStream();
@@ -206,7 +207,7 @@ public class StructuredClient {
         private final CodedInputStream cis;
 
         public RowRecordset(ClientResponse response) {
-            super(response);
+            super(new CloseableClientResponse(response));
 
             InputStream is = response.getEntityInputStream();
             this.cis = CodedInputStream.newInstance(is);
@@ -236,7 +237,7 @@ public class StructuredClient {
         private final CodedInputStream cis;
 
         public ByteStringRecordset(ClientResponse response) {
-            super(response);
+            super(new CloseableClientResponse(response));
 
             InputStream is = response.getEntityInputStream();
             this.cis = CodedInputStream.newInstance(is);

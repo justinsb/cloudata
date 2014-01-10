@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.CloseableClientResponse;
 import com.cloudata.clients.StreamingRecordsetBase;
 import com.cloudata.util.ByteStringMessageBodyWriter;
 import com.cloudata.util.Hex;
@@ -161,7 +162,7 @@ public class KeyValueClient {
         private final DataInputStream dis;
 
         public KeyValueRecordset(ClientResponse response) {
-            super(response);
+            super(new CloseableClientResponse(response));
             InputStream is = response.getEntityInputStream();
             this.dis = new DataInputStream(is);
         }

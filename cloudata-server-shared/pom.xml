@@ -18,10 +18,54 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.0.11</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-client</artifactId>
+			<version>1.17.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sun.jersey.contribs</groupId>
+			<artifactId>jersey-guice</artifactId>
+			<version>1.17.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>com.cloudata</groupId>
 			<artifactId>cloudata-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.robotninjas.barge</groupId>
+			<artifactId>barge-core</artifactId>
+			<version>0.1.0-alpha2-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-core</artifactId>
+			<version>1.17.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.17.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>asm</groupId>
+					<artifactId>asm</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-grizzly</artifactId> 
+			<version>1.17.1</version> </dependency> <dependency> <groupId>com.sun.grizzly</groupId> 
+			<artifactId>grizzly-servlet-webserver</artifactId> <version>1.9.59</version> 
+			</dependency> -->
+
 
 		<dependency>
 			<groupId>org.jclouds.provider</groupId>
@@ -43,6 +87,11 @@
 		<dependency>
 			<groupId>com.cloudata</groupId>
 			<artifactId>cloudata-shared</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
 		</dependency>
 
 		<dependency>

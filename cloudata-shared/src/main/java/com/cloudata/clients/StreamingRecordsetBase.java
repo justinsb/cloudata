@@ -1,24 +1,24 @@
 package com.cloudata.clients;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import com.google.common.base.Throwables;
-import com.sun.jersey.api.client.ClientResponse;
 
 public abstract class StreamingRecordsetBase<V> implements AutoCloseable, Iterable<V> {
-    final ClientResponse response;
+    final Closeable httpResponse;
 
     boolean read;
 
-    public StreamingRecordsetBase(ClientResponse response) {
-        this.response = response;
+    public StreamingRecordsetBase(Closeable httpResponse) {
+        this.httpResponse = httpResponse;
     }
 
     @Override
-    public void close() {
-        response.close();
+    public void close() throws IOException {
+        httpResponse.close();
     }
 
     @Override
