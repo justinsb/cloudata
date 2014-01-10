@@ -1,0 +1,9 @@
+option java_package = "com.cloudata.structured";
+
+message SchemaData {
+	optional int32 tablespace_id = 1;
+	optional bytes name = 2;
+	optional bytes protobuf_schema = 3;
+	
+	repeated int32 primary_key_fields = 4;
+}
