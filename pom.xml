@@ -18,6 +18,7 @@
 		<module>cloudata-git</module>
 		<module>cloudata-files</module>
 		<module>cloudata-blocks</module>
+		<module>cloudata-client</module>
 	</modules>
 
 	<dependencyManagement>
