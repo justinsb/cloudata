@@ -53,21 +53,23 @@ public class StructuredSetOperation extends StructuredOperationBase implements
         Value newValue = Value.fromRawBytes(action.getValue());
         txn.doAction(btree, new SimpleSetOperation(qualifiedKey, newValue));
 
-        // Update the key dictionary
-        JsonObject json = newValue.asJsonObject();
-        Set<String> keys = Sets.newHashSet();
+        if (isJsonKeyspace(keyspace)) {
+            // Update the key dictionary
+            JsonObject json = newValue.asJsonObject();
+            Set<String> keys = Sets.newHashSet();
 
-        for (Entry<String, JsonElement> entry : json.entrySet()) {
-            keys.add(entry.getKey());
-        }
-
-        Keyspace keyspace = Keyspace.user(action.getKeyspaceId());
-        store.getKeys().ensureKeys(txn, keyspace, Iterables.transform(keys, new Function<String, ByteString>() {
-            @Override
-            public ByteString apply(String input) {
-                return ByteString.copyFromUtf8(input);
+            for (Entry<String, JsonElement> entry : json.entrySet()) {
+                keys.add(entry.getKey());
             }
-        }));
+
+            Keyspace keyspace = Keyspace.user(action.getKeyspaceId());
+            store.getKeys().ensureKeys(txn, keyspace, Iterables.transform(keys, new Function<String, ByteString>() {
+                @Override
+                public ByteString apply(String input) {
+                    return ByteString.copyFromUtf8(input);
+                }
+            }));
+        }
 
         // Return DONE
         StructuredResponseEntry.Builder eb = response.addEntryBuilder();
@@ -78,6 +80,11 @@ public class StructuredSetOperation extends StructuredOperationBase implements
             eb.setValue(action.getValue());
         }
         eb.setCode(ActionResponseCode.DONE);
+    }
+
+    private boolean isJsonKeyspace(Keyspace keyspace) {
+        // TODO: Figure out how to cope with JSON keyspaces
+        return false;
     }
 
     public static StructuredSetOperation build(long storeId, Keyspace keyspace, ByteString key, Value value) {
