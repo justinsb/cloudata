@@ -138,4 +138,12 @@ public class ByteBuffers {
             throw Throwables.propagate(e);
         }
     }
+
+    public static byte[] toArray(ByteBuffer bb) {
+        int size = bb.remaining();
+        byte[] buff = new byte[size];
+        bb.duplicate().get(buff);
+        return buff;
+    }
+
 }

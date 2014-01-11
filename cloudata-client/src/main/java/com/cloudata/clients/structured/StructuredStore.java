@@ -28,10 +28,6 @@ public interface StructuredStore {
 
     }
 
-    public static final int SYSTEM_TABLESPACE_START = 2100000000;
-    public static final int TABLESPACEID_TABLESPACES = SYSTEM_TABLESPACE_START + 0;
-    public static final int TABLESPACEID_TABLESPACE_ID_INDEX = SYSTEM_TABLESPACE_START + 1;
-
     Entry read(int tablespace, ByteString key, ReadOption... options) throws IOException;
 
     boolean delete(int tablespaceId, ByteString cloudataKey) throws IOException;

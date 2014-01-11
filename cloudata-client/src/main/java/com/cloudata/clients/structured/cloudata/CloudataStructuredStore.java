@@ -75,7 +75,9 @@ public class CloudataStructuredStore implements StructuredStore {
 
         ab.setStoreId(storeId);
         ab.setKeyspaceId(keyspaceId);
-        ab.setKey(key);
+        if (key != null) {
+            ab.setKey(key);
+        }
         ab.setAction(action);
         if (value != null) {
             ab.setValue(value);
@@ -218,7 +220,7 @@ public class CloudataStructuredStore implements StructuredStore {
         }
     }
 
-    private Entry put(int tablespaceId, ByteString key, ByteString data, Boolean ifNotExists, Long ifVersion)
+    Entry put(int tablespaceId, ByteString key, ByteString data, Boolean ifNotExists, Long ifVersion)
             throws IOException, AlreadyExistsException, VersionMismatchException {
         StructuredRequest.Builder b = StructuredRequest.newBuilder();
         StructuredAction.Builder ab = addCommand(b, StructuredActionType.STRUCTURED_SET, tablespaceId, key, data);
@@ -271,4 +273,5 @@ public class CloudataStructuredStore implements StructuredStore {
     public StructuredStoreSchema getSchema() {
         return new CloudataStructuredStoreSchema(this);
     }
+
 }

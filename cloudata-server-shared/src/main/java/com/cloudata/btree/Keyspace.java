@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.WellKnownKeyspaces;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.protobuf.ByteString;
@@ -16,7 +17,7 @@ public class Keyspace {
     private static final Logger log = LoggerFactory.getLogger(Keyspace.class);
 
     public static final Keyspace ZERO = Keyspace.user(0);
-    private static final int SYSTEM_START = 65536;
+    private static final int SYSTEM_START = WellKnownKeyspaces.SYSTEM_START;
 
     final int keyspaceId;
     final ByteString keyspaceIdPrefix;
@@ -25,22 +26,15 @@ public class Keyspace {
         Preconditions.checkArgument(keyspaceId >= 0);
         this.keyspaceId = keyspaceId;
 
-        if (keyspaceId < 128) {
-            assert 1 == CodedOutputStream.computeInt32SizeNoTag(keyspaceId);
-            byte[] data = new byte[1];
-            data[0] = (byte) keyspaceId;
-            this.keyspaceIdPrefix = ByteString.copyFrom(data);
-        } else {
-            try {
-                byte[] data = new byte[CodedOutputStream.computeInt32SizeNoTag(keyspaceId)];
-                CodedOutputStream c = CodedOutputStream.newInstance(data);
-                c.writeInt32NoTag(keyspaceId);
-                c.flush();
+        try {
+            byte[] data = new byte[CodedOutputStream.computeInt32SizeNoTag(keyspaceId)];
+            CodedOutputStream c = CodedOutputStream.newInstance(data);
+            c.writeInt32NoTag(keyspaceId);
+            c.flush();
 
-                this.keyspaceIdPrefix = ByteString.copyFrom(data);
-            } catch (IOException e) {
-                throw Throwables.propagate(e);
-            }
+            this.keyspaceIdPrefix = ByteString.copyFrom(data);
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
         }
     }
 
@@ -49,13 +43,15 @@ public class Keyspace {
     }
 
     public static Keyspace user(int keyspaceId) {
-        if (keyspaceId > SYSTEM_START) {
-            throw new IllegalArgumentException();
-        }
+        Preconditions.checkArgument(keyspaceId >= 0);
         return new Keyspace(keyspaceId);
     }
 
     public static Keyspace system(int i) {
+        Preconditions.checkArgument(i >= 0);
+        // Sanity check to make sure we're not passing in a full id!
+        Preconditions.checkArgument(i <= 1024);
+
         return new Keyspace(SYSTEM_START + i);
     }
 
@@ -97,5 +93,17 @@ public class Keyspace {
 
     public ByteString mapToKey(ByteString key) {
         return keyspaceIdPrefix.concat(key);
+    }
+
+    public static Keyspace fromId(int keyspaceId) {
+        return new Keyspace(keyspaceId);
+    }
+
+    public boolean isSystem() {
+        return this.keyspaceId >= SYSTEM_START;
+    }
+
+    public ByteString getKeyspacePrefix() {
+        return keyspaceIdPrefix;
     }
 }

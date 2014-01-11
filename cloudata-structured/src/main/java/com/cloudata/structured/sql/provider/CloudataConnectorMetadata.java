@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.cloudata.btree.Keyspace;
+import com.cloudata.structured.Keyspaces;
+import com.cloudata.structured.StructuredProtocol.KeyspaceName;
 import com.cloudata.structured.StructuredStore;
 import com.facebook.presto.spi.ColumnHandle;
 import com.facebook.presto.spi.ColumnMetadata;
@@ -38,18 +40,21 @@ public class CloudataConnectorMetadata extends ReadOnlyConnectorMetadata {
     }
 
     @Override
-    public CloudataTableHandle getTableHandle(SchemaTableName tableName) {
-        if (!listSchemaNames().contains(tableName.getSchemaName())) {
+    public CloudataTableHandle getTableHandle(SchemaTableName schemaTableName) {
+        String schemaName = schemaTableName.getSchemaName();
+        if (!listSchemaNames().contains(schemaName)) {
             return null;
         }
 
-        Keyspace keyspace = store.getKeyspaces().findKeyspace(tableName.getTableName());
-        if (keyspace == null) {
+        String tableName = schemaTableName.getTableName();
+        KeyspaceName keyspaceName = Keyspaces.buildUserKeyspaceName(tableName);
+        Integer keyspaceId = store.getKeyspaces().findKeyspaceId(keyspaceName);
+        if (keyspaceId == null) {
             return null;
         }
 
-        return new CloudataTableHandle(store, connectorId, tableName.getSchemaName(), tableName.getTableName(),
-                keyspace);
+        Keyspace keyspace = Keyspace.user(keyspaceId);
+        return new CloudataTableHandle(store, connectorId, schemaName, tableName, keyspace);
     }
 
     @Override

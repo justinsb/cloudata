@@ -3,7 +3,6 @@ package com.cloudata.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
@@ -50,17 +49,4 @@ public class ByteStrings {
         return asByteSource(data).hash(hash);
     }
 
-    public static ByteString encode(int v) {
-        ByteBuffer b = ByteBuffer.allocate(4);
-        b.putInt(v);
-        b.flip();
-        return ByteString.copyFrom(b);
-    }
-
-    public static ByteString encode(long v) {
-        ByteBuffer b = ByteBuffer.allocate(8);
-        b.putLong(v);
-        b.flip();
-        return ByteString.copyFrom(b);
-    }
 }

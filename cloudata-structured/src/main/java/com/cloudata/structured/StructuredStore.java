@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.btree.Btree;
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Database;
-import com.cloudata.btree.EntryListener;
 import com.cloudata.btree.Keyspace;
 import com.cloudata.btree.ReadOnlyTransaction;
 import com.cloudata.btree.WriteTransaction;
@@ -53,32 +52,6 @@ public class StructuredStore {
 
     public BtreeQuery buildQuery(Keyspace keyspace, boolean stripKeyspace) {
         return new BtreeQuery(btree, keyspace, stripKeyspace);
-    }
-
-    static class FindMaxListener implements EntryListener {
-
-        final Keyspace keyspace;
-
-        public FindMaxListener(Keyspace keyspace) {
-            this.keyspace = keyspace;
-        }
-
-        private ByteBuffer lastKey;
-
-        public ByteBuffer getLastKey() {
-            return lastKey;
-        }
-
-        @Override
-        public boolean found(ByteBuffer key, Value value) {
-            if (keyspace.contains(key)) {
-                this.lastKey = key;
-                return true;
-            } else {
-                return false;
-            }
-        }
-
     }
 
     public Btree getBtree() {

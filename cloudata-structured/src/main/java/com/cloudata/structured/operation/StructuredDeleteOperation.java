@@ -1,7 +1,6 @@
 package com.cloudata.structured.operation;
 
 import com.cloudata.btree.ByteBuffers;
-import com.cloudata.btree.Keyspace;
 import com.cloudata.structured.StructuredProtocol.ActionResponseCode;
 import com.cloudata.structured.StructuredProtocol.StructuredAction;
 import com.cloudata.structured.StructuredProtocol.StructuredActionType;
@@ -18,6 +17,8 @@ public class StructuredDeleteOperation extends SimpleStructuredOperationBase {
         Preconditions.checkState(action.getAction() == StructuredActionType.STRUCTURED_DELETE);
         Preconditions.checkArgument(!action.getIfNotExists());
         Preconditions.checkArgument(!action.hasValue());
+
+        Preconditions.checkArgument(!keyspace.isSystem());
     }
 
     @Override
@@ -65,10 +66,10 @@ public class StructuredDeleteOperation extends SimpleStructuredOperationBase {
     // return new StructuredDeleteOperation(b.build());
     // }
 
-    public static StructuredDeleteOperation build(long storeId, Keyspace keyspace, ByteString key) {
+    public static StructuredDeleteOperation build(long storeId, int keyspaceId, ByteString key) {
         StructuredAction.Builder b = StructuredAction.newBuilder();
         b.setStoreId(storeId);
-        b.setKeyspaceId(keyspace.getKeyspaceId());
+        b.setKeyspaceId(keyspaceId);
         b.setKey(key);
         b.setAction(StructuredActionType.STRUCTURED_DELETE);
         return new StructuredDeleteOperation(b.build());

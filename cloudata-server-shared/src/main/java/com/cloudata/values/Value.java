@@ -14,10 +14,13 @@ public abstract class Value implements Cloneable {
     public static final byte FORMAT_INT64 = 1;
     public static final byte FORMAT_JSON = 2;
     public static final byte FORMAT_PROTOBUF = 3;
+    public static final byte FORMAT_QUALIFIED_KEY = 4;
 
     static final ByteString PREFIX_RAW = ByteString.copyFrom(new byte[] { FORMAT_RAW });
     // static final ByteString PREFIX_INT64 = ByteString.copyFrom(new byte[] { FORMAT_INT64 });
     static final ByteString PREFIX_JSON = ByteString.copyFrom(new byte[] { FORMAT_JSON });
+    static final ByteString PREFIX_QUALIFIED_KEY = ByteString.copyFrom(new byte[] { FORMAT_QUALIFIED_KEY });
+    static final ByteString PREFIX_PROTOBUF = ByteString.copyFrom(new byte[] { FORMAT_PROTOBUF });
 
     protected final ByteBuffer buffer;
 
@@ -112,12 +115,20 @@ public abstract class Value implements Cloneable {
         return new RawBytesValue(PREFIX_RAW.concat(b).asReadOnlyByteBuffer());
     }
 
+    public static Value fromQualifiedKey(ByteString qualifiedPrimaryKey) {
+        return new RawBytesValue(PREFIX_QUALIFIED_KEY.concat(qualifiedPrimaryKey).asReadOnlyByteBuffer());
+    }
+
     public static Value fromJsonBytes(byte[] data) {
         return fromJsonBytes(ByteString.copyFrom(data));
     }
 
     public static Value fromJsonBytes(ByteString b) {
         return new JsonValue(PREFIX_JSON.concat(b).asReadOnlyByteBuffer());
+    }
+
+    public static Value fromProtobuf(Message msg) {
+        return new ProtobufValue(PREFIX_PROTOBUF.concat(msg.toByteString()).asReadOnlyByteBuffer());
     }
 
     public Value concat(ByteString appendValue) {
@@ -189,6 +200,10 @@ public abstract class Value implements Cloneable {
 
         case FORMAT_PROTOBUF: {
             return new ProtobufValue(buffer);
+        }
+
+        case FORMAT_QUALIFIED_KEY: {
+            return new QualifiedKeyValue(buffer);
         }
 
         default:

@@ -59,8 +59,6 @@ message StructuredResponse {
 	optional StructuredActionResponse action_response = 1;
 }
 
-
-
 enum KeyspaceType {
 	USER_DATA = 1;
 }
@@ -71,6 +69,10 @@ message KeyspaceName {
 }
 
 message KeyspaceData {
-	optional uint64 id = 1;
+	optional uint32 id = 1;
 	optional KeyspaceName name = 2;
+
+	optional bytes protobuf_schema = 3;
+
+	repeated int32 primary_key_fields = 4;
 }

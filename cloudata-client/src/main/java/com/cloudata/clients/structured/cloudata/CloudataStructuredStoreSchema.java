@@ -1,22 +1,23 @@
 package com.cloudata.clients.structured.cloudata;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.WellKnownKeyspaces;
 import com.cloudata.clients.structured.AlreadyExistsException;
 import com.cloudata.clients.structured.StructuredStore;
 import com.cloudata.clients.structured.StructuredStoreSchema;
-import com.cloudata.structured.StructuredSchema;
-import com.cloudata.structured.StructuredSchema.SchemaData;
+import com.cloudata.clients.structured.VersionMismatchException;
+import com.cloudata.structured.StructuredProtocol.KeyspaceData;
+import com.cloudata.structured.StructuredProtocol.KeyspaceName;
+import com.cloudata.structured.StructuredProtocol.KeyspaceType;
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.DescriptorProtos.DescriptorProto;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
  * Manages schemas & tablespaces. For now, this is client side. TODO: Move to server!
@@ -35,78 +36,69 @@ public class CloudataStructuredStoreSchema implements StructuredStoreSchema {
     }
 
     @Override
-    public int putTablespace(String name, DescriptorProto proto, FieldDescriptor[] primaryKey)
+    public TableInfo putTablespace(String name, DescriptorProto proto, FieldDescriptor[] primaryKey)
             throws AlreadyExistsException, IOException {
         Preconditions.checkState(primaryKey != null && primaryKey.length > 0);
 
-        ByteString key = ByteString.copyFromUtf8(name);
-
-        while (true) {
-            int tablespaceId = 1 + random.nextInt(StructuredStore.SYSTEM_TABLESPACE_START - 1);
-
-            Preconditions.checkState(tablespaceId > 0);
-            Preconditions.checkState(tablespaceId < StructuredStore.SYSTEM_TABLESPACE_START);
-
-            ByteString schemaData;
-            {
-                SchemaData.Builder b = SchemaData.newBuilder();
-                b.setName(ByteString.copyFromUtf8(name));
-                b.setTablespaceId(tablespaceId);
-                b.setProtobufSchema(proto.toByteString());
-                for (FieldDescriptor field : primaryKey) {
-                    b.addPrimaryKeyFields(field.getNumber());
-                }
-                schemaData = b.build().toByteString();
+        KeyspaceName keyspaceName = buildKeyspaceName(name);
+        KeyspaceData keyspaceData;
+        {
+            KeyspaceData.Builder b = KeyspaceData.newBuilder();
+            b.setName(keyspaceName);
+            b.setProtobufSchema(proto.toByteString());
+            for (FieldDescriptor field : primaryKey) {
+                b.addPrimaryKeyFields(field.getNumber());
             }
-
-            ByteString tablespaceIdKey;
-            {
-                ByteBuffer b = ByteBuffer.allocate(4);
-                b.putInt(tablespaceId);
-                b.flip();
-
-                tablespaceIdKey = ByteString.copyFrom(b);
-            }
-
-            // TODO: Need batch operation here!!
-            try {
-                store.create(StructuredStore.TABLESPACEID_TABLESPACE_ID_INDEX, tablespaceIdKey, key);
-            } catch (AlreadyExistsException e) {
-                log.debug("Retrying after tablespace id conflict", e);
-                continue;
-            }
-
-            boolean rollback = true;
-            try {
-                store.create(StructuredStore.TABLESPACEID_TABLESPACES, key, schemaData);
-                rollback = false;
-            } finally {
-                if (rollback) {
-                    try {
-                        store.create(StructuredStore.TABLESPACEID_TABLESPACE_ID_INDEX, tablespaceIdKey, key);
-                    } catch (Exception e2) {
-                        log.warn("Error while deleting tablespace id entry", e2);
-                    }
-                }
-            }
+            keyspaceData = b.build();
         }
+
+        StructuredStore.Entry entry;
+
+        try {
+            entry = store.put(WellKnownKeyspaces.KEYSPACE_DEFINITIONS, null, keyspaceData.toByteString(), true, null);
+        } catch (VersionMismatchException e) {
+            throw new IOException("Protocol error (unexpected version-mismatch response)", e);
+        }
+
+        keyspaceData = KeyspaceData.parseFrom(entry.getData());
+
+        if (!keyspaceData.hasId()) {
+            throw new IllegalStateException();
+        }
+
+        return new TableInfo(keyspaceData);
+    }
+
+    private KeyspaceName buildKeyspaceName(String name) {
+        KeyspaceName keyspaceName;
+        {
+            KeyspaceName.Builder b = KeyspaceName.newBuilder();
+            b.setType(KeyspaceType.USER_DATA);
+            b.setName(ByteString.copyFromUtf8(name));
+            keyspaceName = b.build();
+        }
+        return keyspaceName;
     }
 
     @Override
-    public Integer findTablespace(String name) throws IOException {
-        ByteString key = ByteString.copyFromUtf8(name);
+    public TableInfo findTablespace(String name) throws IOException {
+        KeyspaceName keyspaceName = buildKeyspaceName(name);
 
-        StructuredStore.Entry entry = store.read(StructuredStore.TABLESPACEID_TABLESPACES, key);
-        if (entry == null) {
+        // TODO: Server side dereference / query
+
+        StructuredStore.Entry indexEntry = store.read(WellKnownKeyspaces.KEYSPACE_DEFINITIONS_IX_NAME,
+                keyspaceName.toByteString());
+        if (indexEntry == null) {
             return null;
         }
-        ByteString data = entry.getData();
-        try {
-            SchemaData schemaData = StructuredSchema.SchemaData.parseFrom(data);
-            return schemaData.getTablespaceId();
-        } catch (InvalidProtocolBufferException e) {
-            throw new IOException("Schema data is corrupted", e);
+
+        StructuredStore.Entry entry = store.read(WellKnownKeyspaces.KEYSPACE_DEFINITIONS, indexEntry.getData());
+        if (entry == null) {
+            throw new IllegalStateException();
         }
+
+        KeyspaceData keyspaceData = KeyspaceData.parseFrom(entry.getData());
+        return new TableInfo(keyspaceData);
     }
 
 }

@@ -18,14 +18,17 @@ public abstract class StructuredOperationBase implements StructuredOperation {
 
     protected final ByteString qualifiedKey;
 
+    protected final Keyspace keyspace;
+
     public StructuredOperationBase(StructuredAction action) {
         this.action = action;
 
         if (action.hasKey()) {
             Preconditions.checkState(action.hasKeyspaceId());
-            Keyspace keyspace = Keyspace.user(action.getKeyspaceId());
+            this.keyspace = Keyspace.fromId(action.getKeyspaceId());
             this.qualifiedKey = keyspace.mapToKey(action.getKey());
         } else {
+            this.keyspace = null;
             this.qualifiedKey = null;
         }
 

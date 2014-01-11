@@ -4902,15 +4902,15 @@ public final class StructuredProtocol {
   public interface KeyspaceDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional uint64 id = 1;
+    // optional uint32 id = 1;
     /**
-     * <code>optional uint64 id = 1;</code>
+     * <code>optional uint32 id = 1;</code>
      */
     boolean hasId();
     /**
-     * <code>optional uint64 id = 1;</code>
+     * <code>optional uint32 id = 1;</code>
      */
-    long getId();
+    int getId();
 
     // optional .KeyspaceName name = 2;
     /**
@@ -4925,6 +4925,30 @@ public final class StructuredProtocol {
      * <code>optional .KeyspaceName name = 2;</code>
      */
     com.cloudata.structured.StructuredProtocol.KeyspaceNameOrBuilder getNameOrBuilder();
+
+    // optional bytes protobuf_schema = 3;
+    /**
+     * <code>optional bytes protobuf_schema = 3;</code>
+     */
+    boolean hasProtobufSchema();
+    /**
+     * <code>optional bytes protobuf_schema = 3;</code>
+     */
+    com.google.protobuf.ByteString getProtobufSchema();
+
+    // repeated int32 primary_key_fields = 4;
+    /**
+     * <code>repeated int32 primary_key_fields = 4;</code>
+     */
+    java.util.List<java.lang.Integer> getPrimaryKeyFieldsList();
+    /**
+     * <code>repeated int32 primary_key_fields = 4;</code>
+     */
+    int getPrimaryKeyFieldsCount();
+    /**
+     * <code>repeated int32 primary_key_fields = 4;</code>
+     */
+    int getPrimaryKeyFields(int index);
   }
   /**
    * Protobuf type {@code KeyspaceData}
@@ -4979,7 +5003,7 @@ public final class StructuredProtocol {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              id_ = input.readUInt64();
+              id_ = input.readUInt32();
               break;
             }
             case 18: {
@@ -4995,6 +5019,32 @@ public final class StructuredProtocol {
               bitField0_ |= 0x00000002;
               break;
             }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              protobufSchema_ = input.readBytes();
+              break;
+            }
+            case 32: {
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+                primaryKeyFields_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              primaryKeyFields_.add(input.readInt32());
+              break;
+            }
+            case 34: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008) && input.getBytesUntilLimit() > 0) {
+                primaryKeyFields_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000008;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                primaryKeyFields_.add(input.readInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -5003,6 +5053,9 @@ public final class StructuredProtocol {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+          primaryKeyFields_ = java.util.Collections.unmodifiableList(primaryKeyFields_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -5035,19 +5088,19 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
-    // optional uint64 id = 1;
+    // optional uint32 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
-    private long id_;
+    private int id_;
     /**
-     * <code>optional uint64 id = 1;</code>
+     * <code>optional uint32 id = 1;</code>
      */
     public boolean hasId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional uint64 id = 1;</code>
+     * <code>optional uint32 id = 1;</code>
      */
-    public long getId() {
+    public int getId() {
       return id_;
     }
 
@@ -5073,9 +5126,50 @@ public final class StructuredProtocol {
       return name_;
     }
 
+    // optional bytes protobuf_schema = 3;
+    public static final int PROTOBUF_SCHEMA_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString protobufSchema_;
+    /**
+     * <code>optional bytes protobuf_schema = 3;</code>
+     */
+    public boolean hasProtobufSchema() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes protobuf_schema = 3;</code>
+     */
+    public com.google.protobuf.ByteString getProtobufSchema() {
+      return protobufSchema_;
+    }
+
+    // repeated int32 primary_key_fields = 4;
+    public static final int PRIMARY_KEY_FIELDS_FIELD_NUMBER = 4;
+    private java.util.List<java.lang.Integer> primaryKeyFields_;
+    /**
+     * <code>repeated int32 primary_key_fields = 4;</code>
+     */
+    public java.util.List<java.lang.Integer>
+        getPrimaryKeyFieldsList() {
+      return primaryKeyFields_;
+    }
+    /**
+     * <code>repeated int32 primary_key_fields = 4;</code>
+     */
+    public int getPrimaryKeyFieldsCount() {
+      return primaryKeyFields_.size();
+    }
+    /**
+     * <code>repeated int32 primary_key_fields = 4;</code>
+     */
+    public int getPrimaryKeyFields(int index) {
+      return primaryKeyFields_.get(index);
+    }
+
     private void initFields() {
-      id_ = 0L;
+      id_ = 0;
       name_ = com.cloudata.structured.StructuredProtocol.KeyspaceName.getDefaultInstance();
+      protobufSchema_ = com.google.protobuf.ByteString.EMPTY;
+      primaryKeyFields_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5090,10 +5184,16 @@ public final class StructuredProtocol {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeUInt64(1, id_);
+        output.writeUInt32(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeMessage(2, name_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, protobufSchema_);
+      }
+      for (int i = 0; i < primaryKeyFields_.size(); i++) {
+        output.writeInt32(4, primaryKeyFields_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -5106,11 +5206,24 @@ public final class StructuredProtocol {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt64Size(1, id_);
+          .computeUInt32Size(1, id_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, name_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, protobufSchema_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < primaryKeyFields_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(primaryKeyFields_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getPrimaryKeyFieldsList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -5229,7 +5342,7 @@ public final class StructuredProtocol {
 
       public Builder clear() {
         super.clear();
-        id_ = 0L;
+        id_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
         if (nameBuilder_ == null) {
           name_ = com.cloudata.structured.StructuredProtocol.KeyspaceName.getDefaultInstance();
@@ -5237,6 +5350,10 @@ public final class StructuredProtocol {
           nameBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
+        protobufSchema_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        primaryKeyFields_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -5277,6 +5394,15 @@ public final class StructuredProtocol {
         } else {
           result.name_ = nameBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.protobufSchema_ = protobufSchema_;
+        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          primaryKeyFields_ = java.util.Collections.unmodifiableList(primaryKeyFields_);
+          bitField0_ = (bitField0_ & ~0x00000008);
+        }
+        result.primaryKeyFields_ = primaryKeyFields_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -5298,6 +5424,19 @@ public final class StructuredProtocol {
         }
         if (other.hasName()) {
           mergeName(other.getName());
+        }
+        if (other.hasProtobufSchema()) {
+          setProtobufSchema(other.getProtobufSchema());
+        }
+        if (!other.primaryKeyFields_.isEmpty()) {
+          if (primaryKeyFields_.isEmpty()) {
+            primaryKeyFields_ = other.primaryKeyFields_;
+            bitField0_ = (bitField0_ & ~0x00000008);
+          } else {
+            ensurePrimaryKeyFieldsIsMutable();
+            primaryKeyFields_.addAll(other.primaryKeyFields_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -5326,35 +5465,35 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
-      // optional uint64 id = 1;
-      private long id_ ;
+      // optional uint32 id = 1;
+      private int id_ ;
       /**
-       * <code>optional uint64 id = 1;</code>
+       * <code>optional uint32 id = 1;</code>
        */
       public boolean hasId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional uint64 id = 1;</code>
+       * <code>optional uint32 id = 1;</code>
        */
-      public long getId() {
+      public int getId() {
         return id_;
       }
       /**
-       * <code>optional uint64 id = 1;</code>
+       * <code>optional uint32 id = 1;</code>
        */
-      public Builder setId(long value) {
+      public Builder setId(int value) {
         bitField0_ |= 0x00000001;
         id_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional uint64 id = 1;</code>
+       * <code>optional uint32 id = 1;</code>
        */
       public Builder clearId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        id_ = 0L;
+        id_ = 0;
         onChanged();
         return this;
       }
@@ -5474,6 +5613,108 @@ public final class StructuredProtocol {
           name_ = null;
         }
         return nameBuilder_;
+      }
+
+      // optional bytes protobuf_schema = 3;
+      private com.google.protobuf.ByteString protobufSchema_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes protobuf_schema = 3;</code>
+       */
+      public boolean hasProtobufSchema() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes protobuf_schema = 3;</code>
+       */
+      public com.google.protobuf.ByteString getProtobufSchema() {
+        return protobufSchema_;
+      }
+      /**
+       * <code>optional bytes protobuf_schema = 3;</code>
+       */
+      public Builder setProtobufSchema(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        protobufSchema_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes protobuf_schema = 3;</code>
+       */
+      public Builder clearProtobufSchema() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        protobufSchema_ = getDefaultInstance().getProtobufSchema();
+        onChanged();
+        return this;
+      }
+
+      // repeated int32 primary_key_fields = 4;
+      private java.util.List<java.lang.Integer> primaryKeyFields_ = java.util.Collections.emptyList();
+      private void ensurePrimaryKeyFieldsIsMutable() {
+        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+          primaryKeyFields_ = new java.util.ArrayList<java.lang.Integer>(primaryKeyFields_);
+          bitField0_ |= 0x00000008;
+         }
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public java.util.List<java.lang.Integer>
+          getPrimaryKeyFieldsList() {
+        return java.util.Collections.unmodifiableList(primaryKeyFields_);
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public int getPrimaryKeyFieldsCount() {
+        return primaryKeyFields_.size();
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public int getPrimaryKeyFields(int index) {
+        return primaryKeyFields_.get(index);
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public Builder setPrimaryKeyFields(
+          int index, int value) {
+        ensurePrimaryKeyFieldsIsMutable();
+        primaryKeyFields_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public Builder addPrimaryKeyFields(int value) {
+        ensurePrimaryKeyFieldsIsMutable();
+        primaryKeyFields_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public Builder addAllPrimaryKeyFields(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensurePrimaryKeyFieldsIsMutable();
+        super.addAll(values, primaryKeyFields_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 primary_key_fields = 4;</code>
+       */
+      public Builder clearPrimaryKeyFields() {
+        primaryKeyFields_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000008);
+        onChanged();
+        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:KeyspaceData)
@@ -5780,17 +6021,18 @@ public final class StructuredProtocol {
       "uredResponse\0222\n\017action_response\030\001 \001(\0132\031." +
       "StructuredActionResponse\"9\n\014KeyspaceName" +
       "\022\033\n\004type\030\001 \001(\0162\r.KeyspaceType\022\014\n\004name\030\002 " +
-      "\001(\014\"7\n\014KeyspaceData\022\n\n\002id\030\001 \001(\004\022\033\n\004name\030" +
-      "\002 \001(\0132\r.KeyspaceName*W\n\022ActionResponseCo" +
-      "de\022\010\n\004DONE\020\001\022\r\n\tNOT_FOUND\020\002\022\022\n\016ALREADY_E",
-      "XISTS\020\036\022\024\n\020VERSION_MISMATCH\020\037*\204\001\n\024Struct" +
-      "uredActionType\022\022\n\016STRUCTURED_GET\020\001\022\022\n\016ST" +
-      "RUCTURED_SET\020\002\022\025\n\021STRUCTURED_DELETE\020\003\022\024\n" +
-      "\020LIST_WITH_PREFIX\020\004\022\027\n\023STRUCTURED_COMPOU" +
-      "ND\020\010*\035\n\014KeyspaceType\022\r\n\tUSER_DATA\020\0012J\n\024S" +
-      "tructuredRpcService\0222\n\007Execute\022\022.Structu" +
-      "redRequest\032\023.StructuredResponseB\034\n\027com.c" +
-      "loudata.structured\210\001\001"
+      "\001(\014\"l\n\014KeyspaceData\022\n\n\002id\030\001 \001(\r\022\033\n\004name\030" +
+      "\002 \001(\0132\r.KeyspaceName\022\027\n\017protobuf_schema\030" +
+      "\003 \001(\014\022\032\n\022primary_key_fields\030\004 \003(\005*W\n\022Act",
+      "ionResponseCode\022\010\n\004DONE\020\001\022\r\n\tNOT_FOUND\020\002" +
+      "\022\022\n\016ALREADY_EXISTS\020\036\022\024\n\020VERSION_MISMATCH" +
+      "\020\037*\204\001\n\024StructuredActionType\022\022\n\016STRUCTURE" +
+      "D_GET\020\001\022\022\n\016STRUCTURED_SET\020\002\022\025\n\021STRUCTURE" +
+      "D_DELETE\020\003\022\024\n\020LIST_WITH_PREFIX\020\004\022\027\n\023STRU" +
+      "CTURED_COMPOUND\020\010*\035\n\014KeyspaceType\022\r\n\tUSE" +
+      "R_DATA\020\0012J\n\024StructuredRpcService\0222\n\007Exec" +
+      "ute\022\022.StructuredRequest\032\023.StructuredResp" +
+      "onseB\034\n\027com.cloudata.structured\210\001\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -5838,7 +6080,7 @@ public final class StructuredProtocol {
           internal_static_KeyspaceData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_KeyspaceData_descriptor,
-              new java.lang.String[] { "Id", "Name", });
+              new java.lang.String[] { "Id", "Name", "ProtobufSchema", "PrimaryKeyFields", });
           return null;
         }
       };
