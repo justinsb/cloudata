@@ -35,7 +35,7 @@ public class GetOperation extends KeyValueOperationBase {
 
     public static GetOperation build(long storeId, Keyspace keyspace, ByteString key) {
         KeyValueAction.Builder b = KeyValueAction.newBuilder();
-        b.setAction(ActionType.APPEND);
+        b.setAction(ActionType.GET);
         b.setStoreId(storeId);
         b.setKeyspaceId(keyspace.getKeyspaceId());
         b.setKey(key);

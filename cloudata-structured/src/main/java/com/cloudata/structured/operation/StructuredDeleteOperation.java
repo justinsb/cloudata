@@ -1,58 +1,76 @@
 package com.cloudata.structured.operation;
 
-import com.cloudata.btree.Btree;
+import com.cloudata.btree.ByteBuffers;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.btree.Transaction;
-import com.cloudata.btree.operation.ComplexOperation;
-import com.cloudata.btree.operation.SimpleDeleteOperation;
-import com.cloudata.structured.StructuredProto.LogAction;
-import com.cloudata.structured.StructuredProto.LogEntry;
-import com.cloudata.structured.StructuredStore;
+import com.cloudata.structured.StructuredProtocol.ActionResponseCode;
+import com.cloudata.structured.StructuredProtocol.StructuredAction;
+import com.cloudata.structured.StructuredProtocol.StructuredActionType;
+import com.cloudata.structured.StructuredProtocol.StructuredResponseEntry;
+import com.cloudata.values.Value;
+import com.google.common.base.Preconditions;
+import com.google.common.hash.Hashing;
 import com.google.protobuf.ByteString;
 
-public class StructuredDeleteOperation implements StructuredOperation<Integer>, ComplexOperation<Integer> {
+public class StructuredDeleteOperation extends SimpleStructuredOperationBase {
+    public StructuredDeleteOperation(StructuredAction action) {
+        super(action);
 
-    private final StructuredStore store;
-    private final ByteString keyspaceName;
-    private final ByteString key;
-
-    int deleteCount;
-
-    public StructuredDeleteOperation(StructuredStore store, ByteString keyspaceName, ByteString key) {
-        this.store = store;
-        this.keyspaceName = keyspaceName;
-        this.key = key;
+        Preconditions.checkState(action.getAction() == StructuredActionType.STRUCTURED_DELETE);
+        Preconditions.checkArgument(!action.getIfNotExists());
+        Preconditions.checkArgument(!action.hasValue());
     }
 
     @Override
-    public LogEntry.Builder serialize() {
-        LogEntry.Builder b = LogEntry.newBuilder();
-        b.setKey(key);
-        b.setKeyspaceName(keyspaceName);
-        b.setAction(LogAction.DELETE);
-        return b;
-    }
-
-    @Override
-    public Integer getResult() {
-        return deleteCount;
-    }
-
-    @Override
-    public void doAction(Btree btree, Transaction txn) {
-        Keyspace keyspace = store.findKeyspace(txn, keyspaceName);
-        if (keyspace != null) {
-            ByteString qualifiedKey = keyspace.mapToKey(key);
-
-            // Delete the value
-            SimpleDeleteOperation op = new SimpleDeleteOperation(qualifiedKey);
-            txn.doAction(btree, op);
-            deleteCount += op.getResult();
+    public Value doAction(Value oldValue) {
+        StructuredResponseEntry.Builder eb = response.addEntryBuilder();
+        if (returnKeys) {
+            eb.setKey(action.getKey());
         }
+
+        if (oldValue == null) {
+            eb.setCode(ActionResponseCode.NOT_FOUND);
+            return oldValue; // Doesn't exist; no change
+        }
+
+        if (action.hasIfVersion()) {
+            boolean match = true;
+
+            long oldValueVersion = ByteBuffers.hash(Hashing.md5(), oldValue.asBytes()).asLong();
+
+            if (action.getIfVersion() != oldValueVersion) {
+                match = false;
+            }
+
+            if (!match) {
+                // Mismatch on value-conditional; don't change value
+                eb.setCode(ActionResponseCode.VERSION_MISMATCH);
+                return oldValue;
+            }
+        }
+
+        if (returnValues) {
+            eb.setValue(ByteString.copyFrom(oldValue.asBytes()));
+        }
+
+        eb.setCode(ActionResponseCode.DONE);
+        return null; // Delete the value
     }
 
-    @Override
-    public boolean isReadOnly() {
-        return false;
+    // public static StructuredDeleteOperation build(long storeId, int tablespaceId, ByteString key) {
+    // StructuredAction.Builder b = StructuredAction.newBuilder();
+    // b.setStoreId(storeId);
+    // b.setTablespaceId(tablespaceId);
+    // b.setKey(key);
+    // b.setAction(StructuredActionType.STRUCTURED_DELETE);
+    // return new StructuredDeleteOperation(b.build());
+    // }
+
+    public static StructuredDeleteOperation build(long storeId, Keyspace keyspace, ByteString key) {
+        StructuredAction.Builder b = StructuredAction.newBuilder();
+        b.setStoreId(storeId);
+        b.setKeyspaceId(keyspace.getKeyspaceId());
+        b.setKey(key);
+        b.setAction(StructuredActionType.STRUCTURED_DELETE);
+        return new StructuredDeleteOperation(b.build());
     }
 }

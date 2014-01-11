@@ -18,8 +18,8 @@ import org.robotninjas.barge.Replica;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.ProtobufServer;
 import com.cloudata.keyvalue.protobuf.KeyValueProtobufEndpoint;
-import com.cloudata.keyvalue.protobuf.ProtobufServer;
 import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;

@@ -100,28 +100,28 @@ public class ProtobufRpcClient {
     public static class RpcMethod<RequestT extends Message, ResponseT extends Message> {
 
         final Descriptors.MethodDescriptor method;
-        final Class<ResponseT> responseClass;
         final ResponseT responseDefaultInstance;
 
-        public RpcMethod(MethodDescriptor method, Class<ResponseT> responseClass, ResponseT responseDefaultInstance) {
+        public RpcMethod(MethodDescriptor method, ResponseT responseDefaultInstance) {
             this.method = method;
-            this.responseClass = responseClass;
             this.responseDefaultInstance = responseDefaultInstance;
         }
 
         public void call(com.google.protobuf.RpcChannel channel, RpcController controller, RequestT request,
                 RpcCallback<ResponseT> callback) {
-            channel.callMethod(method, controller, request, responseDefaultInstance,
-                    com.google.protobuf.RpcUtil.generalizeCallback(callback, responseClass, responseDefaultInstance));
+            channel.callMethod(method, controller, request, responseDefaultInstance, (RpcCallback<Message>) callback);
         }
 
         public static <RequestT extends Message, ResponseT extends Message> RpcMethod<RequestT, ResponseT> create(
-                ServiceDescriptor descriptor, String methodName, Class<ResponseT> responseClass,
+                ServiceDescriptor descriptor, String methodName, RequestT requestDefaultInstance,
                 ResponseT responseDefaultInstance) {
             MethodDescriptor method = descriptor.findMethodByName(methodName);
             Preconditions.checkArgument(method != null);
 
-            return new RpcMethod<RequestT, ResponseT>(method, responseClass, responseDefaultInstance);
+            Preconditions.checkArgument(requestDefaultInstance.getDescriptorForType() == method.getInputType());
+            Preconditions.checkArgument(responseDefaultInstance.getDescriptorForType() == method.getOutputType());
+
+            return new RpcMethod<RequestT, ResponseT>(method, responseDefaultInstance);
         }
     }
 

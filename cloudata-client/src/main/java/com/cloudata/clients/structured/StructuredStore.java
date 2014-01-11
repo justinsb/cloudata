@@ -24,7 +24,7 @@ public interface StructuredStore {
 
         ByteString getData();
 
-        int getVersion();
+        long getVersion();
 
     }
 
@@ -36,12 +36,12 @@ public interface StructuredStore {
 
     boolean delete(int tablespaceId, ByteString cloudataKey) throws IOException;
 
-    boolean delete(int tablespaceId, ByteString cloudataKey, int ifVersion) throws IOException,
+    boolean delete(int tablespaceId, ByteString cloudataKey, long ifVersion) throws IOException,
             VersionMismatchException;
 
     Entry create(int tablespaceId, ByteString cloudataKey, ByteString data) throws IOException, AlreadyExistsException;
 
-    Entry put(int tablespaceId, ByteString cloudataKey, ByteString data, int readVersion) throws IOException,
+    Entry put(int tablespaceId, ByteString cloudataKey, ByteString data, long readVersion) throws IOException,
             VersionMismatchException;
 
     Iterator<ByteString> listKeysWithPrefix(int tablespaceId, ByteString filterBytes) throws IOException;

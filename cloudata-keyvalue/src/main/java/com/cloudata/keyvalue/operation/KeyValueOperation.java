@@ -5,7 +5,7 @@ import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
 import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
 
 public interface KeyValueOperation extends BtreeOperation<ActionResponse> {
-    public abstract KeyValueAction serialize();
+    KeyValueAction serialize();
 
-    public abstract long getStoreId();
+    long getStoreId();
 }

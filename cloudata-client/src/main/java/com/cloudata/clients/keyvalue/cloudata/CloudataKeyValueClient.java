@@ -18,7 +18,7 @@ public class CloudataKeyValueClient {
     }
 
     static final ProtobufRpcClient.RpcMethod<KeyValueRequest, KeyValueResponse> METHOD_EXECUTE = ProtobufRpcClient.RpcMethod
-            .create(KeyValueService.getDescriptor(), "Execute", KeyValueResponse.class,
+            .create(KeyValueService.getDescriptor(), "Execute", KeyValueRequest.getDefaultInstance(),
                     KeyValueResponse.getDefaultInstance());
 
     @Nonnull

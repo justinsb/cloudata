@@ -1,0 +1,76 @@
+option java_package = "com.cloudata.structured";
+
+option java_generic_services = true;
+
+service StructuredRpcService {
+  rpc Execute (StructuredRequest) returns (StructuredResponse);
+}
+
+
+enum ActionResponseCode {
+	DONE = 1;
+	NOT_FOUND = 2;
+	ALREADY_EXISTS = 30;
+	VERSION_MISMATCH = 31;
+}
+	
+message StructuredResponseEntry {
+	optional bytes key = 1;
+	optional bytes value = 2;
+	
+	optional ActionResponseCode code = 5;
+}
+
+message StructuredAction {
+	optional uint64 store_id = 1;
+	optional uint32 keyspace_id = 2;
+	optional StructuredActionType action = 3;
+	optional bytes key = 4;
+	optional bytes value = 5;
+	optional uint64 version = 6;
+	
+	repeated StructuredAction children = 7;
+
+	optional bool if_not_exists = 10;
+	optional uint64 if_version = 11;
+	
+	repeated uint32 suppress_fields = 12;
+}
+
+enum StructuredActionType {
+	STRUCTURED_GET = 1;
+	STRUCTURED_SET = 2;
+	STRUCTURED_DELETE = 3;
+	LIST_WITH_PREFIX = 4;
+	STRUCTURED_COMPOUND = 8;
+}
+
+message StructuredRequest {
+	optional StructuredAction action = 1;
+}
+
+message StructuredActionResponse {
+	repeated StructuredResponseEntry entry = 1;
+	
+	repeated StructuredActionResponse children = 2;
+}
+
+message StructuredResponse {
+	optional StructuredActionResponse action_response = 1;
+}
+
+
+
+enum KeyspaceType {
+	USER_DATA = 1;
+}
+
+message KeyspaceName {
+	optional KeyspaceType type = 1;
+	optional bytes name = 2;
+}
+
+message KeyspaceData {
+	optional uint64 id = 1;
+	optional KeyspaceName name = 2;
+}

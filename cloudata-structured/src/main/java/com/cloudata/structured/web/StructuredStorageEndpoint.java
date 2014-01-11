@@ -26,8 +26,10 @@ import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
 
 import com.cloudata.btree.BtreeQuery;
+import com.cloudata.btree.Keyspace;
 import com.cloudata.structured.Listener;
 import com.cloudata.structured.StructuredStateMachine;
+import com.cloudata.structured.StructuredStore;
 import com.cloudata.structured.operation.StructuredDeleteOperation;
 import com.cloudata.structured.operation.StructuredSetOperation;
 import com.cloudata.values.Value;
@@ -46,18 +48,33 @@ public class StructuredStorageEndpoint {
     @PathParam("storeId")
     long storeId;
 
+    StructuredStore store;
+
+    StructuredStore getStore() {
+        if (store == null) {
+            store = stateMachine.getStructuredStore(storeId);
+        }
+        return store;
+    }
+
     @GET
     @Path("{keyspace}/{key}")
     // @Consumes(MediaType.APPLICATION_OCTET_STREAM)
     public Response get(@PathParam("keyspace") String keyspaceString, @PathParam("key") String keyString)
             throws IOException {
-        ByteString keyspaceName = ByteString.copyFromUtf8(keyspaceString);
         ByteString key = ByteString.copyFromUtf8(keyString);
 
-        Value v = stateMachine.get(storeId, keyspaceName, key);
+        StructuredStore store = getStore();
+
+        Keyspace keyspace = store.getKeyspaces().findKeyspace(keyspaceString);
+        if (keyspace == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        Value v = stateMachine.get(store, keyspace, key);
 
         if (v == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            throw new WebApplicationException(Status.NOT_FOUND);
         }
 
         ByteBuffer data = v.asBytes();
@@ -68,11 +85,16 @@ public class StructuredStorageEndpoint {
     @Path("{keyspace}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response queryJson(@PathParam("keyspace") String keyspaceString) throws IOException {
-        ByteString keyspaceName = ByteString.copyFrom(keyspaceString.getBytes(Charsets.UTF_8));
+        StructuredStore store = getStore();
 
-        BtreeQuery query = stateMachine.scan(storeId, keyspaceName);
+        Keyspace keyspace = store.getKeyspaces().findKeyspace(keyspaceString);
+        if (keyspace == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
+
+        BtreeQuery query = stateMachine.scan(store, keyspace);
         if (query == null) {
-            return Response.status(Status.NOT_FOUND).build();
+            throw new WebApplicationException(Status.NOT_FOUND);
         }
 
         query.setFormat(MediaType.APPLICATION_JSON_TYPE);
@@ -82,7 +104,12 @@ public class StructuredStorageEndpoint {
     @GET
     @Path("keys/{keyspace}")
     public Response listKeys(@PathParam("keyspace") String keyspaceString) throws IOException {
-        final ByteString keyspaceName = ByteString.copyFromUtf8(keyspaceString);
+        final StructuredStore store = getStore();
+
+        final Keyspace keyspace = store.getKeyspaces().findKeyspace(keyspaceString);
+        if (keyspace == null) {
+            throw new WebApplicationException(Status.NOT_FOUND);
+        }
 
         StreamingOutput stream = new StreamingOutput() {
             @Override
@@ -90,7 +117,7 @@ public class StructuredStorageEndpoint {
                 final CodedOutputStream cos = CodedOutputStream.newInstance(os);
                 final byte[] buffer = new byte[8192];
 
-                stateMachine.listKeys(storeId, keyspaceName, new Listener<ByteBuffer>() {
+                stateMachine.listKeys(store, keyspace, new Listener<ByteBuffer>() {
 
                     @Override
                     public boolean next(ByteBuffer value) {
@@ -142,22 +169,29 @@ public class StructuredStorageEndpoint {
     public Response post(@PathParam("keyspace") String keyspaceString, @PathParam("key") String keyString,
             InputStream valueStream) throws IOException {
         try {
-            ByteString keyspace = ByteString.copyFrom(keyspaceString.getBytes(Charsets.UTF_8));
             ByteString key = ByteString.copyFrom(keyString.getBytes(Charsets.UTF_8));
             byte[] v = ByteStreams.toByteArray(valueStream);
 
             Object ret;
 
             Value value = Value.fromJsonBytes(v);
-            StructuredSetOperation operation = new StructuredSetOperation(null, keyspace, key, value);
-            stateMachine.doAction(storeId, operation);
+
+            StructuredStore store = getStore();
+
+            Keyspace keyspace = store.getKeyspaces().findKeyspace(keyspaceString);
+            if (keyspace == null) {
+                throw new WebApplicationException(Status.NOT_FOUND);
+            }
+
+            StructuredSetOperation operation = StructuredSetOperation.build(storeId, keyspace, key, value);
+            stateMachine.doActionSync(operation);
             ret = null;
 
             return Response.ok(ret).build();
         } catch (InterruptedException e) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+            throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
         } catch (NoLeaderException e) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+            throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
         } catch (NotLeaderException e) {
             Replica leader = e.getLeader();
             InetSocketAddress address = (InetSocketAddress) leader.address();
@@ -174,16 +208,22 @@ public class StructuredStorageEndpoint {
     public Response delete(@PathParam("keyspace") String keyspaceString, @PathParam("key") String keyString)
             throws IOException {
         try {
-            ByteString keyspaceName = ByteString.copyFrom(keyspaceString.getBytes(Charsets.UTF_8));
             ByteString key = ByteString.copyFrom(keyString.getBytes(Charsets.UTF_8));
 
-            stateMachine.doAction(storeId, new StructuredDeleteOperation(null, keyspaceName, key));
+            StructuredStore store = getStore();
+
+            Keyspace keyspace = store.getKeyspaces().findKeyspace(keyspaceString);
+            if (keyspace == null) {
+                throw new WebApplicationException(Status.NOT_FOUND);
+            }
+
+            stateMachine.doActionSync(StructuredDeleteOperation.build(storeId, keyspace, key));
 
             return Response.noContent().build();
         } catch (InterruptedException e) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+            throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
         } catch (NoLeaderException e) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+            throw new WebApplicationException(Status.SERVICE_UNAVAILABLE);
         } catch (NotLeaderException e) {
             Replica leader = e.getLeader();
             InetSocketAddress address = (InetSocketAddress) leader.address();

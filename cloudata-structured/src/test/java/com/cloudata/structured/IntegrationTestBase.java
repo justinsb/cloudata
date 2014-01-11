@@ -1,6 +1,7 @@
 package com.cloudata.structured;
 
 import java.io.File;
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -30,9 +31,10 @@ public class IntegrationTestBase {
             members.remove(local);
 
             int httpPort = 9990 + i;
+            int protobufPort = 2010 + i;
 
             File baseDir = new File(TEMPDIR, "" + i);
-            SERVERS[i] = new StructuredServer(baseDir, local, members, httpPort);
+            SERVERS[i] = new StructuredServer(baseDir, local, members, httpPort, new InetSocketAddress(protobufPort));
 
             SERVERS[i].start();
         }

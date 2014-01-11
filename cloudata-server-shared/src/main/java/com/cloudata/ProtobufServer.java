@@ -1,4 +1,4 @@
-package com.cloudata.keyvalue.protobuf;
+package com.cloudata;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 

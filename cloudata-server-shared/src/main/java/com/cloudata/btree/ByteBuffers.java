@@ -1,8 +1,14 @@
 package com.cloudata.btree;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import com.cloudata.util.ByteBufferByteSource;
+import com.google.common.base.Throwables;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.io.ByteSource;
 import com.google.protobuf.ByteString;
 
 public class ByteBuffers {
@@ -119,5 +125,17 @@ public class ByteBuffers {
             }
         }
         return true;
+    }
+
+    public static ByteSource asByteSource(ByteBuffer buffer) {
+        return new ByteBufferByteSource(buffer.duplicate());
+    }
+
+    public static HashCode hash(HashFunction hasher, ByteBuffer buffer) {
+        try {
+            return ByteBuffers.asByteSource(buffer).hash(hasher);
+        } catch (IOException e) {
+            throw Throwables.propagate(e);
+        }
     }
 }

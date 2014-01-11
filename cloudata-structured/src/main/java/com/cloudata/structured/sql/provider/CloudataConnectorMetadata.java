@@ -13,7 +13,6 @@ import com.facebook.presto.spi.SchemaTableName;
 import com.facebook.presto.spi.SchemaTablePrefix;
 import com.facebook.presto.spi.TableHandle;
 import com.google.common.collect.Lists;
-import com.google.protobuf.ByteString;
 
 public class CloudataConnectorMetadata extends ReadOnlyConnectorMetadata {
 
@@ -44,7 +43,7 @@ public class CloudataConnectorMetadata extends ReadOnlyConnectorMetadata {
             return null;
         }
 
-        Keyspace keyspace = store.findKeyspace(ByteString.copyFromUtf8(tableName.getTableName()));
+        Keyspace keyspace = store.getKeyspaces().findKeyspace(tableName.getTableName());
         if (keyspace == null) {
             return null;
         }

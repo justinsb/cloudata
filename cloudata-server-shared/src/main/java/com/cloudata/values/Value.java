@@ -1,16 +1,19 @@
 package com.cloudata.values;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import com.cloudata.btree.ByteBuffers;
 import com.cloudata.util.Hex;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 
 public abstract class Value implements Cloneable {
     public static final byte FORMAT_RAW = 0;
     public static final byte FORMAT_INT64 = 1;
     public static final byte FORMAT_JSON = 2;
+    public static final byte FORMAT_PROTOBUF = 3;
 
     static final ByteString PREFIX_RAW = ByteString.copyFrom(new byte[] { FORMAT_RAW });
     // static final ByteString PREFIX_INT64 = ByteString.copyFrom(new byte[] { FORMAT_INT64 });
@@ -184,6 +187,10 @@ public abstract class Value implements Cloneable {
             return new Int64Value(buffer);
         }
 
+        case FORMAT_PROTOBUF: {
+            return new ProtobufValue(buffer);
+        }
+
         default:
             throw new IllegalStateException();
         }
@@ -199,6 +206,10 @@ public abstract class Value implements Cloneable {
 
     public JsonObject asJsonObject() {
         throw new UnsupportedOperationException();
+    }
+
+    public void asProtobuf(Message.Builder builder) throws IOException {
+        throw new IllegalArgumentException();
     }
 
 }

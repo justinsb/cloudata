@@ -52,8 +52,9 @@ public class KeyValueOperations {
     public static boolean isReadOnly(KeyValueAction action) {
         switch (action.getAction()) {
         case GET:
+        case LIST_ENTRIES_WITH_PREFIX:
+        case LIST_KEYS_WITH_PREFIX:
             return true;
-
         case COMPOUND:
             for (KeyValueAction child : action.getChildrenList()) {
                 if (!isReadOnly(child)) {

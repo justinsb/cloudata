@@ -46,7 +46,7 @@ public class CloudataTableHandle implements TableHandle {
 
         final List<ColumnMetadata> columns = Lists.newArrayList();
 
-        store.listKeys(keyspace, new Listener<ByteBuffer>() {
+        store.getKeys().listKeys(keyspace, new Listener<ByteBuffer>() {
             @Override
             public boolean next(ByteBuffer value) {
                 ColumnType type = ColumnType.STRING;

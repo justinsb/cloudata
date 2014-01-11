@@ -1,4 +1,4 @@
-package com.cloudata.clients.structured;
+package com.cloudata.clients.structured.cloudata;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,6 +7,9 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.clients.structured.AlreadyExistsException;
+import com.cloudata.clients.structured.StructuredStore;
+import com.cloudata.clients.structured.StructuredStoreSchema;
 import com.cloudata.structured.StructuredSchema;
 import com.cloudata.structured.StructuredSchema.SchemaData;
 import com.google.common.base.Preconditions;
@@ -19,15 +22,15 @@ import com.google.protobuf.InvalidProtocolBufferException;
  * Manages schemas & tablespaces. For now, this is client side. TODO: Move to server!
  * 
  */
-public class SimpleStructuredStoreSchema implements StructuredStoreSchema {
+public class CloudataStructuredStoreSchema implements StructuredStoreSchema {
 
-    private static final Logger log = LoggerFactory.getLogger(SimpleStructuredStoreSchema.class);
+    private static final Logger log = LoggerFactory.getLogger(CloudataStructuredStoreSchema.class);
 
-    final StructuredStore store;
+    final CloudataStructuredStore store;
 
     static final Random random = new Random();
 
-    public SimpleStructuredStoreSchema(StructuredStore store) {
+    public CloudataStructuredStoreSchema(CloudataStructuredStore store) {
         this.store = store;
     }
 

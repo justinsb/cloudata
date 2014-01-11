@@ -4,11 +4,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
+import org.robotninjas.barge.NoLeaderException;
+import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.StateMachine;
@@ -17,15 +20,20 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
-import com.cloudata.structured.StructuredProto.LogEntry;
-import com.cloudata.structured.operation.StructuredDeleteOperation;
+import com.cloudata.structured.StructuredProtocol.StructuredAction;
+import com.cloudata.structured.StructuredProtocol.StructuredActionResponse;
 import com.cloudata.structured.operation.StructuredOperation;
-import com.cloudata.structured.operation.StructuredSetOperation;
+import com.cloudata.structured.operation.StructuredOperations;
 import com.cloudata.values.Value;
+import com.google.common.base.Function;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -36,7 +44,11 @@ public class StructuredStateMachine implements StateMachine {
     private File baseDir;
     final LoadingCache<Long, StructuredStore> storeCache;
 
-    public StructuredStateMachine() {
+    private final ListeningExecutorService executor;
+
+    public StructuredStateMachine(ListeningExecutorService executor) {
+        this.executor = executor;
+
         StoreCacheLoader loader = new StoreCacheLoader();
         this.storeCache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
@@ -60,47 +72,79 @@ public class StructuredStateMachine implements StateMachine {
     // return raft.commit(entry.toByteArray());
     // }
 
-    public <V> V doAction(long storeId, StructuredOperation<V> operation) throws InterruptedException, RaftException {
-        LogEntry.Builder entry = operation.serialize();
-        entry.setStoreId(storeId);
+    public StructuredActionResponse doActionSync(StructuredOperation operation) throws InterruptedException,
+            RaftException {
+        try {
+            return doActionAsync(operation).get();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof NotLeaderException) {
+                throw (NotLeaderException) cause;
+            }
+            if (cause instanceof NoLeaderException) {
+                throw (NoLeaderException) cause;
+            }
+            throw new RaftException(e.getCause());
+        }
+    }
+
+    public ListenableFuture<StructuredActionResponse> doActionAsync(final StructuredOperation operation)
+            throws RaftException {
+        if (operation.isReadOnly()) {
+            return executor.submit(new Callable<StructuredActionResponse>() {
+
+                @Override
+                public StructuredActionResponse call() throws Exception {
+                    // TODO: Need to check that we are the leader!!
+
+                    long storeId = operation.getStoreId();
+
+                    StructuredStore store = getStructuredStore(storeId);
+
+                    store.doAction(operation);
+
+                    return operation.getResult();
+                }
+            });
+        }
+
+        StructuredAction entry = operation.serialize();
 
         log.debug("Proposing operation {}", entry.getAction());
 
-        return (V) raft.commit(entry.build().toByteArray());
+        return Futures.transform(raft.commitAsync(entry.toByteArray()),
+                new Function<Object, StructuredActionResponse>() {
+                    @Override
+                    public StructuredActionResponse apply(Object input) {
+                        Preconditions.checkArgument(input instanceof StructuredActionResponse);
+                        return (StructuredActionResponse) input;
+                    }
+                });
     }
+
+    // public <V> V doAction(long storeId, StructuredOperation<V> operation) throws InterruptedException, RaftException
+    // {
+    // LogEntry.Builder entry = operation.serialize();
+    // entry.setStoreId(storeId);
+    //
+    // log.debug("Proposing operation {}", entry.getAction());
+    //
+    // return (V) raft.commit(entry.build().toByteArray());
+    // }
 
     @Override
     public Object applyOperation(@Nonnull ByteBuffer op) {
         // TODO: We need to prevent repetition during replay
         // (we need idempotency)
         try {
-            LogEntry entry = LogEntry.parseFrom(ByteString.copyFrom(op));
-            log.debug("Committing operation {}", entry.getAction());
+            StructuredAction action = StructuredAction.parseFrom(ByteString.copyFrom(op));
+            log.debug("Committing operation {}", action.getAction());
 
-            long storeId = entry.getStoreId();
-
-            ByteString key = entry.getKey();
-            ByteString keyspaceName = entry.getKeyspaceName();
-            ByteString value = entry.getValue();
+            long storeId = action.getStoreId();
 
             StructuredStore store = getStructuredStore(storeId);
 
-            StructuredOperation<?> operation;
-
-            switch (entry.getAction()) {
-            case DELETE: {
-                operation = new StructuredDeleteOperation(store, keyspaceName, key);
-                break;
-            }
-            case SET: {
-                operation = new StructuredSetOperation(store, keyspaceName, key, Value.deserialize(entry.getValue()
-                        .asReadOnlyByteBuffer()));
-                break;
-            }
-
-            default:
-                throw new UnsupportedOperationException();
-            }
+            StructuredOperation operation = StructuredOperations.build(store, action);
 
             store.doAction(operation);
 
@@ -144,33 +188,21 @@ public class StructuredStateMachine implements StateMachine {
         }
     }
 
-    public Value get(long storeId, ByteString keyspaceName, ByteString key) {
-        StructuredStore keyValueStore = getStructuredStore(storeId);
-
-        Keyspace keyspace = keyValueStore.findKeyspace(keyspaceName);
-        if (keyspace == null) {
-            return null;
-        }
-
+    // This should also really be an operation, but is special-cased for speed
+    public Value get(StructuredStore store, Keyspace keyspace, ByteString key) {
         ByteString qualifiedKey = keyspace.mapToKey(key);
-        return keyValueStore.get(qualifiedKey.asReadOnlyByteBuffer());
+        return store.get(qualifiedKey.asReadOnlyByteBuffer());
     }
 
-    public BtreeQuery scan(long storeId, ByteString keyspaceName) {
-        StructuredStore keyValueStore = getStructuredStore(storeId);
-        Keyspace keyspace = keyValueStore.findKeyspace(keyspaceName);
-        if (keyspace == null) {
-            return null;
-        }
-        return keyValueStore.buildQuery(keyspace, true);
+    // This should also really be an operation, but is special-cased for speed
+    public BtreeQuery scan(StructuredStore store, Keyspace keyspace) {
+        return store.buildQuery(keyspace, true);
     }
 
-    public void listKeys(long storeId, ByteString keyspaceName, Listener<ByteBuffer> listener) {
-        StructuredStore keyValueStore = getStructuredStore(storeId);
-
-        Keyspace keyspace = keyValueStore.findKeyspace(keyspaceName);
+    // This should also really be an operation, but is special-cased for speed
+    public void listKeys(StructuredStore store, Keyspace keyspace, Listener<ByteBuffer> listener) {
         if (keyspace != null) {
-            keyValueStore.listKeys(keyspace, listener);
+            store.getKeys().listKeys(keyspace, listener);
         }
 
         listener.done();

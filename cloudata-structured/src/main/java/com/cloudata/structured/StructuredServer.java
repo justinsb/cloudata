@@ -1,8 +1,11 @@
 package com.cloudata.structured;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.servlet.DispatcherType;
 
@@ -15,11 +18,17 @@ import org.robotninjas.barge.Replica;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.ProtobufServer;
+import com.cloudata.structured.protobuf.StructuredProtobufEndpoint;
 import com.cloudata.structured.web.WebModule;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
+import com.google.protobuf.Service;
 
 public class StructuredServer {
 
@@ -32,11 +41,17 @@ public class StructuredServer {
     private RaftService raft;
     private Server jetty;
 
-    public StructuredServer(File baseDir, Replica local, List<Replica> peers, int httpPort) {
+    final SocketAddress protobufSocketAddress;
+
+    private ProtobufServer protobufServer;
+
+    public StructuredServer(File baseDir, Replica local, List<Replica> peers, int httpPort,
+            SocketAddress protobufSocketAddress) {
         this.baseDir = baseDir;
         this.local = local;
         this.peers = peers;
         this.httpPort = httpPort;
+        this.protobufSocketAddress = protobufSocketAddress;
     }
 
     public synchronized void start() throws Exception {
@@ -50,7 +65,8 @@ public class StructuredServer {
         logDir.mkdirs();
         stateDir.mkdirs();
 
-        StructuredStateMachine stateMachine = new StructuredStateMachine();
+        ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+        StructuredStateMachine stateMachine = new StructuredStateMachine(executor);
 
         ClusterConfig config = ClusterConfig.from(local, peers);
         this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(stateMachine);
@@ -80,6 +96,17 @@ public class StructuredServer {
         jetty.setHandler(context);
 
         jetty.start();
+
+        if (protobufSocketAddress != null) {
+            this.protobufServer = new ProtobufServer(protobufSocketAddress);
+
+            StructuredProtobufEndpoint endpoint = injector.getInstance(StructuredProtobufEndpoint.class);
+            Service service = StructuredProtocol.StructuredRpcService.newReflectiveService(endpoint);
+
+            protobufServer.addService(service);
+
+            this.protobufServer.start();
+        }
     }
 
     public String getHttpUrl() {
@@ -96,8 +123,11 @@ public class StructuredServer {
 
         File baseDir = new File(args[0]);
         int httpPort = (9990 + port);
+        int protobufPort = 2100 + port;
 
-        final StructuredServer server = new StructuredServer(baseDir, local, members, httpPort);
+        SocketAddress protobufSocketAddress = new InetSocketAddress(protobufPort);
+
+        final StructuredServer server = new StructuredServer(baseDir, local, members, httpPort, protobufSocketAddress);
         server.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -116,6 +146,15 @@ public class StructuredServer {
         if (jetty != null) {
             jetty.stop();
             jetty = null;
+        }
+
+        if (protobufServer != null) {
+            try {
+                protobufServer.stop();
+            } catch (Exception e) {
+                throw Throwables.propagate(e);
+            }
+            protobufServer = null;
         }
 
         if (raft != null) {
