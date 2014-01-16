@@ -1,6 +1,7 @@
 package com.cloudata;
 
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
@@ -17,7 +18,7 @@ public class ProtobufServer {
 
     public ProtobufServer(SocketAddress socketAddress) {
         this.socketAddress = socketAddress;
-        this.eventLoopGroup = new NioEventLoopGroup();
+        this.eventLoopGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("pool-protobuf"));
         this.rpcServer = new RpcServer(eventLoopGroup, socketAddress);
     }
 
@@ -27,6 +28,7 @@ public class ProtobufServer {
 
     public void stop() throws TimeoutException {
         this.rpcServer.stopAsync().awaitTerminated(5, TimeUnit.SECONDS);
+        this.eventLoopGroup.shutdownGracefully();
     }
 
     public void addService(Service service) {

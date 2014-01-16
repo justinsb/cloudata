@@ -6,6 +6,10 @@ import com.google.protobuf.ByteString;
 
 public class TestUtils {
     public static void rmdir(File dir) {
+        if (!dir.exists()) {
+            return;
+        }
+
         for (File f : dir.listFiles()) {
             if (f.isFile()) {
                 f.delete();

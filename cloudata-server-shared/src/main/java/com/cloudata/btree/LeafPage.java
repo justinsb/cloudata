@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.util.Hex;
 import com.cloudata.values.Value;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Shorts;
 
@@ -46,6 +47,7 @@ public class LeafPage extends Page {
 
     public LeafPage(Btree btree, Page parent, int pageNumber, ByteBuffer buffer) {
         super(btree, parent, pageNumber, buffer);
+        Preconditions.checkArgument(btree != null);
         this.uniqueKeys = btree.isUniqueKeys();
     }
 

@@ -21,7 +21,10 @@ public class MmapPageStore extends PageStore {
 
     private static final int ALIGNMENT = 256;
 
-    private MmapPageStore(MappedByteBuffer buffer) {
+    final File file;
+
+    private MmapPageStore(File file, MappedByteBuffer buffer) {
+        this.file = file;
         this.buffer = buffer;
 
         this.buffer.position(HEADER_SIZE);
@@ -37,12 +40,12 @@ public class MmapPageStore extends PageStore {
                 MasterPage.create(mmap, 0, 0, 0);
             }
 
-            return new MmapPageStore(mmap);
+            return new MmapPageStore(data, mmap);
         } else {
             long size = data.length();
             MappedByteBuffer mmap = Mmap.mmapFile(data, size);
 
-            return new MmapPageStore(mmap);
+            return new MmapPageStore(data, mmap);
         }
     }
 
@@ -164,6 +167,11 @@ public class MmapPageStore extends PageStore {
     @Override
     public String toString() {
         return "MmapPageStore [buffer=" + buffer + "]";
+    }
+
+    @Override
+    public String getPathInfo() {
+        return file.getAbsolutePath();
     }
 
 }

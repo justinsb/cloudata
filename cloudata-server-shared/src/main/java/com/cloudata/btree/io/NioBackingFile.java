@@ -191,4 +191,14 @@ public class NioBackingFile implements BackingFile {
         return 1;
     }
 
+    @Override
+    public String toString() {
+        return "NioBackingFile [file=" + file + "]";
+    }
+
+    @Override
+    public String getPathInfo() {
+        return file.getAbsolutePath();
+    }
+
 }

@@ -3,6 +3,7 @@ package com.cloudata.btree.caching;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.Callable;
@@ -20,7 +21,7 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import com.google.common.collect.Lists;
 
-public class PageCache {
+public class PageCache implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(PageCache.class);
 
@@ -128,6 +129,7 @@ public class PageCache {
         return true;
     }
 
+    @Override
     public void close() {
         cache.invalidateAll();
         // TODO: Close pool?

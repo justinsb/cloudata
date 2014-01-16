@@ -5,12 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudata.btree.io.BackingFile;
 import com.cloudata.btree.io.CipherSpec;
 import com.cloudata.btree.io.EncryptedBackingFile;
 import com.cloudata.btree.io.NioBackingFile;
 
 public class Database implements Closeable {
+
+    private static final Logger log = LoggerFactory.getLogger(Database.class);
+
     final PageStore pageStore;
     final TransactionTracker transactionTracker;
 
@@ -56,6 +62,7 @@ public class Database implements Closeable {
 
     @Override
     public void close() throws IOException {
+        log.info("Closing down database: {}", pageStore.getPathInfo());
         pageStore.close();
         transactionTracker.close();
     }

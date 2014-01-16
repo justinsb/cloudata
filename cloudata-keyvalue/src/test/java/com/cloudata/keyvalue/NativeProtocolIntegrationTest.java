@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.robotninjas.protobuf.netty.client.RpcClient;
 
@@ -26,9 +27,15 @@ public class NativeProtocolIntegrationTest extends IntegrationTestBase {
 
     private com.cloudata.clients.keyvalue.KeyValueStore keyValueStore;
 
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        resetState();
+        startCluster(3);
+    }
+
     @Before
     public void buildClient() {
-        InetSocketAddress protobufSocketAddress = (InetSocketAddress) SERVERS[0].getProtobufSocketAddress();
+        InetSocketAddress protobufSocketAddress = (InetSocketAddress) SERVERS.get(0).getProtobufSocketAddress();
 
         NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         RpcClient rpcClient = new RpcClient(eventLoopGroup);

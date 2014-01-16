@@ -79,9 +79,9 @@ public abstract class Transaction implements AutoCloseable {
 
     @Override
     public void close() {
-        unlock();
-
         db.transactionTracker.finished(this);
+
+        unlock();
     }
 
     protected void unlock() {

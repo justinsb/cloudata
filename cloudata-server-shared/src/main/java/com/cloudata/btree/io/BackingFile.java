@@ -19,4 +19,6 @@ public interface BackingFile extends Closeable {
     ListenableFuture<ByteBuffer> read(ByteBuffer buffer, long position);
 
     int getBlockSize();
+
+    String getPathInfo();
 }

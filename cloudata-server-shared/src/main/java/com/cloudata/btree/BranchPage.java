@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.operation.RowOperation;
 import com.cloudata.util.Hex;
+import com.google.common.base.Preconditions;
 
 public class BranchPage extends Page {
     private static final Logger log = LoggerFactory.getLogger(BranchPage.class);
@@ -23,6 +24,7 @@ public class BranchPage extends Page {
 
     public BranchPage(Btree btree, Page parent, int pageNumber, ByteBuffer buffer) {
         super(btree, parent, pageNumber, buffer);
+        Preconditions.checkArgument(btree != null);
     }
 
     static class Mutable {

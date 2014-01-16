@@ -12,6 +12,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
+import org.robotninjas.barge.proto.RaftEntry.Membership;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,18 +32,14 @@ public class AppendLogServer {
     private RaftService raft;
     private Server jetty;
 
+    private final AppendLogStore appendLogStore;
+
     public AppendLogServer(File baseDir, Replica local, List<Replica> peers, int httpPort) {
         super();
         this.baseDir = baseDir;
         this.local = local;
         this.peers = peers;
         this.httpPort = httpPort;
-    }
-
-    public synchronized void start() throws Exception {
-        if (raft != null || jetty != null) {
-            throw new IllegalStateException();
-        }
 
         File logDir = new File(baseDir, "logs");
         File stateDir = new File(baseDir, "state");
@@ -50,12 +47,23 @@ public class AppendLogServer {
         logDir.mkdirs();
         stateDir.mkdirs();
 
-        AppendLogStore appendLogStore = new AppendLogStore();
+        this.appendLogStore = new AppendLogStore(stateDir);
 
         ClusterConfig config = ClusterConfig.from(local, peers);
         this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(appendLogStore);
 
-        appendLogStore.init(raft, stateDir);
+        appendLogStore.init(raft);
+    }
+
+    public void bootstrap() {
+        Membership membership = Membership.newBuilder().addMembers(local.getKey()).build();
+        this.raft.bootstrap(membership);
+    }
+
+    public synchronized void start() throws Exception {
+        if (raft != null || jetty != null) {
+            throw new IllegalStateException();
+        }
 
         raft.startAsync().awaitRunning();
 

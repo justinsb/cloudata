@@ -1,5 +1,6 @@
 package com.cloudata.keyvalue;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,15 +18,16 @@ import com.cloudata.keyvalue.operation.KeyValueOperation;
 import com.cloudata.values.Value;
 import com.google.protobuf.ByteString;
 
-public class KeyValueStore {
+public class KeyValueStore implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(KeyValueStore.class);
 
     final Btree btree;
+    final Database db;
 
     public KeyValueStore(File dir, boolean uniqueKeys) throws IOException {
         File data = new File(dir, "data");
-        Database db = Database.build(data, null);
+        this.db = Database.build(data, null);
 
         log.warn("Building new btree @{}", dir);
 
@@ -53,6 +55,11 @@ public class KeyValueStore {
 
     public BtreeQuery buildQuery(Keyspace keyspace, boolean stripKeyspace, ByteString keyPrefix) {
         return new BtreeQuery(btree, keyspace, stripKeyspace, keyPrefix);
+    }
+
+    @Override
+    public void close() throws IOException {
+        db.close();
     }
 
 }

@@ -29,18 +29,18 @@ public class AppendLogStore implements StateMachine {
     private static final Logger log = LoggerFactory.getLogger(AppendLogStore.class);
 
     private RaftService raft;
-    private File baseDir;
+    private final File baseDir;
 
     final LoadingCache<Long, LogFileSet> logCache;
 
-    public AppendLogStore() {
+    public AppendLogStore(File baseDir) {
+        this.baseDir = baseDir;
         LogCacheLoader loader = new LogCacheLoader();
         this.logCache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
 
-    public void init(RaftService raft, File stateDir) {
+    public void init(RaftService raft) {
         this.raft = raft;
-        this.baseDir = stateDir;
     }
 
     public LogMessageIterable readLog(long logId, long begin, int max) {

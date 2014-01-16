@@ -294,4 +294,14 @@ public class CachingPageStore extends PageStore {
         return Optional.of(cache.debugIsIdle());
     }
 
+    @Override
+    public String toString() {
+        return "CachingPageStore [backingFile=" + backingFile + "]";
+    }
+
+    @Override
+    public String getPathInfo() {
+        return backingFile.getPathInfo();
+    }
+
 }

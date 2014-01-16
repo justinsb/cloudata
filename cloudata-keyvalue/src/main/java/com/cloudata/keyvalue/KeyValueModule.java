@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue;
 
+import io.netty.util.concurrent.DefaultThreadFactory;
+
 import java.util.concurrent.Executors;
 
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -18,7 +20,7 @@ public class KeyValueModule extends AbstractModule {
     protected void configure() {
         bind(KeyValueStateMachine.class).toInstance(keyValueStateMachine);
         ListeningExecutorService listeningExecutorService = MoreExecutors.listeningDecorator(Executors
-                .newCachedThreadPool());
+                .newCachedThreadPool(new DefaultThreadFactory("pool-executor-keyvalue")));
         bind(ListeningExecutorService.class).toInstance(listeningExecutorService);
     }
 

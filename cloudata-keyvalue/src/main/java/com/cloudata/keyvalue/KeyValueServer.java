@@ -1,5 +1,7 @@
 package com.cloudata.keyvalue;
 
+import io.netty.util.concurrent.DefaultThreadFactory;
+
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -12,9 +14,12 @@ import javax.servlet.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.robotninjas.barge.ClusterConfig;
+import org.robotninjas.barge.RaftMembership;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
+import org.robotninjas.barge.proto.RaftEntry.Membership;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +29,8 @@ import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
@@ -38,8 +44,7 @@ public class KeyValueServer {
     final File baseDir;
     final int httpPort;
     private final Replica local;
-    private final List<Replica> peers;
-    private RaftService raft;
+    private final RaftService raft;
     private final SocketAddress redisSocketAddress;
     private RedisEndpoint redisEndpoint;
     private Server jetty;
@@ -47,20 +52,15 @@ public class KeyValueServer {
 
     private ProtobufServer protobufServer;
 
-    public KeyValueServer(File baseDir, Replica local, List<Replica> peers, int httpPort,
-            SocketAddress redisSocketAddress, SocketAddress protobufSocketAddress) {
+    private final KeyValueStateMachine stateMachine;
+
+    public KeyValueServer(File baseDir, Replica local, int httpPort, SocketAddress redisSocketAddress,
+            SocketAddress protobufSocketAddress) {
         this.baseDir = baseDir;
         this.local = local;
-        this.peers = peers;
         this.httpPort = httpPort;
         this.redisSocketAddress = redisSocketAddress;
         this.protobufSocketAddress = protobufSocketAddress;
-    }
-
-    public synchronized void start() throws Exception {
-        if (raft != null || jetty != null) {
-            throw new IllegalStateException();
-        }
 
         File logDir = new File(baseDir, "logs");
         File stateDir = new File(baseDir, "state");
@@ -68,13 +68,25 @@ public class KeyValueServer {
         logDir.mkdirs();
         stateDir.mkdirs();
 
-        ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
-        KeyValueStateMachine stateMachine = new KeyValueStateMachine(executor);
+        ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors
+                .newCachedThreadPool(new DefaultThreadFactory("pool-worker-keyvalue")));
+        this.stateMachine = new KeyValueStateMachine(executor, stateDir);
 
-        ClusterConfig config = ClusterConfig.from(local, peers);
+        ClusterConfig config = ClusterConfig.from(local);
         this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(stateMachine);
 
-        stateMachine.init(raft, stateDir);
+        stateMachine.init(raft);
+    }
+
+    public void bootstrap() {
+        Membership membership = Membership.newBuilder().addMembers(local.getKey()).build();
+        this.raft.bootstrap(membership);
+    }
+
+    public synchronized void start() throws Exception {
+        if (jetty != null) {
+            throw new IllegalStateException();
+        }
 
         raft.startAsync().awaitRunning();
 
@@ -127,9 +139,6 @@ public class KeyValueServer {
         final int port = Integer.parseInt(args[0]);
 
         Replica local = Replica.fromString("localhost:" + (10000 + port));
-        List<Replica> members = Lists.newArrayList(Replica.fromString("localhost:10001"),
-                Replica.fromString("localhost:10002"), Replica.fromString("localhost:10003"));
-        members.remove(local);
 
         File baseDir = new File(args[0]);
         int httpPort = (9990 + port);
@@ -138,7 +147,7 @@ public class KeyValueServer {
 
         SocketAddress redisSocketAddress = new InetSocketAddress(redisPort);
         SocketAddress protobufSocketAddress = new InetSocketAddress(protobufPort);
-        final KeyValueServer server = new KeyValueServer(baseDir, local, members, httpPort, redisSocketAddress,
+        final KeyValueServer server = new KeyValueServer(baseDir, local, httpPort, redisSocketAddress,
                 protobufSocketAddress);
         server.start();
 
@@ -157,6 +166,15 @@ public class KeyValueServer {
     public synchronized void stop() throws Exception {
         if (jetty != null) {
             jetty.stop();
+            while (true) {
+                String state = jetty.getState();
+                if (state.equals(AbstractLifeCycle.STOPPED)) {
+                    break;
+                }
+                log.debug("Waiting for jetty; state={}", state);
+                Thread.sleep(5000);
+            }
+
             jetty = null;
         }
 
@@ -179,9 +197,12 @@ public class KeyValueServer {
             protobufServer = null;
         }
 
-        if (raft != null) {
+        if (stateMachine != null) {
+            stateMachine.close();
+        }
+
+        if (raft.isRunning()) {
             raft.stopAsync().awaitTerminated();
-            raft = null;
         }
     }
 
@@ -191,6 +212,24 @@ public class KeyValueServer {
 
     public SocketAddress getProtobufSocketAddress() {
         return protobufSocketAddress;
+    }
+
+    public String getRaftServerKey() {
+        return raft.getServerKey();
+    }
+
+    public void reconfigure(List<String> servers) {
+        RaftMembership oldMembership = raft.getClusterMembership();
+        RaftMembership newMembership = new RaftMembership(-1, servers);
+        ListenableFuture<Boolean> future = raft.setConfiguration(oldMembership, newMembership);
+        Boolean result = Futures.getUnchecked(future);
+        if (!Boolean.TRUE.equals(result)) {
+            throw new IllegalStateException();
+        }
+    }
+
+    public boolean isLeader() {
+        return raft.isLeader();
     }
 
 }

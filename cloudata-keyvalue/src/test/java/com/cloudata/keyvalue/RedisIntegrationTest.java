@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import redis.clients.jedis.Jedis;
@@ -21,9 +22,15 @@ public class RedisIntegrationTest extends IntegrationTestBase {
 
     private Jedis jedis;
 
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        resetState();
+        startCluster(3);
+    }
+
     @Before
     public void buildJedisClient() {
-        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS[0].getRedisSocketAddress();
+        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS.get(0).getRedisSocketAddress();
 
         this.jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
     }

@@ -136,4 +136,9 @@ public class EncryptedBackingFile implements BackingFile {
         return BLOCK_SIZE;
     }
 
+    @Override
+    public String getPathInfo() {
+        return this.inner.getPathInfo();
+    }
+
 }

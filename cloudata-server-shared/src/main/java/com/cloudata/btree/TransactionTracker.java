@@ -20,7 +20,7 @@ public class TransactionTracker {
 
     private static final Logger log = LoggerFactory.getLogger(TransactionTracker.class);
 
-    protected int currentTransactionPage;
+    protected int currentTransactionPageId;
     private int currentRootPage;
     private long currentTransactionId;
 
@@ -162,7 +162,7 @@ public class TransactionTracker {
         synchronized (this) {
             this.currentRootPage = rootPage;
             this.currentTransactionId = transactionId;
-            this.currentTransactionPage = rootPage;
+            this.currentTransactionPageId = transactionPageId;
         }
     }
 
@@ -223,7 +223,7 @@ public class TransactionTracker {
         synchronized (this) {
             PageStore pageStore = db.pageStore;
 
-            transactionPage.setPreviousTransactionPageId(currentTransactionPage);
+            transactionPage.setPreviousTransactionPageId(currentTransactionPageId);
 
             if (deferredReclaim.size() > 64) {
                 freeSpaceMap.reclaimAll(deferredReclaim);

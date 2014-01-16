@@ -21,6 +21,8 @@ import org.robotninjas.barge.NoLeaderException;
 import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudata.btree.BtreeQuery;
 import com.cloudata.btree.Keyspace;
@@ -38,6 +40,8 @@ import com.google.protobuf.ByteString;
 
 @Path("/{storeId}/")
 public class KeyValueEndpoint {
+
+    private static final Logger log = LoggerFactory.getLogger(KeyValueEndpoint.class);
 
     @Inject
     KeyValueStateMachine stateMachine;
@@ -96,7 +100,8 @@ public class KeyValueEndpoint {
             case SET: {
                 Value value = Value.fromRawBytes(v);
                 SetOperation operation = SetOperation.build(storeId, keyspace, key, value);
-                stateMachine.doActionSync(operation);
+                ActionResponse response = stateMachine.doActionSync(operation);
+                log.debug("SET gave result: {}", response);
                 ret = null;
                 break;
             }
@@ -124,13 +129,20 @@ public class KeyValueEndpoint {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         } catch (NotLeaderException e) {
             Replica leader = e.getLeader();
-            InetSocketAddress address = (InetSocketAddress) leader.address();
-            URI uri = URI.create("http://" + address.getHostName() + ":" + address.getPort() /* + "/" + key */);
-            System.out.println(uri);
+            URI uri = getUri(leader);
+            log.debug("Redirecting to {}", uri);
             return Response.seeOther(uri).build();
         } catch (RaftException e) {
             return Response.serverError().build();
         }
+    }
+
+    private URI getUri(Replica leader) {
+        InetSocketAddress address = (InetSocketAddress) leader.address();
+        int id = address.getPort() - 10000;
+        int httpPort = 9990 + id;
+        URI uri = URI.create("http://" + address.getHostName() + ":" + httpPort/* + "/" + key */);
+        return uri;
     }
 
     @DELETE

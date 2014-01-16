@@ -1,5 +1,6 @@
 package com.cloudata.btree;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -179,9 +180,12 @@ public abstract class PageStore {
         return Optional.absent();
     }
 
+    @Override
     public void close() throws IOException {
         // Note: we don't do a sync - that is driven by transactions
 
     }
+
+    public abstract String getPathInfo();
 
 }

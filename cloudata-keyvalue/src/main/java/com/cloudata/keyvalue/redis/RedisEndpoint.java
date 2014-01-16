@@ -9,13 +9,12 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.net.SocketAddress;
 
 public class RedisEndpoint {
-    DefaultEventExecutorGroup group;
+    NioEventLoopGroup group;
 
     final SocketAddress localAddress;
 
@@ -33,9 +32,9 @@ public class RedisEndpoint {
 
         ServerBootstrap b = new ServerBootstrap();
         int nThreads = 1;
-        group = new DefaultEventExecutorGroup(nThreads);
+        group = new NioEventLoopGroup(nThreads, new DefaultThreadFactory("pool-redis"));
 
-        b.group(new NioEventLoopGroup(), new NioEventLoopGroup())
+        b.group(group, group)
 
         .channel(NioServerSocketChannel.class)
 
@@ -67,11 +66,12 @@ public class RedisEndpoint {
     }
 
     public void stop() throws InterruptedException {
-        Future<?> f1 = group.shutdownGracefully();
+        // Future<?> f1 = group.shutdownGracefully();
 
         ChannelFuture f2 = serverChannel.close();
+        group.shutdown();
 
-        f1.sync();
+        // f1.sync();
         f2.sync();
     }
 }

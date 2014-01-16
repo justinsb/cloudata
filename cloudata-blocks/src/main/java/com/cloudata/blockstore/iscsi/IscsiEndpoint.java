@@ -10,6 +10,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.Future;
 
 import java.net.SocketAddress;
@@ -33,7 +34,7 @@ public class IscsiEndpoint {
 
         ServerBootstrap b = new ServerBootstrap();
         int nThreads = 1;
-        group = new DefaultEventExecutorGroup(nThreads);
+        group = new DefaultEventExecutorGroup(nThreads, new DefaultThreadFactory("pool-iscsi"));
 
         b.group(new NioEventLoopGroup(), new NioEventLoopGroup())
 
