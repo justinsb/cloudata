@@ -9,29 +9,33 @@ import java.util.concurrent.TimeoutException;
 
 import org.robotninjas.protobuf.netty.server.RpcServer;
 
+import com.cloudata.services.CompoundService;
+import com.cloudata.services.ExecutorServiceWrapper;
+import com.google.common.collect.Lists;
+import com.google.common.net.HostAndPort;
 import com.google.protobuf.Service;
 
-public class ProtobufServer {
-    private final SocketAddress socketAddress;
+public class ProtobufServer extends CompoundService {
+    private final HostAndPort hostAndPort;
     private final NioEventLoopGroup eventLoopGroup;
     private final RpcServer rpcServer;
 
-    public ProtobufServer(SocketAddress socketAddress) {
-        this.socketAddress = socketAddress;
+    public ProtobufServer(HostAndPort hostAndPort) {
+        this.hostAndPort = hostAndPort;
         this.eventLoopGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("pool-protobuf"));
         this.rpcServer = new RpcServer(eventLoopGroup, socketAddress);
-    }
-
-    public com.google.common.util.concurrent.Service start() throws TimeoutException {
-        return this.rpcServer.startAsync();
-    }
-
-    public void stop() throws TimeoutException {
-        this.rpcServer.stopAsync().awaitTerminated(5, TimeUnit.SECONDS);
-        this.eventLoopGroup.shutdownGracefully();
     }
 
     public void addService(Service service) {
         rpcServer.registerService(service);
     }
+
+    @Override
+    protected List<com.google.common.util.concurrent.Service> buildServices() {
+        List<com.google.common.util.concurrent.Service> services = Lists.newArrayList();
+        services.add(new ExecutorServiceWrapper(eventLoopGroup));
+        services.add(rpcServer);
+        return services;
+    }
+
 }

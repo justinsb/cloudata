@@ -57,21 +57,6 @@ public class RedisEndpoint {
 
         });
 
-        // Start the server.
-        Channel serverChannel = b.bind().sync().channel();
-
-        this.serverChannel = serverChannel;
-
-        // return f;
-    }
-
-    public void stop() throws InterruptedException {
-        // Future<?> f1 = group.shutdownGracefully();
-
-        ChannelFuture f2 = serverChannel.close();
-        group.shutdown();
-
-        // f1.sync();
-        f2.sync();
+        return serverBootstrap;
     }
 }

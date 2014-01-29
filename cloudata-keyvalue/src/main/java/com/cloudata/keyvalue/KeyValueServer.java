@@ -3,18 +3,9 @@ package com.cloudata.keyvalue;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.io.File;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.Executors;
 
-import javax.servlet.DispatcherType;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.util.component.AbstractLifeCycle;
 import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftMembership;
 import org.robotninjas.barge.RaftService;
@@ -163,55 +154,12 @@ public class KeyValueServer {
         });
     }
 
-    public synchronized void stop() throws Exception {
-        if (jetty != null) {
-            jetty.stop();
-            while (true) {
-                String state = jetty.getState();
-                if (state.equals(AbstractLifeCycle.STOPPED)) {
-                    break;
-                }
-                log.debug("Waiting for jetty; state={}", state);
-                Thread.sleep(5000);
-            }
-
-            jetty = null;
-        }
-
-        if (redisEndpoint != null) {
-            try {
-                redisEndpoint.stop();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw Throwables.propagate(e);
-            }
-            redisEndpoint = null;
-        }
-
-        if (protobufServer != null) {
-            try {
-                protobufServer.stop();
-            } catch (Exception e) {
-                throw Throwables.propagate(e);
-            }
-            protobufServer = null;
-        }
-
-        if (stateMachine != null) {
-            stateMachine.close();
-        }
-
-        if (raft.isRunning()) {
-            raft.stopAsync().awaitTerminated();
-        }
+    public HostAndPort getRedisSocketAddress() {
+        return config.redisEndpoint;
     }
 
-    public SocketAddress getRedisSocketAddress() {
-        return redisSocketAddress;
-    }
-
-    public SocketAddress getProtobufSocketAddress() {
-        return protobufSocketAddress;
+    public HostAndPort getProtobufSocketAddress() {
+        return config.protobufEndpoint;
     }
 
     public String getRaftServerKey() {
@@ -230,6 +178,49 @@ public class KeyValueServer {
 
     public boolean isLeader() {
         return raft.isLeader();
+    }
+
+    @Override
+    protected List<com.google.common.util.concurrent.Service> buildServices() {
+        Injector injector = Guice.createInjector(new KeyValueModule(stateMachine), new WebModule());
+
+        List<com.google.common.util.concurrent.Service> services = Lists.newArrayList();
+
+        services.add(new StateMachineService(stateMachine, raft));
+
+        services.add(raft);
+
+        JettyService jetty = injector.getInstance(JettyService.class);
+        jetty.init(config.httpPort);
+        services.add(jetty);
+
+        if (config.redisEndpoint != null) {
+            long storeId = 1;
+            RedisServer redisServer = new RedisServer(stateMachine, storeId);
+
+            RedisEndpoint redisEndpoint = new RedisEndpoint(config.redisEndpoint, redisServer);
+            services.add(redisEndpoint);
+        }
+
+        if (config.protobufEndpoint != null) {
+            ProtobufServer protobufServer = new ProtobufServer(config.protobufEndpoint);
+
+            KeyValueProtobufEndpoint endpoint = injector.getInstance(KeyValueProtobufEndpoint.class);
+            Service service = KeyValueProtocol.KeyValueService.newReflectiveService(endpoint);
+
+            protobufServer.addService(service);
+
+            services.add(protobufServer);
+        }
+
+        if (config.gossip != null) {
+            ClusterService cluster = new ClusterService(config.gossip);
+            services.add(cluster);
+
+            services.add(new RepairService(raft, cluster));
+        }
+
+        return services;
     }
 
 }
