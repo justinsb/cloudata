@@ -1,0 +1,21 @@
+option java_package = "com.cloudata.cluster";
+
+option java_generic_services = true;
+
+service ClusterRpcService {
+  rpc gossip (GossipRequest) returns (GossipResponse);
+}
+
+message BroadcastMessage {
+	optional string service = 1;
+	optional string id = 2;
+	optional bytes address = 3;
+	optional int32 port = 4;
+}
+
+message GossipRequest {
+	required string from_id = 1;
+}
+
+message GossipResponse {
+}

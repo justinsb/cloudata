@@ -15,7 +15,7 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
-public abstract class PageStore {
+public abstract class PageStore implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(PageStore.class);
 
