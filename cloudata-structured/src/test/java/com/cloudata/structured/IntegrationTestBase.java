@@ -1,7 +1,6 @@
 package com.cloudata.structured;
 
 import java.io.File;
-import java.net.InetSocketAddress;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -11,6 +10,7 @@ import org.robotninjas.barge.Replica;
 import com.cloudata.TestUtils;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.common.net.HostAndPort;
 
 public class IntegrationTestBase {
     protected static StructuredServer[] SERVERS;
@@ -34,7 +34,8 @@ public class IntegrationTestBase {
             int protobufPort = 2010 + i;
 
             File baseDir = new File(TEMPDIR, "" + i);
-            SERVERS[i] = new StructuredServer(baseDir, local, members, httpPort, new InetSocketAddress(protobufPort));
+            SERVERS[i] = new StructuredServer(baseDir, local, members, httpPort,
+                    HostAndPort.fromParts("", protobufPort));
 
             SERVERS[i].start();
         }

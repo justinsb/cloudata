@@ -2,7 +2,7 @@ package com.cloudata.clients.protobuf;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -30,8 +31,9 @@ class ProtobufRpcChannelFactory extends BaseKeyedPoolableObjectFactory<Object, L
 
     @Override
     public ListenableFuture<NettyRpcChannel> makeObject(Object key) throws Exception {
-        Preconditions.checkArgument(key instanceof SocketAddress);
-        SocketAddress socketAddress = (SocketAddress) key;
+        Preconditions.checkArgument(key instanceof HostAndPort);
+        HostAndPort hostAndPort = (HostAndPort) key;
+        InetSocketAddress socketAddress = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
         return client.connectAsync(socketAddress);
     }
 

@@ -3,9 +3,8 @@ package com.cloudata;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
-import java.net.SocketAddress;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 import org.robotninjas.protobuf.netty.server.RpcServer;
 
@@ -23,7 +22,8 @@ public class ProtobufServer extends CompoundService {
     public ProtobufServer(HostAndPort hostAndPort) {
         this.hostAndPort = hostAndPort;
         this.eventLoopGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("pool-protobuf"));
-        this.rpcServer = new RpcServer(eventLoopGroup, socketAddress);
+        this.rpcServer = new RpcServer(eventLoopGroup, new InetSocketAddress(hostAndPort.getHostText(),
+                hostAndPort.getPort()));
     }
 
     public void addService(Service service) {

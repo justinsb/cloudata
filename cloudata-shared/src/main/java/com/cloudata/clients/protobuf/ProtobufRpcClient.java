@@ -32,8 +32,8 @@ import com.google.protobuf.RpcController;
 
 @Immutable
 public class ProtobufRpcClient {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcClient.class);
+
     private static final long DEFAULT_TIMEOUT = 2000;
 
     private final ObjectPool<ListenableFuture<NettyRpcChannel>> channelPool;

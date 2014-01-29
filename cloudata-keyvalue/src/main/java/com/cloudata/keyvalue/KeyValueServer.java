@@ -15,43 +15,39 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.ProtobufServer;
+import com.cloudata.cluster.ClusterService;
 import com.cloudata.keyvalue.protobuf.KeyValueProtobufEndpoint;
 import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
-import com.google.common.base.Throwables;
+import com.cloudata.services.CompoundService;
+import com.cloudata.services.JettyService;
+import com.google.common.collect.Lists;
+import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.servlet.GuiceFilter;
 import com.google.protobuf.Service;
 
-public class KeyValueServer {
+public class KeyValueServer extends CompoundService {
     private static final Logger log = LoggerFactory.getLogger(KeyValueServer.class);
 
     final File baseDir;
-    final int httpPort;
     private final Replica local;
     private final RaftService raft;
-    private final SocketAddress redisSocketAddress;
-    private RedisEndpoint redisEndpoint;
-    private Server jetty;
-    private final SocketAddress protobufSocketAddress;
-
-    private ProtobufServer protobufServer;
 
     private final KeyValueStateMachine stateMachine;
 
-    public KeyValueServer(File baseDir, Replica local, int httpPort, SocketAddress redisSocketAddress,
-            SocketAddress protobufSocketAddress) {
+    private final KeyValueConfig config;
+
+    public KeyValueServer(File baseDir, Replica local, KeyValueConfig config) {
         this.baseDir = baseDir;
         this.local = local;
-        this.httpPort = httpPort;
-        this.redisSocketAddress = redisSocketAddress;
-        this.protobufSocketAddress = protobufSocketAddress;
+
+        this.config = config.deepCopy();
 
         File logDir = new File(baseDir, "logs");
         File stateDir = new File(baseDir, "state");
@@ -63,10 +59,8 @@ public class KeyValueServer {
                 .newCachedThreadPool(new DefaultThreadFactory("pool-worker-keyvalue")));
         this.stateMachine = new KeyValueStateMachine(executor, stateDir);
 
-        ClusterConfig config = ClusterConfig.from(local);
-        this.raft = RaftService.newBuilder(config).logDir(logDir).timeout(300).build(stateMachine);
-
-        stateMachine.init(raft);
+        ClusterConfig clusterConfig = ClusterConfig.from(local);
+        this.raft = RaftService.newBuilder(clusterConfig).logDir(logDir).timeout(300).build(stateMachine);
     }
 
     public void bootstrap() {
@@ -74,56 +68,8 @@ public class KeyValueServer {
         this.raft.bootstrap(membership);
     }
 
-    public synchronized void start() throws Exception {
-        if (jetty != null) {
-            throw new IllegalStateException();
-        }
-
-        raft.startAsync().awaitRunning();
-
-        // final String baseUri = getHttpUrl();
-
-        Injector injector = Guice.createInjector(new KeyValueModule(stateMachine), new WebModule());
-
-        // ResourceConfig rc = new PackagesResourceConfig(WebModule.class.getPackage().getName());
-        // IoCComponentProviderFactory ioc = new GuiceComponentProviderFactory(rc, injector);
-
-        // this.selector = GrizzlyServerFactory.create(baseUri, rc, ioc);
-
-        this.jetty = new Server(httpPort);
-
-        ServletContextHandler context = new ServletContextHandler();
-        context.setContextPath("/");
-
-        FilterHolder filterHolder = new FilterHolder(injector.getInstance(GuiceFilter.class));
-        context.addFilter(filterHolder, "*", EnumSet.of(DispatcherType.REQUEST));
-
-        jetty.setHandler(context);
-
-        jetty.start();
-
-        if (redisSocketAddress != null) {
-            long storeId = 1;
-            RedisServer redisServer = new RedisServer(stateMachine, storeId);
-
-            this.redisEndpoint = new RedisEndpoint(redisSocketAddress, redisServer);
-            this.redisEndpoint.start();
-        }
-
-        if (protobufSocketAddress != null) {
-            this.protobufServer = new ProtobufServer(protobufSocketAddress);
-
-            KeyValueProtobufEndpoint endpoint = injector.getInstance(KeyValueProtobufEndpoint.class);
-            Service service = KeyValueProtocol.KeyValueService.newReflectiveService(endpoint);
-
-            protobufServer.addService(service);
-
-            this.protobufServer.start();
-        }
-    }
-
     public String getHttpUrl() {
-        return "http://localhost:" + httpPort + "/";
+        return "http://localhost:" + config.httpPort + "/";
     }
 
     public static void main(String... args) throws Exception {
@@ -131,15 +77,17 @@ public class KeyValueServer {
 
         Replica local = Replica.fromString("localhost:" + (10000 + port));
 
+        KeyValueConfig config = new KeyValueConfig();
+
         File baseDir = new File(args[0]);
-        int httpPort = (9990 + port);
+        config.httpPort = (9990 + port);
         int redisPort = 6379 + port;
         int protobufPort = 2000 + port;
 
-        SocketAddress redisSocketAddress = new InetSocketAddress(redisPort);
-        SocketAddress protobufSocketAddress = new InetSocketAddress(protobufPort);
-        final KeyValueServer server = new KeyValueServer(baseDir, local, httpPort, redisSocketAddress,
-                protobufSocketAddress);
+        config.redisEndpoint = HostAndPort.fromParts("", redisPort);
+        config.protobufEndpoint = HostAndPort.fromParts("", protobufPort);
+
+        final KeyValueServer server = new KeyValueServer(baseDir, local, config);
         server.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread() {

@@ -1,46 +1,41 @@
 package com.cloudata.keyvalue.redis;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
-import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.util.concurrent.DefaultThreadFactory;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
 
-public class RedisEndpoint {
-    NioEventLoopGroup group;
+import com.cloudata.services.NettyService;
+import com.google.common.net.HostAndPort;
 
-    final SocketAddress localAddress;
+public class RedisEndpoint extends NettyService {
+
+    final HostAndPort hostAndPort;
 
     final RedisServer redisServer;
 
-    private Channel serverChannel;
-
-    public RedisEndpoint(SocketAddress localAddress, RedisServer redisServer) {
-        this.localAddress = localAddress;
+    public RedisEndpoint(HostAndPort hostAndPort, RedisServer redisServer) {
+        this.hostAndPort = hostAndPort;
         this.redisServer = redisServer;
     }
 
-    public void start() throws InterruptedException {
+    @Override
+    protected ServerBootstrap buildBootstrap() {
         final RedisRequestHandler commandHandler = new RedisRequestHandler(redisServer);
 
-        ServerBootstrap b = new ServerBootstrap();
-        int nThreads = 1;
-        group = new NioEventLoopGroup(nThreads, new DefaultThreadFactory("pool-redis"));
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
 
-        b.group(group, group)
+        serverBootstrap.group(group, group)
 
         .channel(NioServerSocketChannel.class)
 
         .option(ChannelOption.SO_BACKLOG, 100)
 
-        .localAddress(localAddress)
+        .localAddress(new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort()))
 
         .childOption(ChannelOption.TCP_NODELAY, true)
 

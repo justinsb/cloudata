@@ -1,8 +1,6 @@
 package com.cloudata.structured;
 
 import java.io.File;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -23,6 +21,7 @@ import com.cloudata.structured.protobuf.StructuredProtobufEndpoint;
 import com.cloudata.structured.web.WebModule;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.inject.Guice;
@@ -41,12 +40,12 @@ public class StructuredServer {
     private RaftService raft;
     private Server jetty;
 
-    final SocketAddress protobufSocketAddress;
+    final HostAndPort protobufSocketAddress;
 
     private ProtobufServer protobufServer;
 
     public StructuredServer(File baseDir, Replica local, List<Replica> peers, int httpPort,
-            SocketAddress protobufSocketAddress) {
+            HostAndPort protobufSocketAddress) {
         this.baseDir = baseDir;
         this.local = local;
         this.peers = peers;
@@ -125,7 +124,7 @@ public class StructuredServer {
         int httpPort = (9990 + port);
         int protobufPort = 2100 + port;
 
-        SocketAddress protobufSocketAddress = new InetSocketAddress(protobufPort);
+        HostAndPort protobufSocketAddress = HostAndPort.fromParts("", protobufPort);
 
         final StructuredServer server = new StructuredServer(baseDir, local, members, httpPort, protobufSocketAddress);
         server.start();

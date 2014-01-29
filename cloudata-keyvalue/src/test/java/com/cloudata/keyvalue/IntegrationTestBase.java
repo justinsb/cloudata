@@ -1,8 +1,6 @@
 package com.cloudata.keyvalue;
 
 import java.io.File;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -11,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.TestUtils;
+import com.cloudata.cluster.GossipConfig;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
+import com.google.common.net.HostAndPort;
 
 public class IntegrationTestBase {
     private static final Logger log = LoggerFactory.getLogger(IntegrationTestBase.class);
@@ -75,12 +75,19 @@ public class IntegrationTestBase {
     protected static KeyValueServer buildServer(int i) {
         Replica local = Replica.fromString("localhost:" + (10000 + i));
 
-        int httpPort = 9990 + i;
-
         File baseDir = new File(TEMPDIR, "" + i);
-        SocketAddress redisAddress = new InetSocketAddress(6379 + i + 1);
-        SocketAddress protobufAddress = new InetSocketAddress(2000 + i + 1);
-        KeyValueServer server = new KeyValueServer(baseDir, local, httpPort, redisAddress, protobufAddress);
+
+        KeyValueConfig config = new KeyValueConfig();
+        config.redisEndpoint = HostAndPort.fromParts("", 6379 + i + 1);
+        config.protobufEndpoint = HostAndPort.fromParts("", 2000 + i + 1);
+        config.httpPort = 9990 + i;
+        config.gossip = new GossipConfig();
+        config.gossip.serviceId = "keyvalue";
+        config.gossip.nodeId = "node" + i;
+        config.gossip.broadcastAddress = HostAndPort.fromParts("", 2100 + i + 1);
+        config.gossip.protobufEndpoint = HostAndPort.fromParts("", 2200 + i + 1);
+
+        KeyValueServer server = new KeyValueServer(baseDir, local, config);
         return server;
     }
 

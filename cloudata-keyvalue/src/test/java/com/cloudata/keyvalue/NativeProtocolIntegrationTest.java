@@ -2,7 +2,6 @@ package com.cloudata.keyvalue;
 
 import io.netty.channel.nio.NioEventLoopGroup;
 
-import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,6 +18,7 @@ import com.cloudata.clients.protobuf.ProtobufRpcClient;
 import com.cloudata.clients.protobuf.ProtobufRpcClientProvider;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.net.HostAndPort;
 import com.google.protobuf.ByteString;
 
 public class NativeProtocolIntegrationTest extends IntegrationTestBase {
@@ -35,7 +35,7 @@ public class NativeProtocolIntegrationTest extends IntegrationTestBase {
 
     @Before
     public void buildClient() {
-        InetSocketAddress protobufSocketAddress = (InetSocketAddress) SERVERS.get(0).getProtobufSocketAddress();
+        HostAndPort protobufSocketAddress = SERVERS.get(0).getProtobufSocketAddress();
 
         NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         RpcClient rpcClient = new RpcClient(eventLoopGroup);

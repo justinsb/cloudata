@@ -2,7 +2,6 @@ package com.cloudata.keyvalue;
 
 import static com.cloudata.TestUtils.buildBytes;
 
-import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -17,6 +16,7 @@ import redis.clients.jedis.Jedis;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.net.HostAndPort;
 
 public class RedisIntegrationTest extends IntegrationTestBase {
 
@@ -30,9 +30,9 @@ public class RedisIntegrationTest extends IntegrationTestBase {
 
     @Before
     public void buildJedisClient() {
-        InetSocketAddress redisSocketAddress = (InetSocketAddress) SERVERS.get(0).getRedisSocketAddress();
+        HostAndPort redisEndpoint = SERVERS.get(0).getRedisSocketAddress();
 
-        this.jedis = new Jedis(redisSocketAddress.getHostName(), redisSocketAddress.getPort());
+        this.jedis = new Jedis(redisEndpoint.getHostText(), redisEndpoint.getPort());
     }
 
     @Test
