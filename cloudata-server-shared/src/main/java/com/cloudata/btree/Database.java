@@ -12,6 +12,8 @@ import com.cloudata.btree.io.BackingFile;
 import com.cloudata.btree.io.CipherSpec;
 import com.cloudata.btree.io.EncryptedBackingFile;
 import com.cloudata.btree.io.NioBackingFile;
+import com.cloudata.util.Directory;
+import com.google.common.io.Files;
 
 public class Database implements Closeable {
 
@@ -31,6 +33,8 @@ public class Database implements Closeable {
         CipherSpec cipherSpec = CipherSpec.AES_128;
 
         if (!file.exists()) {
+          Directory.mkdirs(file.getParentFile());
+
             long size = 1024L * 1024L * 64L;
             try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
                 raf.setLength(size);

@@ -4,6 +4,7 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
@@ -24,7 +25,7 @@ public class RedisEndpoint extends NettyService {
     }
 
     @Override
-    protected ServerBootstrap buildBootstrap() {
+    protected ServerBootstrap buildBootstrap(final EventLoopGroup group) {
         final RedisRequestHandler commandHandler = new RedisRequestHandler(redisServer);
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();

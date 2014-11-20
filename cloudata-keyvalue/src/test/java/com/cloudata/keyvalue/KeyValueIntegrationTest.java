@@ -7,13 +7,17 @@ import java.util.ArrayList;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.KeyValueClient.ClusterState;
 import com.cloudata.keyvalue.KeyValueClient.KeyValueEntry;
 import com.cloudata.keyvalue.KeyValueClient.KeyValueRecordset;
 import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
 
 public class KeyValueIntegrationTest extends HttpTestBase {
+  private static final Logger log = LoggerFactory.getLogger(KeyValueIntegrationTest.class);
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -27,7 +31,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -42,7 +46,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -69,7 +73,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -89,7 +93,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -114,7 +118,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 30;
 
@@ -122,11 +126,14 @@ public class KeyValueIntegrationTest extends HttpTestBase {
             byte[] key = buildKey(i);
 
             byte[] data = buildBytes(i * 10000);
+            log.info("Setting key {}", i);
             client.put(storeId, ByteString.copyFrom(key), ByteString.copyFrom(data));
         }
 
         for (int i = 1; i <= n; i++) {
             byte[] key = buildKey(i);
+
+            log.info("Reading key {}", i);
 
             KeyValueEntry entry = client.read(storeId, ByteString.copyFrom(key));
             byte[] data = entry.getValue().toByteArray();
@@ -141,7 +148,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -178,7 +185,7 @@ public class KeyValueIntegrationTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 

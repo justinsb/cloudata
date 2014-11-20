@@ -3,14 +3,19 @@ package com.cloudata.keyvalue;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
 import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.RaftMembership;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
 import org.robotninjas.barge.proto.RaftEntry.Membership;
+import org.robotninjas.barge.rpc.netty.NettyRaftService;
+import org.robotninjas.barge.rpc.netty.NettyRaftService.Builder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +27,7 @@ import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
 import com.cloudata.services.CompoundService;
 import com.cloudata.services.JettyService;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 import com.google.common.util.concurrent.Futures;
@@ -33,142 +39,164 @@ import com.google.inject.Injector;
 import com.google.protobuf.Service;
 
 public class KeyValueServer extends CompoundService {
-    private static final Logger log = LoggerFactory.getLogger(KeyValueServer.class);
+  private static final Logger log = LoggerFactory.getLogger(KeyValueServer.class);
 
-    final File baseDir;
-    private final Replica local;
-    private final RaftService raft;
+  final File baseDir;
+  private final Replica local;
+  private final RaftService raft;
 
-    private final KeyValueStateMachine stateMachine;
+  private final KeyValueStateMachine stateMachine;
 
-    private final KeyValueConfig config;
+  private final KeyValueConfig config;
 
-    public KeyValueServer(File baseDir, Replica local, KeyValueConfig config) {
-        this.baseDir = baseDir;
-        this.local = local;
+  public KeyValueServer(File baseDir, Replica local, KeyValueConfig config) {
+    Preconditions.checkNotNull(config);
+    Preconditions.checkNotNull(config.seedConfig);
 
-        this.config = config.deepCopy();
+    this.baseDir = baseDir;
+    this.local = local;
 
-        File logDir = new File(baseDir, "logs");
-        File stateDir = new File(baseDir, "state");
+    this.config = config.deepCopy();
 
-        logDir.mkdirs();
-        stateDir.mkdirs();
+    File logDir = new File(baseDir, "logs");
+    File stateDir = new File(baseDir, "state");
 
-        ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors
-                .newCachedThreadPool(new DefaultThreadFactory("pool-worker-keyvalue")));
-        this.stateMachine = new KeyValueStateMachine(executor, stateDir);
+    logDir.mkdirs();
+    stateDir.mkdirs();
 
-        ClusterConfig clusterConfig = ClusterConfig.from(local);
-        this.raft = RaftService.newBuilder(clusterConfig).logDir(logDir).timeout(300).build(stateMachine);
+    ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors
+        .newCachedThreadPool(new DefaultThreadFactory("pool-worker-keyvalue")));
+    this.stateMachine = new KeyValueStateMachine(executor, stateDir);
+
+    {
+      NettyRaftService.Builder b = NettyRaftService.newBuilder();
+      b.seedConfig = config.seedConfig;
+      b.logDir = logDir;
+      // b.listener = groupOfCounters;
+      b.stateMachine = stateMachine;
+      this.raft = b.build();
     }
 
-    public void bootstrap() {
-        Membership membership = Membership.newBuilder().addMembers(local.getKey()).build();
-        this.raft.bootstrap(membership);
-    }
+  }
 
-    public String getHttpUrl() {
-        return "http://localhost:" + config.httpPort + "/";
-    }
+  public void bootstrap() {
+    Membership membership = Membership.newBuilder().addMembers(local.getKey()).build();
+    this.raft.bootstrap(membership);
+  }
 
-    public static void main(String... args) throws Exception {
-        final int port = Integer.parseInt(args[0]);
+  public String getHttpUrl() {
+    return "http://localhost:" + config.httpPort + "/";
+  }
 
-        Replica local = Replica.fromString("localhost:" + (10000 + port));
+  public static void main(String... args) throws Exception {
+    final int port = Integer.parseInt(args[0]);
 
-        KeyValueConfig config = new KeyValueConfig();
+    Replica local = Replica.fromString("localhost:" + (10000 + port));
 
-        File baseDir = new File(args[0]);
-        config.httpPort = (9990 + port);
-        int redisPort = 6379 + port;
-        int protobufPort = 2000 + port;
+    KeyValueConfig config = new KeyValueConfig();
 
-        config.redisEndpoint = HostAndPort.fromParts("", redisPort);
-        config.protobufEndpoint = HostAndPort.fromParts("", protobufPort);
+    File baseDir = new File(args[0]);
+    config.httpPort = (9990 + port);
+    int redisPort = 6379 + port;
+    int protobufPort = 2000 + port;
 
-        final KeyValueServer server = new KeyValueServer(baseDir, local, config);
-        server.start();
+    config.redisEndpoint = HostAndPort.fromParts("", redisPort);
+    config.protobufEndpoint = HostAndPort.fromParts("", protobufPort);
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                try {
-                    server.stop();
-                } catch (Exception e) {
-                    log.error("Error stopping server", e);
-                }
-            }
-        });
-    }
+    final KeyValueServer server = new KeyValueServer(baseDir, local, config);
+    server.start();
 
-    public HostAndPort getRedisSocketAddress() {
-        return config.redisEndpoint;
-    }
-
-    public HostAndPort getProtobufSocketAddress() {
-        return config.protobufEndpoint;
-    }
-
-    public String getRaftServerKey() {
-        return raft.getServerKey();
-    }
-
-    public void reconfigure(List<String> servers) {
-        RaftMembership oldMembership = raft.getClusterMembership();
-        RaftMembership newMembership = new RaftMembership(-1, servers);
-        ListenableFuture<Boolean> future = raft.setConfiguration(oldMembership, newMembership);
-        Boolean result = Futures.getUnchecked(future);
-        if (!Boolean.TRUE.equals(result)) {
-            throw new IllegalStateException();
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
+      public void run() {
+        try {
+          server.stop();
+        } catch (Exception e) {
+          log.error("Error stopping server", e);
         }
+      }
+    });
+  }
+
+  public HostAndPort getRedisSocketAddress() {
+    return config.redisEndpoint;
+  }
+
+  public HostAndPort getProtobufSocketAddress() {
+    return config.protobufEndpoint;
+  }
+
+  public String getRaftServerKey() {
+    return raft.getServerKey();
+  }
+
+  public void reconfigure(List<String> servers) {
+    RaftMembership oldMembership = raft.getClusterMembership();
+    RaftMembership newMembership = new RaftMembership(-1, servers);
+    ListenableFuture<Boolean> future = raft.setConfiguration(oldMembership, newMembership);
+    Boolean result = Futures.getUnchecked(future);
+    if (!Boolean.TRUE.equals(result)) {
+      throw new IllegalStateException();
+    }
+  }
+
+  public boolean isLeader() {
+    return raft.isLeader();
+  }
+
+  @Override
+  protected List<com.google.common.util.concurrent.Service> buildServices() {
+    Injector injector = Guice.createInjector(new KeyValueModule(stateMachine), new WebModule());
+
+    List<com.google.common.util.concurrent.Service> services = Lists.newArrayList();
+
+    services.add(new StateMachineService(stateMachine, raft));
+
+    services.add(raft);
+
+    JettyService jetty = injector.getInstance(JettyService.class);
+    jetty.init(config.httpPort);
+    services.add(jetty);
+
+    if (config.redisEndpoint != null) {
+      long storeId = 1;
+      RedisServer redisServer = new RedisServer(stateMachine, storeId);
+
+      RedisEndpoint redisEndpoint = new RedisEndpoint(config.redisEndpoint, redisServer);
+      services.add(redisEndpoint);
     }
 
-    public boolean isLeader() {
-        return raft.isLeader();
+    if (config.protobufEndpoint != null) {
+      ProtobufServer protobufServer = new ProtobufServer(config.protobufEndpoint);
+
+      KeyValueProtobufEndpoint endpoint = injector.getInstance(KeyValueProtobufEndpoint.class);
+      Service service = KeyValueProtocol.KeyValueService.newReflectiveService(endpoint);
+
+      protobufServer.addService(service);
+
+      services.add(protobufServer);
     }
 
-    @Override
-    protected List<com.google.common.util.concurrent.Service> buildServices() {
-        Injector injector = Guice.createInjector(new KeyValueModule(stateMachine), new WebModule());
+    if (config.gossip != null) {
+      ScheduledExecutorService executor = Executors.newScheduledThreadPool(0, new DefaultThreadFactory(
+          "pool-gossip-workers"));
 
-        List<com.google.common.util.concurrent.Service> services = Lists.newArrayList();
+      ClusterService cluster = new ClusterService(config.gossip, executor);
+      services.add(cluster);
 
-        services.add(new StateMachineService(stateMachine, raft));
-
-        services.add(raft);
-
-        JettyService jetty = injector.getInstance(JettyService.class);
-        jetty.init(config.httpPort);
-        services.add(jetty);
-
-        if (config.redisEndpoint != null) {
-            long storeId = 1;
-            RedisServer redisServer = new RedisServer(stateMachine, storeId);
-
-            RedisEndpoint redisEndpoint = new RedisEndpoint(config.redisEndpoint, redisServer);
-            services.add(redisEndpoint);
-        }
-
-        if (config.protobufEndpoint != null) {
-            ProtobufServer protobufServer = new ProtobufServer(config.protobufEndpoint);
-
-            KeyValueProtobufEndpoint endpoint = injector.getInstance(KeyValueProtobufEndpoint.class);
-            Service service = KeyValueProtocol.KeyValueService.newReflectiveService(endpoint);
-
-            protobufServer.addService(service);
-
-            services.add(protobufServer);
-        }
-
-        if (config.gossip != null) {
-            ClusterService cluster = new ClusterService(config.gossip);
-            services.add(cluster);
-
-            services.add(new RepairService(raft, cluster));
-        }
-
-        return services;
+      services.add(new RepairService(raft, cluster, executor));
     }
+
+    return services;
+  }
+
+  @Override
+  public String toString() {
+    return "KeyValueServer [raft=" + raft + "]";
+  }
+
+  public Replica getReplica() {
+    return this.raft.self();
+  }
 
 }

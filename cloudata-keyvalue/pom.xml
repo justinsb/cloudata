@@ -11,11 +11,16 @@
 
 	<artifactId>cloudata-keyvalue</artifactId>
 
-
 	<dependencies>
 		<dependency>
 			<groupId>com.cloudata</groupId>
 			<artifactId>cloudata-server-shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.cloudata</groupId>
+			<artifactId>cloudata-cluster</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

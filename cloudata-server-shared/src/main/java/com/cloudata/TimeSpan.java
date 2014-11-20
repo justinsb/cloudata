@@ -40,4 +40,8 @@ public class TimeSpan {
             throw new InterruptedError(e);
         }
     }
+
+    public static TimeSpan millis(long duration) {
+      return new TimeSpan(duration, TimeUnit.MILLISECONDS);
+    }
 }

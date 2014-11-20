@@ -8,10 +8,10 @@ public final class FilesModel {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface ChunkDataOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface ChunkDataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ChunkData)
+      com.google.protobuf.MessageOrBuilder {
 
-    // optional uint64 length = 1;
     /**
      * <code>optional uint64 length = 1;</code>
      */
@@ -21,7 +21,6 @@ public final class FilesModel {
      */
     long getLength();
 
-    // optional bytes hash = 2;
     /**
      * <code>optional bytes hash = 2;</code>
      */
@@ -35,8 +34,9 @@ public final class FilesModel {
    * Protobuf type {@code ChunkData}
    */
   public static final class ChunkData extends
-      com.google.protobuf.GeneratedMessage
-      implements ChunkDataOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:ChunkData)
+      ChunkDataOrBuilder {
     // Use ChunkData.newBuilder() to construct.
     private ChunkData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -132,7 +132,6 @@ public final class FilesModel {
     }
 
     private int bitField0_;
-    // optional uint64 length = 1;
     public static final int LENGTH_FIELD_NUMBER = 1;
     private long length_;
     /**
@@ -148,7 +147,6 @@ public final class FilesModel {
       return length_;
     }
 
-    // optional bytes hash = 2;
     public static final int HASH_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString hash_;
     /**
@@ -171,7 +169,8 @@ public final class FilesModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       memoizedIsInitialized = 1;
       return true;
@@ -285,8 +284,9 @@ public final class FilesModel {
      * Protobuf type {@code ChunkData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.files.FilesModel.ChunkDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ChunkData)
+        com.cloudata.files.FilesModel.ChunkDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.files.FilesModel.internal_static_ChunkData_descriptor;
@@ -408,7 +408,6 @@ public final class FilesModel {
       }
       private int bitField0_;
 
-      // optional uint64 length = 1;
       private long length_ ;
       /**
        * <code>optional uint64 length = 1;</code>
@@ -441,7 +440,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional bytes hash = 2;
       private com.google.protobuf.ByteString hash_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes hash = 2;</code>
@@ -488,10 +486,10 @@ public final class FilesModel {
     // @@protoc_insertion_point(class_scope:ChunkData)
   }
 
-  public interface DeletedDataOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface DeletedDataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:DeletedData)
+      com.google.protobuf.MessageOrBuilder {
 
-    // optional uint64 inode = 1;
     /**
      * <code>optional uint64 inode = 1;</code>
      */
@@ -501,7 +499,6 @@ public final class FilesModel {
      */
     long getInode();
 
-    // repeated bytes path = 2;
     /**
      * <code>repeated bytes path = 2;</code>
      */
@@ -519,8 +516,9 @@ public final class FilesModel {
    * Protobuf type {@code DeletedData}
    */
   public static final class DeletedData extends
-      com.google.protobuf.GeneratedMessage
-      implements DeletedDataOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:DeletedData)
+      DeletedDataOrBuilder {
     // Use DeletedData.newBuilder() to construct.
     private DeletedData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -622,7 +620,6 @@ public final class FilesModel {
     }
 
     private int bitField0_;
-    // optional uint64 inode = 1;
     public static final int INODE_FIELD_NUMBER = 1;
     private long inode_;
     /**
@@ -638,7 +635,6 @@ public final class FilesModel {
       return inode_;
     }
 
-    // repeated bytes path = 2;
     public static final int PATH_FIELD_NUMBER = 2;
     private java.util.List<com.google.protobuf.ByteString> path_;
     /**
@@ -668,7 +664,8 @@ public final class FilesModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       memoizedIsInitialized = 1;
       return true;
@@ -787,8 +784,9 @@ public final class FilesModel {
      * Protobuf type {@code DeletedData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.files.FilesModel.DeletedDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:DeletedData)
+        com.cloudata.files.FilesModel.DeletedDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.files.FilesModel.internal_static_DeletedData_descriptor;
@@ -918,7 +916,6 @@ public final class FilesModel {
       }
       private int bitField0_;
 
-      // optional uint64 inode = 1;
       private long inode_ ;
       /**
        * <code>optional uint64 inode = 1;</code>
@@ -951,7 +948,6 @@ public final class FilesModel {
         return this;
       }
 
-      // repeated bytes path = 2;
       private java.util.List<com.google.protobuf.ByteString> path_ = java.util.Collections.emptyList();
       private void ensurePathIsMutable() {
         if (!((bitField0_ & 0x00000002) == 0x00000002)) {
@@ -1009,7 +1005,8 @@ public final class FilesModel {
       public Builder addAllPath(
           java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
         ensurePathIsMutable();
-        super.addAll(values, path_);
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, path_);
         onChanged();
         return this;
       }
@@ -1034,10 +1031,10 @@ public final class FilesModel {
     // @@protoc_insertion_point(class_scope:DeletedData)
   }
 
-  public interface InodeDataOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface InodeDataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:InodeData)
+      com.google.protobuf.MessageOrBuilder {
 
-    // optional uint64 length = 1;
     /**
      * <code>optional uint64 length = 1;</code>
      */
@@ -1047,7 +1044,6 @@ public final class FilesModel {
      */
     long getLength();
 
-    // optional uint64 inode = 2;
     /**
      * <code>optional uint64 inode = 2;</code>
      */
@@ -1057,7 +1053,6 @@ public final class FilesModel {
      */
     long getInode();
 
-    // optional uint32 uid = 3;
     /**
      * <code>optional uint32 uid = 3;</code>
      */
@@ -1067,7 +1062,6 @@ public final class FilesModel {
      */
     int getUid();
 
-    // optional uint32 gid = 4;
     /**
      * <code>optional uint32 gid = 4;</code>
      */
@@ -1077,7 +1071,6 @@ public final class FilesModel {
      */
     int getGid();
 
-    // optional uint32 mode = 5;
     /**
      * <code>optional uint32 mode = 5;</code>
      */
@@ -1087,7 +1080,6 @@ public final class FilesModel {
      */
     int getMode();
 
-    // optional uint32 nlink = 6;
     /**
      * <code>optional uint32 nlink = 6;</code>
      */
@@ -1097,7 +1089,6 @@ public final class FilesModel {
      */
     int getNlink();
 
-    // optional uint64 accessTime = 7;
     /**
      * <code>optional uint64 accessTime = 7;</code>
      */
@@ -1107,7 +1098,6 @@ public final class FilesModel {
      */
     long getAccessTime();
 
-    // optional uint64 createTime = 8;
     /**
      * <code>optional uint64 createTime = 8;</code>
      */
@@ -1117,7 +1107,6 @@ public final class FilesModel {
      */
     long getCreateTime();
 
-    // optional uint64 modifiedTime = 9;
     /**
      * <code>optional uint64 modifiedTime = 9;</code>
      */
@@ -1127,7 +1116,6 @@ public final class FilesModel {
      */
     long getModifiedTime();
 
-    // repeated .ChunkData chunk = 10;
     /**
      * <code>repeated .ChunkData chunk = 10;</code>
      */
@@ -1156,8 +1144,9 @@ public final class FilesModel {
    * Protobuf type {@code InodeData}
    */
   public static final class InodeData extends
-      com.google.protobuf.GeneratedMessage
-      implements InodeDataOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:InodeData)
+      InodeDataOrBuilder {
     // Use InodeData.newBuilder() to construct.
     private InodeData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1299,7 +1288,6 @@ public final class FilesModel {
     }
 
     private int bitField0_;
-    // optional uint64 length = 1;
     public static final int LENGTH_FIELD_NUMBER = 1;
     private long length_;
     /**
@@ -1315,7 +1303,6 @@ public final class FilesModel {
       return length_;
     }
 
-    // optional uint64 inode = 2;
     public static final int INODE_FIELD_NUMBER = 2;
     private long inode_;
     /**
@@ -1331,7 +1318,6 @@ public final class FilesModel {
       return inode_;
     }
 
-    // optional uint32 uid = 3;
     public static final int UID_FIELD_NUMBER = 3;
     private int uid_;
     /**
@@ -1347,7 +1333,6 @@ public final class FilesModel {
       return uid_;
     }
 
-    // optional uint32 gid = 4;
     public static final int GID_FIELD_NUMBER = 4;
     private int gid_;
     /**
@@ -1363,7 +1348,6 @@ public final class FilesModel {
       return gid_;
     }
 
-    // optional uint32 mode = 5;
     public static final int MODE_FIELD_NUMBER = 5;
     private int mode_;
     /**
@@ -1379,7 +1363,6 @@ public final class FilesModel {
       return mode_;
     }
 
-    // optional uint32 nlink = 6;
     public static final int NLINK_FIELD_NUMBER = 6;
     private int nlink_;
     /**
@@ -1395,7 +1378,6 @@ public final class FilesModel {
       return nlink_;
     }
 
-    // optional uint64 accessTime = 7;
     public static final int ACCESSTIME_FIELD_NUMBER = 7;
     private long accessTime_;
     /**
@@ -1411,7 +1393,6 @@ public final class FilesModel {
       return accessTime_;
     }
 
-    // optional uint64 createTime = 8;
     public static final int CREATETIME_FIELD_NUMBER = 8;
     private long createTime_;
     /**
@@ -1427,7 +1408,6 @@ public final class FilesModel {
       return createTime_;
     }
 
-    // optional uint64 modifiedTime = 9;
     public static final int MODIFIEDTIME_FIELD_NUMBER = 9;
     private long modifiedTime_;
     /**
@@ -1443,7 +1423,6 @@ public final class FilesModel {
       return modifiedTime_;
     }
 
-    // repeated .ChunkData chunk = 10;
     public static final int CHUNK_FIELD_NUMBER = 10;
     private java.util.List<com.cloudata.files.FilesModel.ChunkData> chunk_;
     /**
@@ -1494,7 +1473,8 @@ public final class FilesModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1664,8 +1644,9 @@ public final class FilesModel {
      * Protobuf type {@code InodeData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.files.FilesModel.InodeDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:InodeData)
+        com.cloudata.files.FilesModel.InodeDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.files.FilesModel.internal_static_InodeData_descriptor;
@@ -1892,7 +1873,6 @@ public final class FilesModel {
       }
       private int bitField0_;
 
-      // optional uint64 length = 1;
       private long length_ ;
       /**
        * <code>optional uint64 length = 1;</code>
@@ -1925,7 +1905,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint64 inode = 2;
       private long inode_ ;
       /**
        * <code>optional uint64 inode = 2;</code>
@@ -1958,7 +1937,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint32 uid = 3;
       private int uid_ ;
       /**
        * <code>optional uint32 uid = 3;</code>
@@ -1991,7 +1969,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint32 gid = 4;
       private int gid_ ;
       /**
        * <code>optional uint32 gid = 4;</code>
@@ -2024,7 +2001,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint32 mode = 5;
       private int mode_ ;
       /**
        * <code>optional uint32 mode = 5;</code>
@@ -2057,7 +2033,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint32 nlink = 6;
       private int nlink_ ;
       /**
        * <code>optional uint32 nlink = 6;</code>
@@ -2090,7 +2065,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint64 accessTime = 7;
       private long accessTime_ ;
       /**
        * <code>optional uint64 accessTime = 7;</code>
@@ -2123,7 +2097,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint64 createTime = 8;
       private long createTime_ ;
       /**
        * <code>optional uint64 createTime = 8;</code>
@@ -2156,7 +2129,6 @@ public final class FilesModel {
         return this;
       }
 
-      // optional uint64 modifiedTime = 9;
       private long modifiedTime_ ;
       /**
        * <code>optional uint64 modifiedTime = 9;</code>
@@ -2189,7 +2161,6 @@ public final class FilesModel {
         return this;
       }
 
-      // repeated .ChunkData chunk = 10;
       private java.util.List<com.cloudata.files.FilesModel.ChunkData> chunk_ =
         java.util.Collections.emptyList();
       private void ensureChunkIsMutable() {
@@ -2331,7 +2302,8 @@ public final class FilesModel {
           java.lang.Iterable<? extends com.cloudata.files.FilesModel.ChunkData> values) {
         if (chunkBuilder_ == null) {
           ensureChunkIsMutable();
-          super.addAll(values, chunk_);
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, chunk_);
           onChanged();
         } else {
           chunkBuilder_.addAllMessages(values);
@@ -2440,17 +2412,17 @@ public final class FilesModel {
     // @@protoc_insertion_point(class_scope:InodeData)
   }
 
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_ChunkData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_ChunkData_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_DeletedData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_DeletedData_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_InodeData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -2475,35 +2447,35 @@ public final class FilesModel {
       "udata.files"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_ChunkData_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_ChunkData_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_ChunkData_descriptor,
-              new java.lang.String[] { "Length", "Hash", });
-          internal_static_DeletedData_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_DeletedData_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_DeletedData_descriptor,
-              new java.lang.String[] { "Inode", "Path", });
-          internal_static_InodeData_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_InodeData_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_InodeData_descriptor,
-              new java.lang.String[] { "Length", "Inode", "Uid", "Gid", "Mode", "Nlink", "AccessTime", "CreateTime", "ModifiedTime", "Chunk", });
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_ChunkData_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_ChunkData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_ChunkData_descriptor,
+        new java.lang.String[] { "Length", "Hash", });
+    internal_static_DeletedData_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_DeletedData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_DeletedData_descriptor,
+        new java.lang.String[] { "Inode", "Path", });
+    internal_static_InodeData_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_InodeData_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_InodeData_descriptor,
+        new java.lang.String[] { "Length", "Inode", "Uid", "Gid", "Mode", "Nlink", "AccessTime", "CreateTime", "ModifiedTime", "Chunk", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -10,6 +10,7 @@ import org.robotninjas.protobuf.netty.server.RpcServer;
 
 import com.cloudata.services.CompoundService;
 import com.cloudata.services.ExecutorServiceWrapper;
+import com.cloudata.util.InetSocketAddresses;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 import com.google.protobuf.Service;
@@ -22,8 +23,7 @@ public class ProtobufServer extends CompoundService {
     public ProtobufServer(HostAndPort hostAndPort) {
         this.hostAndPort = hostAndPort;
         this.eventLoopGroup = new NioEventLoopGroup(0, new DefaultThreadFactory("pool-protobuf"));
-        this.rpcServer = new RpcServer(eventLoopGroup, new InetSocketAddress(hostAndPort.getHostText(),
-                hostAndPort.getPort()));
+        this.rpcServer = new RpcServer(eventLoopGroup, InetSocketAddresses.fromHostAndPort(hostAndPort));
     }
 
     public void addService(Service service) {

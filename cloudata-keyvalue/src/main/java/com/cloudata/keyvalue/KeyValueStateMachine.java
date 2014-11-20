@@ -11,10 +11,11 @@ import java.util.concurrent.ExecutionException;
 import javax.annotation.Nonnull;
 import javax.annotation.concurrent.Immutable;
 
-import org.robotninjas.barge.NoLeaderException;
 import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
+import org.robotninjas.barge.RaftMembership;
 import org.robotninjas.barge.RaftService;
+import org.robotninjas.barge.Replica;
 import org.robotninjas.barge.StateMachine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,7 @@ import com.cloudata.keyvalue.operation.KeyValueOperation;
 import com.cloudata.keyvalue.operation.KeyValueOperations;
 import com.cloudata.values.Value;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
@@ -80,9 +82,6 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
             Throwable cause = e.getCause();
             if (cause instanceof NotLeaderException) {
                 throw (NotLeaderException) cause;
-            }
-            if (cause instanceof NoLeaderException) {
-                throw (NoLeaderException) cause;
             }
             throw new RaftException(e.getCause());
         }
@@ -195,6 +194,19 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
     @Override
     public void close() {
         keyValueStoreCache.invalidateAll();
+    }
+
+    public RaftMembership getRaftMembership() {
+      return raft.getClusterMembership();
+    }
+    
+    public Optional<String> getLeader() {
+      Optional<Replica> leader = raft.getLeader();
+      if (leader.isPresent()) {
+        return Optional.of(leader.get().getKey());
+      } else {
+        return Optional.absent();
+      }
     }
 
 }

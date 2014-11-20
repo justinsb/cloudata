@@ -48,7 +48,7 @@ public abstract class ThreadService extends AbstractService {
         @Override
         public void run() {
             try {
-                run();
+                run0();
             } catch (Throwable t) {
                 log.error("Unexpected error during thread cycle", t);
                 // And we exit the thread...
@@ -59,7 +59,8 @@ public abstract class ThreadService extends AbstractService {
     }
 
     protected boolean shouldStop() {
-        switch (this.state()) {
+        State state = this.state();
+        switch (state) {
         case STOPPING:
         case TERMINATED:
             return true;

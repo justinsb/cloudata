@@ -8,10 +8,10 @@ public final class ClusterProtocol {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface BroadcastMessageOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface BroadcastMessageOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:BroadcastMessage)
+      com.google.protobuf.MessageOrBuilder {
 
-    // optional string service = 1;
     /**
      * <code>optional string service = 1;</code>
      */
@@ -26,7 +26,6 @@ public final class ClusterProtocol {
     com.google.protobuf.ByteString
         getServiceBytes();
 
-    // optional string id = 2;
     /**
      * <code>optional string id = 2;</code>
      */
@@ -41,7 +40,6 @@ public final class ClusterProtocol {
     com.google.protobuf.ByteString
         getIdBytes();
 
-    // optional bytes address = 3;
     /**
      * <code>optional bytes address = 3;</code>
      */
@@ -51,7 +49,6 @@ public final class ClusterProtocol {
      */
     com.google.protobuf.ByteString getAddress();
 
-    // optional int32 port = 4;
     /**
      * <code>optional int32 port = 4;</code>
      */
@@ -65,8 +62,9 @@ public final class ClusterProtocol {
    * Protobuf type {@code BroadcastMessage}
    */
   public static final class BroadcastMessage extends
-      com.google.protobuf.GeneratedMessage
-      implements BroadcastMessageOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:BroadcastMessage)
+      BroadcastMessageOrBuilder {
     // Use BroadcastMessage.newBuilder() to construct.
     private BroadcastMessage(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -113,13 +111,15 @@ public final class ClusterProtocol {
               break;
             }
             case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              service_ = input.readBytes();
+              service_ = bs;
               break;
             }
             case 18: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              id_ = input.readBytes();
+              id_ = bs;
               break;
             }
             case 26: {
@@ -172,7 +172,6 @@ public final class ClusterProtocol {
     }
 
     private int bitField0_;
-    // optional string service = 1;
     public static final int SERVICE_FIELD_NUMBER = 1;
     private java.lang.Object service_;
     /**
@@ -215,7 +214,6 @@ public final class ClusterProtocol {
       }
     }
 
-    // optional string id = 2;
     public static final int ID_FIELD_NUMBER = 2;
     private java.lang.Object id_;
     /**
@@ -258,7 +256,6 @@ public final class ClusterProtocol {
       }
     }
 
-    // optional bytes address = 3;
     public static final int ADDRESS_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString address_;
     /**
@@ -274,7 +271,6 @@ public final class ClusterProtocol {
       return address_;
     }
 
-    // optional int32 port = 4;
     public static final int PORT_FIELD_NUMBER = 4;
     private int port_;
     /**
@@ -299,7 +295,8 @@ public final class ClusterProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       memoizedIsInitialized = 1;
       return true;
@@ -427,8 +424,9 @@ public final class ClusterProtocol {
      * Protobuf type {@code BroadcastMessage}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.cluster.ClusterProtocol.BroadcastMessageOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:BroadcastMessage)
+        com.cloudata.cluster.ClusterProtocol.BroadcastMessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.cluster.ClusterProtocol.internal_static_BroadcastMessage_descriptor;
@@ -572,7 +570,6 @@ public final class ClusterProtocol {
       }
       private int bitField0_;
 
-      // optional string service = 1;
       private java.lang.Object service_ = "";
       /**
        * <code>optional string service = 1;</code>
@@ -586,9 +583,12 @@ public final class ClusterProtocol {
       public java.lang.String getService() {
         java.lang.Object ref = service_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          service_ = s;
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            service_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -646,7 +646,6 @@ public final class ClusterProtocol {
         return this;
       }
 
-      // optional string id = 2;
       private java.lang.Object id_ = "";
       /**
        * <code>optional string id = 2;</code>
@@ -660,9 +659,12 @@ public final class ClusterProtocol {
       public java.lang.String getId() {
         java.lang.Object ref = id_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          id_ = s;
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            id_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -720,7 +722,6 @@ public final class ClusterProtocol {
         return this;
       }
 
-      // optional bytes address = 3;
       private com.google.protobuf.ByteString address_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes address = 3;</code>
@@ -756,7 +757,6 @@ public final class ClusterProtocol {
         return this;
       }
 
-      // optional int32 port = 4;
       private int port_ ;
       /**
        * <code>optional int32 port = 4;</code>
@@ -800,10 +800,10 @@ public final class ClusterProtocol {
     // @@protoc_insertion_point(class_scope:BroadcastMessage)
   }
 
-  public interface GossipRequestOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface GossipRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:GossipRequest)
+      com.google.protobuf.MessageOrBuilder {
 
-    // required string from_id = 1;
     /**
      * <code>required string from_id = 1;</code>
      */
@@ -822,8 +822,9 @@ public final class ClusterProtocol {
    * Protobuf type {@code GossipRequest}
    */
   public static final class GossipRequest extends
-      com.google.protobuf.GeneratedMessage
-      implements GossipRequestOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:GossipRequest)
+      GossipRequestOrBuilder {
     // Use GossipRequest.newBuilder() to construct.
     private GossipRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -870,8 +871,9 @@ public final class ClusterProtocol {
               break;
             }
             case 10: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              fromId_ = input.readBytes();
+              fromId_ = bs;
               break;
             }
           }
@@ -914,7 +916,6 @@ public final class ClusterProtocol {
     }
 
     private int bitField0_;
-    // required string from_id = 1;
     public static final int FROM_ID_FIELD_NUMBER = 1;
     private java.lang.Object fromId_;
     /**
@@ -963,7 +964,8 @@ public final class ClusterProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       if (!hasFromId()) {
         memoizedIsInitialized = 0;
@@ -1074,8 +1076,9 @@ public final class ClusterProtocol {
      * Protobuf type {@code GossipRequest}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.cluster.ClusterProtocol.GossipRequestOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:GossipRequest)
+        com.cloudata.cluster.ClusterProtocol.GossipRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.cluster.ClusterProtocol.internal_static_GossipRequest_descriptor;
@@ -1194,7 +1197,6 @@ public final class ClusterProtocol {
       }
       private int bitField0_;
 
-      // required string from_id = 1;
       private java.lang.Object fromId_ = "";
       /**
        * <code>required string from_id = 1;</code>
@@ -1208,9 +1210,12 @@ public final class ClusterProtocol {
       public java.lang.String getFromId() {
         java.lang.Object ref = fromId_;
         if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          fromId_ = s;
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            fromId_ = s;
+          }
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1279,15 +1284,17 @@ public final class ClusterProtocol {
     // @@protoc_insertion_point(class_scope:GossipRequest)
   }
 
-  public interface GossipResponseOrBuilder
-      extends com.google.protobuf.MessageOrBuilder {
+  public interface GossipResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:GossipResponse)
+      com.google.protobuf.MessageOrBuilder {
   }
   /**
    * Protobuf type {@code GossipResponse}
    */
   public static final class GossipResponse extends
-      com.google.protobuf.GeneratedMessage
-      implements GossipResponseOrBuilder {
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:GossipResponse)
+      GossipResponseOrBuilder {
     // Use GossipResponse.newBuilder() to construct.
     private GossipResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1376,7 +1383,8 @@ public final class ClusterProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized != -1) return isInitialized == 1;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1476,8 +1484,9 @@ public final class ClusterProtocol {
      * Protobuf type {@code GossipResponse}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.cluster.ClusterProtocol.GossipResponseOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:GossipResponse)
+        com.cloudata.cluster.ClusterProtocol.GossipResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.cluster.ClusterProtocol.internal_static_GossipResponse_descriptor;
@@ -1820,17 +1829,17 @@ public final class ClusterProtocol {
     // @@protoc_insertion_point(class_scope:ClusterRpcService)
   }
 
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_BroadcastMessage_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_BroadcastMessage_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_GossipRequest_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_GossipRequest_fieldAccessorTable;
-  private static com.google.protobuf.Descriptors.Descriptor
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_GossipResponse_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -1853,35 +1862,35 @@ public final class ClusterProtocol {
       "m.cloudata.cluster\210\001\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
-        public com.google.protobuf.ExtensionRegistry assignDescriptors(
-            com.google.protobuf.Descriptors.FileDescriptor root) {
-          descriptor = root;
-          internal_static_BroadcastMessage_descriptor =
-            getDescriptor().getMessageTypes().get(0);
-          internal_static_BroadcastMessage_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_BroadcastMessage_descriptor,
-              new java.lang.String[] { "Service", "Id", "Address", "Port", });
-          internal_static_GossipRequest_descriptor =
-            getDescriptor().getMessageTypes().get(1);
-          internal_static_GossipRequest_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_GossipRequest_descriptor,
-              new java.lang.String[] { "FromId", });
-          internal_static_GossipResponse_descriptor =
-            getDescriptor().getMessageTypes().get(2);
-          internal_static_GossipResponse_fieldAccessorTable = new
-            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_GossipResponse_descriptor,
-              new java.lang.String[] { });
-          return null;
-        }
-      };
+        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
+          public com.google.protobuf.ExtensionRegistry assignDescriptors(
+              com.google.protobuf.Descriptors.FileDescriptor root) {
+            descriptor = root;
+            return null;
+          }
+        };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
+    internal_static_BroadcastMessage_descriptor =
+      getDescriptor().getMessageTypes().get(0);
+    internal_static_BroadcastMessage_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_BroadcastMessage_descriptor,
+        new java.lang.String[] { "Service", "Id", "Address", "Port", });
+    internal_static_GossipRequest_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_GossipRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_GossipRequest_descriptor,
+        new java.lang.String[] { "FromId", });
+    internal_static_GossipResponse_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_GossipResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_GossipResponse_descriptor,
+        new java.lang.String[] { });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

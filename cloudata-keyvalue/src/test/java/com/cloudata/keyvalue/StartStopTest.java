@@ -1,7 +1,12 @@
 package com.cloudata.keyvalue;
 
+import java.util.List;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import com.cloudata.keyvalue.KeyValueClient.ClusterState;
+import com.google.common.collect.Lists;
 
 public class StartStopTest extends HttpTestBase {
 
@@ -18,7 +23,9 @@ public class StartStopTest extends HttpTestBase {
         startCluster(1);
 
         String url = SERVERS.get(0).getHttpUrl();
-        KeyValueClient client = new KeyValueClient(url);
+        
+        ClusterState clusterState = ClusterState.fromSeeds(url);
+        KeyValueClient client = new KeyValueClient(clusterState);
 
         checkWrite(client, storeId, n);
         checkRead(client, storeId, n);

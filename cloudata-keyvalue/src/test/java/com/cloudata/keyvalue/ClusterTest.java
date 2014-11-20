@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.keyvalue.KeyValueClient.ClusterState;
 import com.google.protobuf.ByteString;
 
 public class ClusterTest extends HttpTestBase {
@@ -32,7 +33,7 @@ public class ClusterTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 10;
 
@@ -41,7 +42,7 @@ public class ClusterTest extends HttpTestBase {
         Thread.sleep(1000);
 
         url = SERVERS.get(1).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, n);
 
@@ -52,7 +53,7 @@ public class ClusterTest extends HttpTestBase {
         Thread.sleep(1000);
 
         url = SERVERS.get(4).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, n);
     }
@@ -63,7 +64,7 @@ public class ClusterTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkWrite(client, storeId, 5);
         checkRead(client, storeId, 5);
@@ -71,12 +72,12 @@ public class ClusterTest extends HttpTestBase {
         Thread.sleep(1000);
 
         System.out.println("STOPPING SERVER 0");
-        SERVERS.get(0).stop();
+        SERVERS.get(0).stopAsync().awaitTerminated();
 
         Thread.sleep(1000);
 
         url = SERVERS.get(0).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         try {
             client.read(storeId, ByteString.EMPTY);
@@ -86,20 +87,20 @@ public class ClusterTest extends HttpTestBase {
         }
 
         url = SERVERS.get(1).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, 5);
         checkWrite(client, storeId, 10);
         checkRead(client, storeId, 10);
 
         System.out.println("STARTING SERVER 0");
-        SERVERS.set(0, buildServer(0));
-        SERVERS.get(0).start();
+        SERVERS.set(0, buildServer(0, SERVERS.subList(0, 0)));
+        SERVERS.get(0).startAsync().awaitRunning();
 
         Thread.sleep(1000);
 
         url = SERVERS.get(0).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, 10);
         checkWrite(client, storeId, 10);
@@ -111,18 +112,18 @@ public class ClusterTest extends HttpTestBase {
         long storeId = newStoreId();
 
         String url = SERVERS.get(0).getHttpUrl();
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkWrite(client, storeId, 5);
         checkRead(client, storeId, 5);
 
         System.out.println("STOPPING SERVER 0");
-        SERVERS.get(0).stop();
+        SERVERS.get(0).stopAsync().awaitTerminated();
 
         Thread.sleep(1000);
 
         url = SERVERS.get(0).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         try {
             client.read(storeId, ByteString.EMPTY);
@@ -132,7 +133,7 @@ public class ClusterTest extends HttpTestBase {
         }
 
         url = SERVERS.get(1).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, 5);
         checkWrite(client, storeId, 10);
@@ -140,15 +141,15 @@ public class ClusterTest extends HttpTestBase {
 
         System.out.println("STARTING SERVER 3, REPLACEMENT FOR #0");
         SERVERS.set(0, null);
-        SERVERS.add(buildServer(3));
-        SERVERS.get(3).start();
+        SERVERS.add(buildServer(3, SERVERS.subList(0, 3)));
+        SERVERS.get(3).startAsync().awaitRunning();
 
         reconfigure();
 
         Thread.sleep(1000);
 
         url = SERVERS.get(3).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, 10);
         checkWrite(client, storeId, 10);
@@ -160,18 +161,18 @@ public class ClusterTest extends HttpTestBase {
         long storeId = newStoreId();
 
         String url = SERVERS.get(0).getHttpUrl();
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkWrite(client, storeId, 5);
         checkRead(client, storeId, 5);
 
         for (int i = 0; i < 3; i++) {
-            SERVERS.get(i).stop();
+            SERVERS.get(i).stopAsync().awaitTerminated();
 
             Thread.sleep(1000);
 
             url = SERVERS.get(i).getHttpUrl();
-            client = new KeyValueClient(url);
+            client = new KeyValueClient(ClusterState.fromSeeds(url));
 
             try {
                 client.read(storeId, ByteString.EMPTY);
@@ -181,27 +182,27 @@ public class ClusterTest extends HttpTestBase {
             }
 
             url = SERVERS.get(i + 1).getHttpUrl();
-            client = new KeyValueClient(url);
+            client = new KeyValueClient(ClusterState.fromSeeds(url));
 
             checkRead(client, storeId, 5);
 
             log.info("STARTING REPLACEMENT SERVER #{}", (i + 3));
             SERVERS.set(i, null);
-            SERVERS.add(buildServer(i + 3));
-            SERVERS.get(i + 3).start();
+            SERVERS.add(buildServer(i + 3, SERVERS.subList(0, i+3)));
+            SERVERS.get(i + 3).startAsync().awaitRunning();
 
             reconfigure();
 
             Thread.sleep(1000);
 
             url = SERVERS.get(i + 3).getHttpUrl();
-            client = new KeyValueClient(url);
+            client = new KeyValueClient(ClusterState.fromSeeds(url));
 
             checkRead(client, storeId, 5);
         }
 
         url = SERVERS.get(3).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkWrite(client, storeId, 5);
         checkRead(client, storeId, 5);
@@ -212,7 +213,7 @@ public class ClusterTest extends HttpTestBase {
         long storeId = newStoreId();
 
         String url = SERVERS.get(0).getHttpUrl();
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -220,12 +221,12 @@ public class ClusterTest extends HttpTestBase {
 
         Thread.sleep(1000);
 
-        SERVERS.get(0).stop();
+        SERVERS.get(0).stopAsync().awaitTerminated();
 
         Thread.sleep(1000);
 
         url = SERVERS.get(1).getHttpUrl();
-        client = new KeyValueClient(url);
+        client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         checkRead(client, storeId, n);
     }
@@ -236,7 +237,7 @@ public class ClusterTest extends HttpTestBase {
 
         long storeId = newStoreId();
 
-        KeyValueClient client = new KeyValueClient(url);
+        KeyValueClient client = new KeyValueClient(ClusterState.fromSeeds(url));
 
         int n = 20;
 
@@ -246,7 +247,7 @@ public class ClusterTest extends HttpTestBase {
 
         for (int j = 0; j < SERVERS.size(); j++) {
             url = SERVERS.get(j).getHttpUrl();
-            client = new KeyValueClient(url);
+            client = new KeyValueClient(ClusterState.fromSeeds(url));
 
             checkRead(client, storeId, n);
         }

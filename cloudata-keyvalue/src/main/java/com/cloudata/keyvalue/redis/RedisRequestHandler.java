@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
+import java.nio.channels.Channels;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -131,8 +132,9 @@ public class RedisRequestHandler extends SimpleChannelInboundHandler<RedisReques
             }
         }
         if (reply == StatusRedisResponse.QUIT) {
-            // TODO: Pipelined responses? Do we need to flush?
-            ctx.close();
+          ctx.writeAndFlush(StatusRedisResponse.OK);
+          // ctx.channel.close (unlike ctx.close) waits for previous writes
+          ctx.channel().close();
         } else {
             if (msg.isInline()) {
                 reply = new InlineRedisResponse(reply);

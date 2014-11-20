@@ -7,10 +7,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
 
@@ -19,6 +22,7 @@ import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
 
 public class RedisIntegrationTest extends IntegrationTestBase {
+  private static final Logger log = LoggerFactory.getLogger(RedisIntegrationTest.class);
 
     private Jedis jedis;
 
@@ -33,6 +37,14 @@ public class RedisIntegrationTest extends IntegrationTestBase {
         HostAndPort redisEndpoint = SERVERS.get(0).getRedisSocketAddress();
 
         this.jedis = new Jedis(redisEndpoint.getHostText(), redisEndpoint.getPort());
+    }
+
+    @After
+    public void stopJedisClient() {
+      if (this.jedis != null) {
+        this.jedis.quit();
+        this.jedis = null;
+      }
     }
 
     @Test
@@ -107,10 +119,14 @@ public class RedisIntegrationTest extends IntegrationTestBase {
     public void testSetAndDelete() throws Exception {
         List<byte[]> allKeys = Lists.newArrayList();
         for (int i = 1; i < 100; i++) {
+          log.info("Setting key {}", i);
+          
             byte[] key = Integer.toString(i).getBytes();
 
             byte[] value = buildBytes(i);
 
+            sanityCheck();
+            
             jedis.set(key, value);
 
             allKeys.add(key);
@@ -125,6 +141,8 @@ public class RedisIntegrationTest extends IntegrationTestBase {
             Assert.assertEquals(partition.size(), count.longValue());
         }
     }
+
+  
 
     @Test
     public void testIncrement() throws Exception {

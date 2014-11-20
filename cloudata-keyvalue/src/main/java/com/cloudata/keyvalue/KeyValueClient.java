@@ -5,323 +5,461 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.concurrent.Callable;
 
 import javax.ws.rs.core.MediaType;
 
+import org.robotninjas.barge.RaftMembership;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.CloseableClientResponse;
+import com.cloudata.TimeSpan;
 import com.cloudata.clients.StreamingRecordsetBase;
 import com.cloudata.util.ByteStringMessageBodyWriter;
 import com.cloudata.util.Hex;
+import com.google.common.base.Joiner;
+import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultiset;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientRequest;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.ClientFilter;
 
 public class KeyValueClient {
 
-    @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(KeyValueClient.class);
+  private static final Logger log = LoggerFactory.getLogger(KeyValueClient.class);
 
-    static final Client CLIENT = buildClient();
-    final String startUrl;
+  static final Client CLIENT = buildClient();
 
-    String leader;
+  private ClusterState clusterState;
 
-    public KeyValueClient(String url) {
-        this.startUrl = url;
-        this.leader = url;
+  public KeyValueClient(ClusterState clusterState) {
+    this.clusterState = clusterState;
+  }
+
+  static class ClusterState {
+    final PriorityMap<String> leaderScores = PriorityMap.create();
+
+    public ClusterState(Collection<String> seeds) {
+      for (String seed : seeds) {
+        leaderScores.setPriority(seed, 0);
+      }
     }
 
-    private static Client buildClient() {
-        ClientConfig config = new DefaultClientConfig();
-        config.getClasses().add(ByteStringMessageBodyWriter.class);
-        Client client = Client.create(config);
-        client.setFollowRedirects(true);
-        client.addFilter(new ClientFilter() {
-
-            @Override
-            public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
-                log.debug("Making request {}", cr.getURI());
-
-                ClientResponse response = getNext().handle(cr);
-
-                return response;
-            }
-
-        });
-        return client;
+    public void recordLeaderHint(String fromServer, String leader) {
+      setLeaderScore(fromServer, 0);
+      addLeaderScore(leader, 1);
     }
 
-    abstract class Retry<T> {
-        protected abstract void call() throws IOException;
+    public void confirmedLeader(String leader) {
+      addLeaderScore(leader, 1);
+    }
 
-        boolean done = false;
-        private T value;
+    public void recordServerError(String server, String info) {
+      setLeaderScore(server, -3);
+    }
 
-        public T apply() throws IOException {
-            do {
-                call();
-                if (done) {
-                    return value;
-                }
-            } while (!done);
+    private void setLeaderScore(String server, int newScore) {
+      synchronized (leaderScores) {
+        leaderScores.setPriority(server, newScore);
+      }
+    }
 
-            throw new IOException();
+    private void addLeaderScore(String server, int delta) {
+      synchronized (leaderScores) {
+        leaderScores.addPriority(server, delta);
+      }
+    }
+
+    public Iterable<String> keys() {
+      synchronized (leaderScores) {
+        return leaderScores.keys();
+      }
+    }
+
+    public static ClusterState fromSeeds(String... seeds) {
+      return new ClusterState(Arrays.asList(seeds));
+    }
+
+    public void notifyMembership(String fromServer, String leader, RaftMembership raftMembership) {
+      if (!Objects.equal(fromServer, leader)) {
+        setLeaderScore(fromServer, -1);
+      }
+      for (String member : raftMembership.getMembers()) {
+        if (!Objects.equal(member, leader)) {
+          setLeaderScore(member, 0);
+        }
+      }
+      if (leader != null) {
+        addLeaderScore(leader, 1);
+      }
+    }
+
+  };
+
+  private static Client buildClient() {
+    ClientConfig config = new DefaultClientConfig();
+    config.getClasses().add(ByteStringMessageBodyWriter.class);
+    Client client = Client.create(config);
+    client.setFollowRedirects(true);
+    client.addFilter(new ClientFilter() {
+
+      @Override
+      public ClientResponse handle(ClientRequest cr) throws ClientHandlerException {
+        log.debug("Making request {} {}", cr.getMethod(), cr.getURI());
+
+        ClientResponse response = getNext().handle(cr);
+
+        return response;
+      }
+
+    });
+    return client;
+  }
+
+  abstract class RunRequest<T> implements Callable<T> {
+
+    boolean done = false;
+    private T value;
+
+    int attempt = 0;
+
+    int maxFailPenalty = 5;
+    // int maxSeedRetries = 3;
+    // int maxLeaderRetries = 9;
+    // int maxClusterRetries = 6;
+
+    TimeSpan retryInternal = TimeSpan.millis(200);
+
+    protected void handleRedirect(String server, ClientResponse response) {
+      URI location = response.getLocation();
+      if (location == null) {
+        throw new IllegalStateException("Unexpected redirect without location");
+      }
+      log.info("Following leader redirect from {} to {}", server, location);
+      String leader = location.toString();
+      clusterState.recordLeaderHint(server, leader);
+    }
+
+    // protected <E extends Exception> void maybeRetry(E e) throws E {
+    // if (attempt < maxRetries) {
+    // log.info("Will retry after exception: {}", e.getMessage());
+    // this.retryInternal.sleep();
+    // } else {
+    // throw e;
+    // }
+    // }
+
+    boolean closeResponse;
+    private RaftMembership raftMembership;
+
+    public T call() throws IOException {
+      HashMultiset<String> serversQueried = HashMultiset.create();
+
+      while (true) {
+        String server = pickServer(serversQueried);
+        if (server == null) {
+          // No servers left to try
+          throw new IOException("Service temporarily unavailable");
         }
 
-        public void done(T value) {
-            this.done = true;
-            this.value = value;
+        boolean goodResult = queryServer(server);
 
+        if (done) {
+          return value;
         }
 
-        public void handleRedirect(ClientResponse response) {
-            URI location = response.getLocation();
-            if (location == null) {
-                throw new IllegalStateException("Unexpected redirect without location");
-            }
-            log.info("Following leader redirect from {} to {}", leader, location);
-            leader = location.toString();
+        // We still don't want to infinitely retry redirects, but we penalize them less than an error
+        int penalty = goodResult ? 1 : 3;
+
+        serversQueried.add(server, penalty);
+      }
+    }
+
+    private String pickServer(HashMultiset<String> serversQueried) {
+      for (String key : clusterState.keys()) {
+        if (serversQueried.count(key) < maxFailPenalty) {
+          return key;
         }
+      }
+
+      return null;
     }
 
-    public void put(final long storeId, final ByteString key, final ByteString value) throws Exception {
-        Retry<Void> retry = new Retry<Void>() {
-            @Override
-            protected void call() {
-                ClientResponse response = CLIENT.resource(leader).path(toUrlPath(storeId, key))
-                        .entity(value, MediaType.APPLICATION_OCTET_STREAM_TYPE).post(ClientResponse.class);
+    protected boolean queryServer(String baseUrl) throws IOException {
+      WebResource webResource = CLIENT.resource(baseUrl);
 
-                try {
-                    int status = response.getStatus();
+      if (raftMembership != null) {
+        webResource.header(Headers.CLUSTER_VERSION, raftMembership.getId());
+      } else {
+        webResource.header(Headers.CLUSTER_VERSION, "-");
+      }
+      ClientResponse response = runRequest(webResource);
 
-                    switch (status) {
-                    case 200:
-                        done(null);
-                        break;
-
-                    case 303:
-                        handleRedirect(response);
-                        break;
-
-                    default:
-                        throw new IllegalStateException("Unexpected status: " + status);
-                    }
-                } finally {
-                    response.close();
-                }
-            }
-        };
-
-        retry.apply();
-    }
-
-    public KeyValueEntry increment(final long storeId, final ByteString key) throws Exception {
-        Retry<KeyValueEntry> retry = new Retry<KeyValueEntry>() {
-            @Override
-            protected void call() throws IOException {
-                ClientResponse response = CLIENT.resource(leader).path(toUrlPath(storeId, key))
-                        .queryParam("action", "increment").post(ClientResponse.class);
-
-                try {
-                    int status = response.getStatus();
-
-                    switch (status) {
-                    case 200:
-                        InputStream is = response.getEntityInputStream();
-                        ByteString value = ByteString.readFrom(is);
-
-                        done(new KeyValueEntry(key, value));
-                        break;
-
-                    case 303:
-                        handleRedirect(response);
-                        break;
-
-                    default:
-                        throw new IllegalStateException("Unexpected status: " + status);
-                    }
-                } finally {
-                    response.close();
-                }
-            }
-        };
-
-        return retry.apply();
-    }
-
-    public static class KeyValueEntry {
-        private final ByteString key;
-        private final ByteString value;
-
-        public KeyValueEntry(ByteString key, ByteString value) {
-            this.key = key;
-            this.value = value;
+      closeResponse = true;
+      try {
+        return processResponse(baseUrl, response);
+      } finally {
+        if (closeResponse) {
+          response.close();
         }
+      }
+    }
 
-        public ByteString getKey() {
-            return key;
+    protected abstract ClientResponse runRequest(WebResource webResource);
+
+    protected boolean processResponse(String server, ClientResponse response) throws IOException {
+      int status = response.getStatus();
+      log.debug("Got response {} from {}", status, server);
+
+      String clusterMembers = response.getHeaders().getFirst(Headers.CLUSTER_MEMBERS);
+      if (clusterMembers != null) {
+        long clusterId = Long.parseLong(response.getHeaders().getFirst(Headers.CLUSTER_VERSION));
+        Iterable<String> members = Splitter.on(",").split(clusterMembers);
+        this.raftMembership = new RaftMembership(clusterId, members);
+
+        String leader = response.getHeaders().getFirst(Headers.CLUSTER_LEADER);
+        // Leader might be null
+        clusterState.notifyMembership(server, leader, this.raftMembership);
+      }
+
+      switch (status) {
+      case 200:
+      case 204:
+      case 404:
+        this.value = extractResult(response);
+        this.done = true;
+        return true;
+
+      case 303:
+        handleRedirect(server, response);
+        return true;
+
+      case 503:
+        clusterState.recordServerError(server, null);
+        return false;
+
+      default:
+        String info = getErrorInfo(response);
+        clusterState.recordServerError(server, info);
+        return false;
+      }
+    }
+
+    protected abstract T extractResult(ClientResponse response) throws IOException;
+
+  }
+
+  public void put(final long storeId, final ByteString key, final ByteString value) throws Exception {
+    RunRequest<Void> retry = new RunRequest<Void>() {
+      protected ClientResponse runRequest(WebResource webResource) {
+        ClientResponse response = webResource.path(toUrlPath(storeId, key))
+            .entity(value, MediaType.APPLICATION_OCTET_STREAM_TYPE).post(ClientResponse.class);
+        return response;
+      }
+
+      protected Void extractResult(ClientResponse response) {
+        int status = response.getStatus();
+
+        switch (status) {
+        case 200:
+          return null;
+
+        default:
+          throw new IllegalStateException("Unexpected status: " + status);
         }
+      }
+    };
 
-        public ByteString getValue() {
-            return value;
+    retry.call();
+  }
+
+  public KeyValueEntry increment(final long storeId, final ByteString key) throws Exception {
+    RunRequest<KeyValueEntry> retry = new RunRequest<KeyValueEntry>() {
+      protected ClientResponse runRequest(WebResource webResource) {
+        ClientResponse response = webResource.path(toUrlPath(storeId, key)).queryParam("action", "increment")
+            .post(ClientResponse.class);
+        return response;
+      }
+
+      protected KeyValueEntry extractResult(ClientResponse response) throws IOException {
+        int status = response.getStatus();
+
+        switch (status) {
+        case 200:
+          InputStream is = response.getEntityInputStream();
+          ByteString value = ByteString.readFrom(is);
+
+          return new KeyValueEntry(key, value);
+
+        default:
+          throw new IllegalStateException("Unexpected status: " + status);
         }
+      }
+    };
 
-        @Override
-        public String toString() {
-            return "KeyValueEntry [key=" + Hex.forDebug(key) + ", value=" + Hex.forDebug(value) + "]";
+    return retry.call();
+  }
+
+  protected String getErrorInfo(ClientResponse response) {
+    try {
+      InputStream is = response.getEntityInputStream();
+      ByteString value = ByteString.readFrom(is);
+      return value.toStringUtf8();
+    } catch (Exception e) {
+      log.warn("Error while reading error response info", e);
+      return null;
+    }
+  }
+
+  public static class KeyValueEntry {
+    private final ByteString key;
+    private final ByteString value;
+
+    public KeyValueEntry(ByteString key, ByteString value) {
+      this.key = key;
+      this.value = value;
+    }
+
+    public ByteString getKey() {
+      return key;
+    }
+
+    public ByteString getValue() {
+      return value;
+    }
+
+    @Override
+    public String toString() {
+      return "KeyValueEntry [key=" + Hex.forDebug(key) + ", value=" + Hex.forDebug(value) + "]";
+    }
+
+  }
+
+  public KeyValueEntry read(final long storeId, final ByteString key) throws IOException {
+    RunRequest<KeyValueEntry> request = new RunRequest<KeyValueEntry>() {
+      protected ClientResponse runRequest(WebResource webResource) {
+        ClientResponse response = webResource.path(toUrlPath(storeId, key)).get(ClientResponse.class);
+        return response;
+      }
+
+      protected KeyValueEntry extractResult(ClientResponse response) throws IOException {
+        int status = response.getStatus();
+
+        switch (status) {
+        case 200:
+          InputStream is = response.getEntityInputStream();
+          ByteString value = ByteString.readFrom(is);
+
+          return new KeyValueEntry(key, value);
+
+        case 404:
+          return null;
+
+        default:
+          throw new IllegalStateException("Unexpected status: " + status);
         }
+      }
+    };
 
-    }
+    return request.call();
+  }
 
-    public KeyValueEntry read(final long storeId, final ByteString key) throws IOException {
-        Retry<KeyValueEntry> retry = new Retry<KeyValueEntry>() {
-            @Override
-            protected void call() throws IOException {
-                ClientResponse response = CLIENT.resource(leader).path(toUrlPath(storeId, key))
-                        .get(ClientResponse.class);
+  public KeyValueRecordset query(final long storeId) throws IOException {
+    RunRequest<KeyValueRecordset> request = new RunRequest<KeyValueRecordset>() {
+      protected ClientResponse runRequest(WebResource webResource) {
+        ClientResponse response = webResource.path(toUrlPath(storeId)).get(ClientResponse.class);
+        return response;
+      }
 
-                try {
-                    int status = response.getStatus();
+      protected KeyValueRecordset extractResult(final ClientResponse response) throws IOException {
+        int status = response.getStatus();
 
-                    switch (status) {
-                    case 200:
-                        InputStream is = response.getEntityInputStream();
-                        ByteString value = ByteString.readFrom(is);
+        switch (status) {
+        case 200:
+          KeyValueRecordset records = new KeyValueRecordset(response);
+          this.closeResponse = false;
+          return records;
 
-                        done(new KeyValueEntry(key, value));
-                        break;
-
-                    case 303:
-                        handleRedirect(response);
-                        break;
-
-                    case 404:
-                        done(null);
-                        break;
-
-                    default:
-                        throw new IllegalStateException("Unexpected status: " + status);
-                    }
-                } finally {
-                    response.close();
-                }
-            }
-        };
-
-        return retry.apply();
-    }
-
-    public KeyValueRecordset query(final long storeId) throws IOException {
-        Retry<KeyValueRecordset> retry = new Retry<KeyValueRecordset>() {
-            @Override
-            protected void call() throws IOException {
-                ClientResponse response = CLIENT.resource(leader).path(toUrlPath(storeId)).get(ClientResponse.class);
-
-                try {
-                    int status = response.getStatus();
-
-                    switch (status) {
-                    case 200:
-                        KeyValueRecordset records = new KeyValueRecordset(response);
-                        response = null;
-                        done(records);
-                        break;
-
-                    case 303:
-                        handleRedirect(response);
-                        break;
-
-                    default:
-                        throw new IllegalStateException("Unexpected status: " + status);
-                    }
-                } finally {
-                    if (response != null) {
-                        response.close();
-                    }
-                }
-            }
-        };
-
-        return retry.apply();
-    }
-
-    static class KeyValueRecordset extends StreamingRecordsetBase<KeyValueEntry> {
-        private final DataInputStream dis;
-
-        public KeyValueRecordset(ClientResponse response) {
-            super(new CloseableClientResponse(response));
-            InputStream is = response.getEntityInputStream();
-            this.dis = new DataInputStream(is);
+        default:
+          throw new IllegalStateException("Unexpected status: " + status);
         }
+      }
+    };
 
-        @Override
-        protected KeyValueEntry read() throws IOException {
-            int keyLength = dis.readInt();
-            if (keyLength == -1) {
-                return null;
-            }
+    return request.call();
+  }
 
-            ByteString key = ByteString.readFrom(ByteStreams.limit(dis, keyLength));
-            if (key.size() != keyLength) {
-                throw new EOFException();
-            }
+  static class KeyValueRecordset extends StreamingRecordsetBase<KeyValueEntry> {
+    private final DataInputStream dis;
 
-            int valueLength = dis.readInt();
-            ByteString value = ByteString.readFrom(ByteStreams.limit(dis, valueLength));
-            if (value.size() != valueLength) {
-                throw new EOFException();
-            }
+    public KeyValueRecordset(ClientResponse response) {
+      super(new CloseableClientResponse(response));
+      InputStream is = response.getEntityInputStream();
+      this.dis = new DataInputStream(is);
+    }
 
-            return new KeyValueEntry(key, value);
+    @Override
+    protected KeyValueEntry read() throws IOException {
+      int keyLength = dis.readInt();
+      if (keyLength == -1) {
+        return null;
+      }
+
+      ByteString key = ByteString.readFrom(ByteStreams.limit(dis, keyLength));
+      if (key.size() != keyLength) {
+        throw new EOFException();
+      }
+
+      int valueLength = dis.readInt();
+      ByteString value = ByteString.readFrom(ByteStreams.limit(dis, valueLength));
+      if (value.size() != valueLength) {
+        throw new EOFException();
+      }
+
+      return new KeyValueEntry(key, value);
+    }
+  }
+
+  private String toUrlPath(long storeId, ByteString key) {
+    return Long.toString(storeId) + "/" + Hex.toHex(key);
+  }
+
+  private String toUrlPath(long storeId) {
+    return Long.toString(storeId);
+  }
+
+  public void delete(final long storeId, final ByteString key) throws IOException {
+    RunRequest<Void> request = new RunRequest<Void>() {
+      protected ClientResponse runRequest(WebResource webResource) {
+        ClientResponse response = webResource.path(toUrlPath(storeId, key)).delete(ClientResponse.class);
+        return response;
+      }
+
+      protected Void extractResult(final ClientResponse response) throws IOException {
+        int status = response.getStatus();
+
+        switch (status) {
+        case 200:
+        case 204:
+          return null;
+
+        default:
+          throw new IllegalStateException("Unexpected status: " + status);
         }
-    }
+      }
+    };
 
-    private String toUrlPath(long storeId, ByteString key) {
-        return Long.toString(storeId) + "/" + Hex.toHex(key);
-    }
-
-    private String toUrlPath(long storeId) {
-        return Long.toString(storeId);
-    }
-
-    public void delete(final long storeId, final ByteString key) throws IOException {
-        Retry<Void> retry = new Retry<Void>() {
-            @Override
-            protected void call() throws IOException {
-                ClientResponse response = CLIENT.resource(leader).path(toUrlPath(storeId, key))
-                        .delete(ClientResponse.class);
-
-                try {
-                    int status = response.getStatus();
-
-                    switch (status) {
-                    case 200:
-                    case 204:
-                        done(null);
-                        break;
-
-                    case 303:
-                        handleRedirect(response);
-                        break;
-
-                    default:
-                        throw new IllegalStateException("Unexpected status: " + status);
-                    }
-                } finally {
-                    response.close();
-                }
-            }
-        };
-
-        retry.apply();
-    }
+    request.call();
+  }
 }
