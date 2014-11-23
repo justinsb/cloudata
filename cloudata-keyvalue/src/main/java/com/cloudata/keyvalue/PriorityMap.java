@@ -98,4 +98,11 @@ public class PriorityMap<K> {
     return keys;
   }
 
+  public K getHighest() {
+    if (entries.isEmpty()) {
+      return null;
+    }
+    return entries.get(0).key;
+  }
+
 }

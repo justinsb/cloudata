@@ -4,11 +4,13 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.MediaType;
 
 import org.robotninjas.barge.RaftMembership;
@@ -70,12 +72,15 @@ public class KeyValueClient {
     }
 
     private void setLeaderScore(String server, int newScore) {
+      log.debug("Leader score server={} set={}", server, newScore);
       synchronized (leaderScores) {
         leaderScores.setPriority(server, newScore);
       }
     }
 
     private void addLeaderScore(String server, int delta) {
+      log.debug("Leader score server={} delta={}", server, delta);
+
       synchronized (leaderScores) {
         leaderScores.addPriority(server, delta);
       }
@@ -103,6 +108,10 @@ public class KeyValueClient {
       if (leader != null) {
         addLeaderScore(leader, 1);
       }
+    }
+
+    public String getLeader() {
+      return leaderScores.getHighest();
     }
 
   };
@@ -141,6 +150,24 @@ public class KeyValueClient {
 
     TimeSpan retryInternal = TimeSpan.millis(200);
 
+    final String method;
+    final String path;
+    final ByteString postValue;
+
+    public RunRequest(String method, String path) {
+      this(method, path, null);
+    }
+
+    public RunRequest(String method, String path, ByteString postValue) {
+      this.method = method;
+      this.path = path;
+      this.postValue = postValue;
+    }
+
+    protected WebResource addQueryParams(WebResource webResource) {
+      return webResource;
+    }
+
     protected void handleRedirect(String server, ClientResponse response) {
       URI location = response.getLocation();
       if (location == null) {
@@ -173,6 +200,7 @@ public class KeyValueClient {
           throw new IOException("Service temporarily unavailable");
         }
 
+        log.debug("Trying server {}", server);
         boolean goodResult = queryServer(server);
 
         if (done) {
@@ -197,26 +225,41 @@ public class KeyValueClient {
     }
 
     protected boolean queryServer(String baseUrl) throws IOException {
-      WebResource webResource = CLIENT.resource(baseUrl);
+      WebResource webResource = CLIENT.resource(baseUrl).path(path);
+      webResource = addQueryParams(webResource);
+
+      WebResource.Builder webResourceBuilder;
+      if (postValue != null) {
+        webResourceBuilder = webResource.entity(postValue, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+      } else {
+        webResourceBuilder = webResource.getRequestBuilder();
+      }
 
       if (raftMembership != null) {
-        webResource.header(Headers.CLUSTER_VERSION, raftMembership.getId());
+        webResourceBuilder = webResourceBuilder.header(Headers.CLUSTER_VERSION, raftMembership.getId());
       } else {
-        webResource.header(Headers.CLUSTER_VERSION, "-");
+        webResourceBuilder = webResourceBuilder.header(Headers.CLUSTER_VERSION, "any");
       }
-      ClientResponse response = runRequest(webResource);
 
       closeResponse = true;
+      ClientResponse response = null;
       try {
+        response = webResourceBuilder.method(method, ClientResponse.class);
         return processResponse(baseUrl, response);
+      } catch (IOException e) {
+        log.debug("Error querying server: {}", baseUrl, e);
+        clusterState.recordServerError(baseUrl, null);
+        return false;
+      } catch (ClientHandlerException e) {
+        log.debug("Error querying server: {}", baseUrl, e);
+        clusterState.recordServerError(baseUrl, null);
+        return false;
       } finally {
-        if (closeResponse) {
+        if (response != null && closeResponse) {
           response.close();
         }
       }
     }
-
-    protected abstract ClientResponse runRequest(WebResource webResource);
 
     protected boolean processResponse(String server, ClientResponse response) throws IOException {
       int status = response.getStatus();
@@ -261,12 +304,7 @@ public class KeyValueClient {
   }
 
   public void put(final long storeId, final ByteString key, final ByteString value) throws Exception {
-    RunRequest<Void> retry = new RunRequest<Void>() {
-      protected ClientResponse runRequest(WebResource webResource) {
-        ClientResponse response = webResource.path(toUrlPath(storeId, key))
-            .entity(value, MediaType.APPLICATION_OCTET_STREAM_TYPE).post(ClientResponse.class);
-        return response;
-      }
+    RunRequest<Void> retry = new RunRequest<Void>(HttpMethod.POST, toUrlPath(storeId, key), value) {
 
       protected Void extractResult(ClientResponse response) {
         int status = response.getStatus();
@@ -285,11 +323,10 @@ public class KeyValueClient {
   }
 
   public KeyValueEntry increment(final long storeId, final ByteString key) throws Exception {
-    RunRequest<KeyValueEntry> retry = new RunRequest<KeyValueEntry>() {
-      protected ClientResponse runRequest(WebResource webResource) {
-        ClientResponse response = webResource.path(toUrlPath(storeId, key)).queryParam("action", "increment")
-            .post(ClientResponse.class);
-        return response;
+    RunRequest<KeyValueEntry> retry = new RunRequest<KeyValueEntry>(HttpMethod.POST, toUrlPath(storeId, key)) {
+      @Override
+      protected WebResource addQueryParams(WebResource webResource) {
+        return webResource.queryParam("action", "increment");
       }
 
       protected KeyValueEntry extractResult(ClientResponse response) throws IOException {
@@ -347,11 +384,7 @@ public class KeyValueClient {
   }
 
   public KeyValueEntry read(final long storeId, final ByteString key) throws IOException {
-    RunRequest<KeyValueEntry> request = new RunRequest<KeyValueEntry>() {
-      protected ClientResponse runRequest(WebResource webResource) {
-        ClientResponse response = webResource.path(toUrlPath(storeId, key)).get(ClientResponse.class);
-        return response;
-      }
+    RunRequest<KeyValueEntry> request = new RunRequest<KeyValueEntry>(HttpMethod.GET, toUrlPath(storeId, key)) {
 
       protected KeyValueEntry extractResult(ClientResponse response) throws IOException {
         int status = response.getStatus();
@@ -360,7 +393,6 @@ public class KeyValueClient {
         case 200:
           InputStream is = response.getEntityInputStream();
           ByteString value = ByteString.readFrom(is);
-
           return new KeyValueEntry(key, value);
 
         case 404:
@@ -376,11 +408,7 @@ public class KeyValueClient {
   }
 
   public KeyValueRecordset query(final long storeId) throws IOException {
-    RunRequest<KeyValueRecordset> request = new RunRequest<KeyValueRecordset>() {
-      protected ClientResponse runRequest(WebResource webResource) {
-        ClientResponse response = webResource.path(toUrlPath(storeId)).get(ClientResponse.class);
-        return response;
-      }
+    RunRequest<KeyValueRecordset> request = new RunRequest<KeyValueRecordset>(HttpMethod.GET, toUrlPath(storeId)) {
 
       protected KeyValueRecordset extractResult(final ClientResponse response) throws IOException {
         int status = response.getStatus();
@@ -440,11 +468,7 @@ public class KeyValueClient {
   }
 
   public void delete(final long storeId, final ByteString key) throws IOException {
-    RunRequest<Void> request = new RunRequest<Void>() {
-      protected ClientResponse runRequest(WebResource webResource) {
-        ClientResponse response = webResource.path(toUrlPath(storeId, key)).delete(ClientResponse.class);
-        return response;
-      }
+    RunRequest<Void> request = new RunRequest<Void>(HttpMethod.DELETE, toUrlPath(storeId, key)) {
 
       protected Void extractResult(final ClientResponse response) throws IOException {
         int status = response.getStatus();
@@ -461,5 +485,9 @@ public class KeyValueClient {
     };
 
     request.call();
+  }
+
+  public String getLeader() {
+    return clusterState.getLeader();
   }
 }

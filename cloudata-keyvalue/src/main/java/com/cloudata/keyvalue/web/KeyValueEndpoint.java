@@ -38,7 +38,9 @@ import com.cloudata.keyvalue.KeyValueStateMachine;
 import com.cloudata.keyvalue.operation.DeleteOperation;
 import com.cloudata.keyvalue.operation.IncrementOperation;
 import com.cloudata.keyvalue.operation.SetOperation;
+import com.cloudata.util.InetSocketAddresses;
 import com.cloudata.values.Value;
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
@@ -149,8 +151,8 @@ public class KeyValueEndpoint {
       log.warn("Error from Raft", e);
       Optional<Replica> leader = e.getLeader();
       if (leader.isPresent()) {
-        URI uri = getUri(leader.get());
-        log.debug("Redirecting to {}", uri);
+        URI uri = replicaToUri(leader.get());
+        log.debug("Redirecting to leader: {}", uri);
         response = Response.seeOther(uri);
       } else {
         response = Response.status(Response.Status.SERVICE_UNAVAILABLE);
@@ -165,8 +167,17 @@ public class KeyValueEndpoint {
     return response.build();
   }
 
-  private URI getUri(Replica leader) {
+  private URI replicaToUri(Replica leader) {
     InetSocketAddress address = (InetSocketAddress) leader.address();
+    int id = address.getPort() - 10000;
+    int httpPort = 9990 + id;
+    URI uri = URI.create("http://" + address.getHostName() + ":" + httpPort/* + "/" + key */);
+    return uri;
+  }
+
+
+  private URI serverToUri(String replica) {
+    InetSocketAddress address = InetSocketAddresses.parse(replica);
     int id = address.getPort() - 10000;
     int httpPort = 9990 + id;
     URI uri = URI.create("http://" + address.getHostName() + ":" + httpPort/* + "/" + key */);
@@ -191,8 +202,7 @@ public class KeyValueEndpoint {
     } catch (NotLeaderException e) {
       Optional<Replica> leader = e.getLeader();
       if (leader.isPresent()) {
-        InetSocketAddress address = (InetSocketAddress) leader.get().address();
-        URI uri = URI.create("http://" + address.getHostName() + ":" + address.getPort() /* + "/" + key */);
+        URI uri = replicaToUri(leader.get());
         log.debug("Redirecting to leader: {}", uri);
         response = Response.seeOther(uri);
       } else {
@@ -215,11 +225,17 @@ public class KeyValueEndpoint {
       long id = raftMembership.getId();
       if (!Long.toString(id).equals(clusterVersion)) {
         response.header(Headers.CLUSTER_VERSION, Long.toString(id));
-        response.header(Headers.CLUSTER_MEMBERS, Joiner.on(",").join(raftMembership.getMembers()));
+        response.header(Headers.CLUSTER_MEMBERS,
+            Joiner.on(",").join(Iterables.transform(raftMembership.getMembers(), new Function<String, String>() {
+              @Override
+              public String apply(String member) {
+                return serverToUri(member).toString();
+              }
+            })));
 
         Optional<String> leader = stateMachine.getLeader();
         if (leader.isPresent()) {
-          response.header(Headers.CLUSTER_LEADER, leader.get());
+          response.header(Headers.CLUSTER_LEADER, serverToUri(leader.get()).toString());
         }
       }
     }
