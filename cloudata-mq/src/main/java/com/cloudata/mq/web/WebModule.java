@@ -9,6 +9,7 @@ public class WebModule extends ServletModule {
     sqsActionFactory.add("ListQueues", ListQueueAction.class);
     sqsActionFactory.add("CreateQueue", CreateQueueAction.class);
     sqsActionFactory.add("SendMessage", SendMessageAction.class);
+    sqsActionFactory.add("ReceiveMessage", ReceiveMessageAction.class);
 
     requestInjection(sqsActionFactory);
     bind(ActionFactory.class).toInstance(sqsActionFactory);

@@ -1369,52 +1369,61 @@ public final class MqModel {
     com.google.protobuf.ByteString getQueueId();
 
     /**
-     * <code>optional bytes message_id = 2;</code>
+     * <code>optional bytes receipt_handle = 2;</code>
+     */
+    boolean hasReceiptHandle();
+    /**
+     * <code>optional bytes receipt_handle = 2;</code>
+     */
+    com.google.protobuf.ByteString getReceiptHandle();
+
+    /**
+     * <code>optional bytes message_id = 3;</code>
      */
     boolean hasMessageId();
     /**
-     * <code>optional bytes message_id = 2;</code>
+     * <code>optional bytes message_id = 3;</code>
      */
     com.google.protobuf.ByteString getMessageId();
 
     /**
-     * <code>optional bytes body = 3;</code>
+     * <code>optional bytes body = 4;</code>
      */
     boolean hasBody();
     /**
-     * <code>optional bytes body = 3;</code>
+     * <code>optional bytes body = 4;</code>
      */
     com.google.protobuf.ByteString getBody();
 
     /**
-     * <code>optional bytes message_body_md5 = 4;</code>
+     * <code>optional bytes message_body_md5 = 5;</code>
      */
     boolean hasMessageBodyMd5();
     /**
-     * <code>optional bytes message_body_md5 = 4;</code>
+     * <code>optional bytes message_body_md5 = 5;</code>
      */
     com.google.protobuf.ByteString getMessageBodyMd5();
 
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     java.util.List<com.cloudata.mq.MqModel.MessageAttribute> 
         getAttributeList();
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     com.cloudata.mq.MqModel.MessageAttribute getAttribute(int index);
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     int getAttributeCount();
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     java.util.List<? extends com.cloudata.mq.MqModel.MessageAttributeOrBuilder> 
         getAttributeOrBuilderList();
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     com.cloudata.mq.MqModel.MessageAttributeOrBuilder getAttributeOrBuilder(
         int index);
@@ -1478,23 +1487,28 @@ public final class MqModel {
             }
             case 18: {
               bitField0_ |= 0x00000002;
-              messageId_ = input.readBytes();
+              receiptHandle_ = input.readBytes();
               break;
             }
             case 26: {
               bitField0_ |= 0x00000004;
-              body_ = input.readBytes();
+              messageId_ = input.readBytes();
               break;
             }
             case 34: {
               bitField0_ |= 0x00000008;
-              messageBodyMd5_ = input.readBytes();
+              body_ = input.readBytes();
               break;
             }
             case 42: {
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              bitField0_ |= 0x00000010;
+              messageBodyMd5_ = input.readBytes();
+              break;
+            }
+            case 50: {
+              if (!((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
                 attribute_ = new java.util.ArrayList<com.cloudata.mq.MqModel.MessageAttribute>();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000020;
               }
               attribute_.add(input.readMessage(com.cloudata.mq.MqModel.MessageAttribute.PARSER, extensionRegistry));
               break;
@@ -1507,7 +1521,7 @@ public final class MqModel {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000020) == 0x00000020)) {
           attribute_ = java.util.Collections.unmodifiableList(attribute_);
         }
         this.unknownFields = unknownFields.build();
@@ -1557,80 +1571,95 @@ public final class MqModel {
       return queueId_;
     }
 
-    public static final int MESSAGE_ID_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString messageId_;
+    public static final int RECEIPT_HANDLE_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString receiptHandle_;
     /**
-     * <code>optional bytes message_id = 2;</code>
+     * <code>optional bytes receipt_handle = 2;</code>
      */
-    public boolean hasMessageId() {
+    public boolean hasReceiptHandle() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional bytes message_id = 2;</code>
+     * <code>optional bytes receipt_handle = 2;</code>
+     */
+    public com.google.protobuf.ByteString getReceiptHandle() {
+      return receiptHandle_;
+    }
+
+    public static final int MESSAGE_ID_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString messageId_;
+    /**
+     * <code>optional bytes message_id = 3;</code>
+     */
+    public boolean hasMessageId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes message_id = 3;</code>
      */
     public com.google.protobuf.ByteString getMessageId() {
       return messageId_;
     }
 
-    public static final int BODY_FIELD_NUMBER = 3;
+    public static final int BODY_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString body_;
     /**
-     * <code>optional bytes body = 3;</code>
+     * <code>optional bytes body = 4;</code>
      */
     public boolean hasBody() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional bytes body = 3;</code>
+     * <code>optional bytes body = 4;</code>
      */
     public com.google.protobuf.ByteString getBody() {
       return body_;
     }
 
-    public static final int MESSAGE_BODY_MD5_FIELD_NUMBER = 4;
+    public static final int MESSAGE_BODY_MD5_FIELD_NUMBER = 5;
     private com.google.protobuf.ByteString messageBodyMd5_;
     /**
-     * <code>optional bytes message_body_md5 = 4;</code>
+     * <code>optional bytes message_body_md5 = 5;</code>
      */
     public boolean hasMessageBodyMd5() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>optional bytes message_body_md5 = 4;</code>
+     * <code>optional bytes message_body_md5 = 5;</code>
      */
     public com.google.protobuf.ByteString getMessageBodyMd5() {
       return messageBodyMd5_;
     }
 
-    public static final int ATTRIBUTE_FIELD_NUMBER = 5;
+    public static final int ATTRIBUTE_FIELD_NUMBER = 6;
     private java.util.List<com.cloudata.mq.MqModel.MessageAttribute> attribute_;
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     public java.util.List<com.cloudata.mq.MqModel.MessageAttribute> getAttributeList() {
       return attribute_;
     }
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     public java.util.List<? extends com.cloudata.mq.MqModel.MessageAttributeOrBuilder> 
         getAttributeOrBuilderList() {
       return attribute_;
     }
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     public int getAttributeCount() {
       return attribute_.size();
     }
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     public com.cloudata.mq.MqModel.MessageAttribute getAttribute(int index) {
       return attribute_.get(index);
     }
     /**
-     * <code>repeated .MessageAttribute attribute = 5;</code>
+     * <code>repeated .MessageAttribute attribute = 6;</code>
      */
     public com.cloudata.mq.MqModel.MessageAttributeOrBuilder getAttributeOrBuilder(
         int index) {
@@ -1639,6 +1668,7 @@ public final class MqModel {
 
     private void initFields() {
       queueId_ = com.google.protobuf.ByteString.EMPTY;
+      receiptHandle_ = com.google.protobuf.ByteString.EMPTY;
       messageId_ = com.google.protobuf.ByteString.EMPTY;
       body_ = com.google.protobuf.ByteString.EMPTY;
       messageBodyMd5_ = com.google.protobuf.ByteString.EMPTY;
@@ -1661,16 +1691,19 @@ public final class MqModel {
         output.writeBytes(1, queueId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, messageId_);
+        output.writeBytes(2, receiptHandle_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, body_);
+        output.writeBytes(3, messageId_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeBytes(4, messageBodyMd5_);
+        output.writeBytes(4, body_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeBytes(5, messageBodyMd5_);
       }
       for (int i = 0; i < attribute_.size(); i++) {
-        output.writeMessage(5, attribute_.get(i));
+        output.writeMessage(6, attribute_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -1687,19 +1720,23 @@ public final class MqModel {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, messageId_);
+          .computeBytesSize(2, receiptHandle_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, body_);
+          .computeBytesSize(3, messageId_);
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(4, messageBodyMd5_);
+          .computeBytesSize(4, body_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(5, messageBodyMd5_);
       }
       for (int i = 0; i < attribute_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(5, attribute_.get(i));
+          .computeMessageSize(6, attribute_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1821,15 +1858,17 @@ public final class MqModel {
         super.clear();
         queueId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        messageId_ = com.google.protobuf.ByteString.EMPTY;
+        receiptHandle_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000002);
-        body_ = com.google.protobuf.ByteString.EMPTY;
+        messageId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
-        messageBodyMd5_ = com.google.protobuf.ByteString.EMPTY;
+        body_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000008);
+        messageBodyMd5_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000010);
         if (attributeBuilder_ == null) {
           attribute_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
         } else {
           attributeBuilder_.clear();
         }
@@ -1868,19 +1907,23 @@ public final class MqModel {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.messageId_ = messageId_;
+        result.receiptHandle_ = receiptHandle_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.body_ = body_;
+        result.messageId_ = messageId_;
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
+        result.body_ = body_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
         result.messageBodyMd5_ = messageBodyMd5_;
         if (attributeBuilder_ == null) {
-          if (((bitField0_ & 0x00000010) == 0x00000010)) {
+          if (((bitField0_ & 0x00000020) == 0x00000020)) {
             attribute_ = java.util.Collections.unmodifiableList(attribute_);
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000020);
           }
           result.attribute_ = attribute_;
         } else {
@@ -1905,6 +1948,9 @@ public final class MqModel {
         if (other.hasQueueId()) {
           setQueueId(other.getQueueId());
         }
+        if (other.hasReceiptHandle()) {
+          setReceiptHandle(other.getReceiptHandle());
+        }
         if (other.hasMessageId()) {
           setMessageId(other.getMessageId());
         }
@@ -1918,7 +1964,7 @@ public final class MqModel {
           if (!other.attribute_.isEmpty()) {
             if (attribute_.isEmpty()) {
               attribute_ = other.attribute_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000020);
             } else {
               ensureAttributeIsMutable();
               attribute_.addAll(other.attribute_);
@@ -1931,7 +1977,7 @@ public final class MqModel {
               attributeBuilder_.dispose();
               attributeBuilder_ = null;
               attribute_ = other.attribute_;
-              bitField0_ = (bitField0_ & ~0x00000010);
+              bitField0_ = (bitField0_ & ~0x00000020);
               attributeBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getAttributeFieldBuilder() : null;
@@ -2002,36 +2048,71 @@ public final class MqModel {
         return this;
       }
 
-      private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString receiptHandle_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes message_id = 2;</code>
+       * <code>optional bytes receipt_handle = 2;</code>
        */
-      public boolean hasMessageId() {
+      public boolean hasReceiptHandle() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional bytes message_id = 2;</code>
+       * <code>optional bytes receipt_handle = 2;</code>
+       */
+      public com.google.protobuf.ByteString getReceiptHandle() {
+        return receiptHandle_;
+      }
+      /**
+       * <code>optional bytes receipt_handle = 2;</code>
+       */
+      public Builder setReceiptHandle(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        receiptHandle_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes receipt_handle = 2;</code>
+       */
+      public Builder clearReceiptHandle() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        receiptHandle_ = getDefaultInstance().getReceiptHandle();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes message_id = 3;</code>
+       */
+      public boolean hasMessageId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes message_id = 3;</code>
        */
       public com.google.protobuf.ByteString getMessageId() {
         return messageId_;
       }
       /**
-       * <code>optional bytes message_id = 2;</code>
+       * <code>optional bytes message_id = 3;</code>
        */
       public Builder setMessageId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         messageId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes message_id = 2;</code>
+       * <code>optional bytes message_id = 3;</code>
        */
       public Builder clearMessageId() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         messageId_ = getDefaultInstance().getMessageId();
         onChanged();
         return this;
@@ -2039,34 +2120,34 @@ public final class MqModel {
 
       private com.google.protobuf.ByteString body_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes body = 3;</code>
+       * <code>optional bytes body = 4;</code>
        */
       public boolean hasBody() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional bytes body = 3;</code>
+       * <code>optional bytes body = 4;</code>
        */
       public com.google.protobuf.ByteString getBody() {
         return body_;
       }
       /**
-       * <code>optional bytes body = 3;</code>
+       * <code>optional bytes body = 4;</code>
        */
       public Builder setBody(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         body_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes body = 3;</code>
+       * <code>optional bytes body = 4;</code>
        */
       public Builder clearBody() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         body_ = getDefaultInstance().getBody();
         onChanged();
         return this;
@@ -2074,34 +2155,34 @@ public final class MqModel {
 
       private com.google.protobuf.ByteString messageBodyMd5_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes message_body_md5 = 4;</code>
+       * <code>optional bytes message_body_md5 = 5;</code>
        */
       public boolean hasMessageBodyMd5() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
-       * <code>optional bytes message_body_md5 = 4;</code>
+       * <code>optional bytes message_body_md5 = 5;</code>
        */
       public com.google.protobuf.ByteString getMessageBodyMd5() {
         return messageBodyMd5_;
       }
       /**
-       * <code>optional bytes message_body_md5 = 4;</code>
+       * <code>optional bytes message_body_md5 = 5;</code>
        */
       public Builder setMessageBodyMd5(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000008;
+  bitField0_ |= 0x00000010;
         messageBodyMd5_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes message_body_md5 = 4;</code>
+       * <code>optional bytes message_body_md5 = 5;</code>
        */
       public Builder clearMessageBodyMd5() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         messageBodyMd5_ = getDefaultInstance().getMessageBodyMd5();
         onChanged();
         return this;
@@ -2110,9 +2191,9 @@ public final class MqModel {
       private java.util.List<com.cloudata.mq.MqModel.MessageAttribute> attribute_ =
         java.util.Collections.emptyList();
       private void ensureAttributeIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000020) == 0x00000020)) {
           attribute_ = new java.util.ArrayList<com.cloudata.mq.MqModel.MessageAttribute>(attribute_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000020;
          }
       }
 
@@ -2120,7 +2201,7 @@ public final class MqModel {
           com.cloudata.mq.MqModel.MessageAttribute, com.cloudata.mq.MqModel.MessageAttribute.Builder, com.cloudata.mq.MqModel.MessageAttributeOrBuilder> attributeBuilder_;
 
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public java.util.List<com.cloudata.mq.MqModel.MessageAttribute> getAttributeList() {
         if (attributeBuilder_ == null) {
@@ -2130,7 +2211,7 @@ public final class MqModel {
         }
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public int getAttributeCount() {
         if (attributeBuilder_ == null) {
@@ -2140,7 +2221,7 @@ public final class MqModel {
         }
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public com.cloudata.mq.MqModel.MessageAttribute getAttribute(int index) {
         if (attributeBuilder_ == null) {
@@ -2150,7 +2231,7 @@ public final class MqModel {
         }
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder setAttribute(
           int index, com.cloudata.mq.MqModel.MessageAttribute value) {
@@ -2167,7 +2248,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder setAttribute(
           int index, com.cloudata.mq.MqModel.MessageAttribute.Builder builderForValue) {
@@ -2181,7 +2262,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder addAttribute(com.cloudata.mq.MqModel.MessageAttribute value) {
         if (attributeBuilder_ == null) {
@@ -2197,7 +2278,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder addAttribute(
           int index, com.cloudata.mq.MqModel.MessageAttribute value) {
@@ -2214,7 +2295,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder addAttribute(
           com.cloudata.mq.MqModel.MessageAttribute.Builder builderForValue) {
@@ -2228,7 +2309,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder addAttribute(
           int index, com.cloudata.mq.MqModel.MessageAttribute.Builder builderForValue) {
@@ -2242,7 +2323,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder addAllAttribute(
           java.lang.Iterable<? extends com.cloudata.mq.MqModel.MessageAttribute> values) {
@@ -2257,12 +2338,12 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder clearAttribute() {
         if (attributeBuilder_ == null) {
           attribute_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000020);
           onChanged();
         } else {
           attributeBuilder_.clear();
@@ -2270,7 +2351,7 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public Builder removeAttribute(int index) {
         if (attributeBuilder_ == null) {
@@ -2283,14 +2364,14 @@ public final class MqModel {
         return this;
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public com.cloudata.mq.MqModel.MessageAttribute.Builder getAttributeBuilder(
           int index) {
         return getAttributeFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public com.cloudata.mq.MqModel.MessageAttributeOrBuilder getAttributeOrBuilder(
           int index) {
@@ -2300,7 +2381,7 @@ public final class MqModel {
         }
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public java.util.List<? extends com.cloudata.mq.MqModel.MessageAttributeOrBuilder> 
            getAttributeOrBuilderList() {
@@ -2311,14 +2392,14 @@ public final class MqModel {
         }
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public com.cloudata.mq.MqModel.MessageAttribute.Builder addAttributeBuilder() {
         return getAttributeFieldBuilder().addBuilder(
             com.cloudata.mq.MqModel.MessageAttribute.getDefaultInstance());
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public com.cloudata.mq.MqModel.MessageAttribute.Builder addAttributeBuilder(
           int index) {
@@ -2326,7 +2407,7 @@ public final class MqModel {
             index, com.cloudata.mq.MqModel.MessageAttribute.getDefaultInstance());
       }
       /**
-       * <code>repeated .MessageAttribute attribute = 5;</code>
+       * <code>repeated .MessageAttribute attribute = 6;</code>
        */
       public java.util.List<com.cloudata.mq.MqModel.MessageAttribute.Builder> 
            getAttributeBuilderList() {
@@ -2339,7 +2420,7 @@ public final class MqModel {
           attributeBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.cloudata.mq.MqModel.MessageAttribute, com.cloudata.mq.MqModel.MessageAttribute.Builder, com.cloudata.mq.MqModel.MessageAttributeOrBuilder>(
                   attribute_,
-                  ((bitField0_ & 0x00000010) == 0x00000010),
+                  ((bitField0_ & 0x00000020) == 0x00000020),
                   getParentForChildren(),
                   isClean());
           attribute_ = null;
@@ -2385,11 +2466,11 @@ public final class MqModel {
       "\n\034src/main/proto/MqModel.proto\"6\n\005Queue\022" +
       "\020\n\010queue_id\030\001 \001(\014\022\r\n\005scope\030\002 \001(\t\022\014\n\004name" +
       "\030\003 \001(\t\"/\n\020MessageAttribute\022\014\n\004name\030\001 \001(\t" +
-      "\022\r\n\005value\030\002 \001(\t\"}\n\007Message\022\020\n\010queue_id\030\001" +
-      " \001(\014\022\022\n\nmessage_id\030\002 \001(\014\022\014\n\004body\030\003 \001(\014\022\030" +
-      "\n\020message_body_md5\030\004 \001(\014\022$\n\tattribute\030\005 " +
-      "\003(\0132\021.MessageAttributeB\021\n\017com.cloudata.m" +
-      "q"
+      "\022\r\n\005value\030\002 \001(\t\"\225\001\n\007Message\022\020\n\010queue_id\030" +
+      "\001 \001(\014\022\026\n\016receipt_handle\030\002 \001(\014\022\022\n\nmessage" +
+      "_id\030\003 \001(\014\022\014\n\004body\030\004 \001(\014\022\030\n\020message_body_" +
+      "md5\030\005 \001(\014\022$\n\tattribute\030\006 \003(\0132\021.MessageAt" +
+      "tributeB\021\n\017com.cloudata.mq"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2420,7 +2501,7 @@ public final class MqModel {
     internal_static_Message_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Message_descriptor,
-        new java.lang.String[] { "QueueId", "MessageId", "Body", "MessageBodyMd5", "Attribute", });
+        new java.lang.String[] { "QueueId", "ReceiptHandle", "MessageId", "Body", "MessageBodyMd5", "Attribute", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

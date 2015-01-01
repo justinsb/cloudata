@@ -33,7 +33,8 @@ public class ActionFactory {
 
       @Override
       public Action get() {
-        return injector.getInstance(clazz);
+        Action action = injector.getInstance(clazz);
+        return action;
       }
 
     });

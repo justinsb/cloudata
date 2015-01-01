@@ -28,21 +28,23 @@ public class SqsServlet extends HttpServlet {
   ActionFactory actionFactory;
 
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    String actionName = req.getParameter("Action");
+  protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    String actionName = request.getParameter("Action");
     log.debug("Got request: {}", actionName);
     Action action = actionFactory.getAction(actionName);
     if (action == null) {
       log.debug("InvalidAction: {}", actionName);
-      sendError(resp, 400, "InvalidAction");
+      sendError(response, 400, "InvalidAction");
       return;
     }
 
     try {
-      action.run(req, resp);
+      action.init(request, response);
+
+      action.run();
     } catch (Exception e) {
       log.error("Unexpected failure running action", e);
-      sendError(resp, 500, "InternalFailure");
+      sendError(response, 500, "InternalFailure");
     }
   }
 

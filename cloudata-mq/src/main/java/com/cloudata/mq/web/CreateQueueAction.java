@@ -1,16 +1,13 @@
 package com.cloudata.mq.web;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.cloudata.datastore.UniqueIndexViolation;
 import com.cloudata.mq.MqModel.Queue;
 
 public class CreateQueueAction extends SqsAction {
 
   @Override
-  public void run(HttpServletRequest req, HttpServletResponse resp) throws Exception {
-    String queueName = getRequiredParameter(req, "QueueName");
+  public void run() throws Exception {
+    String queueName = getRequiredParameter("QueueName");
 
     QueueUser user = getQueueUser();
     Queue.Builder queueBuilder = Queue.newBuilder();
@@ -21,7 +18,7 @@ public class CreateQueueAction extends SqsAction {
     } catch (UniqueIndexViolation e) {
       throw new AwsException(400, "QueueNameExists");
     }
-    try (SqsResponseWriter responseWriter = sqsResponseWriterFactory.get(resp)) {
+    try (SqsResponseWriter responseWriter = buildResponseWriter()) {
       responseWriter.writeCreateQueueResponse(queue);
     }
   }

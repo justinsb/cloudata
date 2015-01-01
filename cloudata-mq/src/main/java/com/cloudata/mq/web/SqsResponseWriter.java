@@ -63,6 +63,27 @@ public class SqsResponseWriter implements Closeable {
     writer.writeEndDocument();
   }
 
+  public void writeReceiveMessageResponse(List<Message> received) throws XMLStreamException {
+    writer.writeStartDocument();
+
+    writer.writeStartElement("ReceiveMessageResponse");
+    writer.writeNamespace("", NS_URI);
+
+    writer.writeStartElement("ReceiveMessageResult");
+    for (Message message : received) {
+      writer.writeStartElement("Message");
+      writeReceivedMessage(message);
+      writer.writeEndElement();
+    }
+    writer.writeEndElement();
+
+    writeResponseMetadata();
+
+    writer.writeEndElement();
+
+    writer.writeEndDocument();
+  }
+
   private void writeMessage(Message message) throws XMLStreamException {
 
     ByteString messageId = message.getMessageId();
@@ -71,6 +92,19 @@ public class SqsResponseWriter implements Closeable {
 
     ByteString messageBodyMd5 = message.getMessageBodyMd5();
     writeElement("MD5OfMessageBody", BASE16_LOWERCASE.encode(messageBodyMd5.toByteArray()));
+  }
+
+  private void writeReceivedMessage(Message message) throws XMLStreamException {
+    writeElement("Body", message.getBody().toStringUtf8());
+
+    ByteString messageBodyMd5 = message.getMessageBodyMd5();
+    writeElement("MD5OfBody", BASE16_LOWERCASE.encode(messageBodyMd5.toByteArray()));
+
+    writeElement("ReceiptHandle", BaseEncoding.base64Url().encode(message.getReceiptHandle().toByteArray()));
+
+    ByteString messageId = message.getMessageId();
+    UUID uuid = UUID.nameUUIDFromBytes(messageId.toByteArray());
+    writeElement("MessageId", uuid.toString());
   }
 
   public void writeCreateQueueResponse(Queue queue) throws XMLStreamException {

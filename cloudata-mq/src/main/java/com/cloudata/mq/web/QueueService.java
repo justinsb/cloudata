@@ -7,6 +7,8 @@ import javax.inject.Singleton;
 
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
+import com.cloudata.datastore.Modifier;
+import com.cloudata.datastore.WhereModifier;
 import com.cloudata.mq.MqModel.Message;
 import com.cloudata.mq.MqModel.Queue;
 import com.google.common.collect.Lists;
@@ -52,7 +54,8 @@ public class QueueService {
     queue.setScope(user.getScope());
     queue.setQueueId(Randoms.buildId());
 
-    Queue inserted = dataStore.insert(queue.build());
+    Queue inserted = queue.build();
+    dataStore.insert(inserted);
 
     return inserted;
   }
@@ -75,10 +78,39 @@ public class QueueService {
 
     message.setQueueId(queue.getQueueId());
     message.setMessageId(Randoms.buildId());
+    message.setReceiptHandle(ByteString.EMPTY);
 
     HashCode hc = Hashing.md5().newHasher().putBytes(message.getBody().toByteArray()).hash();
     message.setMessageBodyMd5(ByteString.copyFrom(hc.asBytes()));
 
-    return dataStore.insert(message.build());
+    Message insert = message.build();
+    dataStore.insert(insert);
+    return insert;
+  }
+
+  public List<Message> receiveMessages(Queue queue, int maxNumberOfMessages) throws DataStoreException {
+    Message.Builder matcher = Message.newBuilder();
+    matcher.setQueueId(queue.getQueueId());
+    matcher.setReceiptHandle(ByteString.EMPTY);
+
+    List<Message> received = Lists.newArrayList();
+
+    // TODO: Limit or iterable
+    for (Message message : dataStore.find(matcher.build())) {
+      ByteString receiptHandle = Randoms.buildId();
+      Message.Builder update = Message.newBuilder(message);
+      update.setReceiptHandle(receiptHandle);
+      Message updated = update.build();
+      Modifier whereReceiptHandleEmpty = WhereModifier.create(Message.newBuilder().setReceiptHandle(ByteString.EMPTY)
+          .build());
+      if (dataStore.update(updated, whereReceiptHandleEmpty)) {
+        received.add(updated);
+        if (received.size() >= maxNumberOfMessages) {
+          break;
+        }
+      }
+    }
+
+    return received;
   }
 }

@@ -4,7 +4,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public abstract class Action {
+  protected HttpServletRequest request;
+  protected HttpServletResponse response;
 
-  public abstract void run(HttpServletRequest req, HttpServletResponse resp) throws Exception;
+  public void init(HttpServletRequest request, HttpServletResponse response) {
+    this.request = request;
+    this.response = response;
+  }
+
+  public abstract void run() throws Exception;
 
 }

@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
-import com.cloudata.datastore.IfVersion;
 import com.cloudata.datastore.Modifier;
+import com.cloudata.datastore.WhereModifier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
@@ -118,7 +118,7 @@ public class SqlDataStore implements DataStore {
   }
 
   @Override
-  public <T extends Message> T insert(T data, Modifier... modifiers) throws DataStoreException {
+  public <T extends Message> void insert(T data, Modifier... modifiers) throws DataStoreException {
     TableInfo<T> tableInfo = getTableInfo((Class<T>) data.getClass());
 
     String sql;
@@ -153,7 +153,7 @@ public class SqlDataStore implements DataStore {
       sb.append(")");
 
       for (Modifier modifier : modifiers) {
-        if (modifier instanceof IfVersion) {
+        if (modifier instanceof WhereModifier<?>) {
           throw new UnsupportedOperationException();
         } else {
           throw new IllegalStateException("Unhandler modifier: " + modifier.getClass().getSimpleName());
@@ -177,10 +177,11 @@ public class SqlDataStore implements DataStore {
         if (rowCount > 1) {
           throw new IllegalStateException("Multiple rows inserted");
         }
-        if (rowCount != 0) {
-          return data;
+
+        if (rowCount == 0) {
+          throw new IllegalStateException("Row not inserted");
         }
-        throw new IllegalStateException();
+        return;
       }
     } catch (SQLException e) {
       throw new DataStoreException("Error querying database", e);
@@ -227,7 +228,7 @@ public class SqlDataStore implements DataStore {
       }
 
       for (Modifier modifier : modifiers) {
-        if (modifier instanceof IfVersion) {
+        if (modifier instanceof WhereModifier<?>) {
           throw new UnsupportedOperationException();
         } else {
           throw new IllegalStateException("Unhandler modifier: " + modifier.getClass().getSimpleName());
@@ -292,7 +293,7 @@ public class SqlDataStore implements DataStore {
         n++;
       }
       for (Modifier modifier : modifiers) {
-        if (modifier instanceof IfVersion) {
+        if (modifier instanceof WhereModifier<?>) {
           throw new UnsupportedOperationException();
         } else {
           throw new IllegalStateException("Unhandler modifier: " + modifier.getClass().getSimpleName());

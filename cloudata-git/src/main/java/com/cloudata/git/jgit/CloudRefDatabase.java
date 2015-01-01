@@ -13,8 +13,9 @@ import org.eclipse.jgit.lib.SymbolicRef;
 import org.eclipse.jgit.util.RefList;
 
 import com.cloudata.datastore.DataStore;
-import com.cloudata.datastore.IfVersion;
+import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.UniqueIndexViolation;
+import com.cloudata.datastore.WhereModifier;
 import com.cloudata.git.GitModel.RefData;
 import com.cloudata.git.GitModel.RepositoryData;
 import com.google.protobuf.ByteString;
@@ -84,7 +85,8 @@ public class CloudRefDatabase extends DfsRefDatabase {
         return false;
       }
 
-      return dataStore.update(newModel, new IfVersion(cur.data));
+      Modifier whereUnchanged = WhereModifier.create(cur.data);
+      return dataStore.update(newModel, whereUnchanged);
     } catch (IOException e) {
       throw new IOException("Error creating reference", e);
     }
@@ -105,7 +107,8 @@ public class CloudRefDatabase extends DfsRefDatabase {
 
     public boolean delete() throws IOException {
       try {
-        if (!dataStore.delete(data, new IfVersion(data))) {
+        Modifier whereUnchanged = WhereModifier.create(data);
+        if (!dataStore.delete(data, whereUnchanged)) {
           return false;
         }
         return true;

@@ -7,28 +7,43 @@ import java.util.Map.Entry;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
 import com.cloudata.datastore.Modifier;
+import com.cloudata.datastore.UniqueIndexViolation;
+import com.cloudata.datastore.WhereModifier;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import com.google.protobuf.Message.Builder;
 
 public class InMemoryDataStore implements DataStore {
 
   class Space<T extends Message> {
-    final Class<T> clazz;
-    final List<T> items = Lists.newArrayList();
+    final T instance;
+    final Map<ByteString, T> items = Maps.newHashMap();
+    final FieldDescriptor[] primaryKey;
 
-    public Space(Class<T> clazz) {
-      super();
-      this.clazz = clazz;
+    public Space(T instance, String[] primaryKey) {
+      this.instance = instance;
+      Descriptor descriptorForType = instance.getDescriptorForType();
+
+      FieldDescriptor[] primaryKeyFields = new FieldDescriptor[primaryKey.length];
+      for (int i = 0; i < primaryKey.length; i++) {
+        primaryKeyFields[i] = descriptorForType.findFieldByName(primaryKey[i]);
+        if (primaryKeyFields[i] == null) {
+          throw new IllegalArgumentException("Unknown field: " + primaryKey);
+        }
+      }
+      this.primaryKey = primaryKeyFields;
     }
 
     public List<T> findAll(T matcher) {
       List<T> matches = Lists.newArrayList();
       Map<FieldDescriptor, Object> matcherFields = matcher.getAllFields();
 
-      for (T item : items) {
+      for (T item : items.values()) {
         if (matches(matcherFields, item)) {
           matches.add(item);
         }
@@ -36,10 +51,54 @@ public class InMemoryDataStore implements DataStore {
       return matches;
     }
 
-    public T insert(T data) {
-      items.add(data);
-      return data;
+    public boolean insert(T data, Modifier... modifiers) throws UniqueIndexViolation {
+      T key = toKey(data);
+      ByteString keyBytes = key.toByteString();
+
+      T existing = items.get(keyBytes);
+      if (existing != null) {
+        throw new UniqueIndexViolation(null);
+      }
+
+      for (Modifier modifier : modifiers) {
+        throw new UnsupportedOperationException();
+      }
+
+      items.put(keyBytes, data);
+      return true;
     }
+
+    public boolean update(T data, Modifier... modifiers) {
+      T key = toKey(data);
+      ByteString keyBytes = key.toByteString();
+      T existing = items.get(keyBytes);
+      if (existing == null) {
+        return false;
+      }
+      for (Modifier modifier : modifiers) {
+        if (modifier instanceof WhereModifier) {
+          WhereModifier where = (WhereModifier) modifier;
+          Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
+          if (!matches(matcherFields, existing)) {
+            return false;
+          }
+        } else {
+          throw new UnsupportedOperationException();
+        }
+      }
+      items.put(keyBytes, data);
+      return true;
+    }
+
+    private T toKey(T data) {
+      Builder b = data.newBuilderForType();
+      for (FieldDescriptor field : primaryKey) {
+        Object value = data.getField(field);
+        b.setField(field, value);
+      }
+      return (T) b.build();
+    }
+
   }
 
   private static <T extends Message> boolean matches(Map<FieldDescriptor, Object> matcherFields, T item) {
@@ -61,13 +120,17 @@ public class InMemoryDataStore implements DataStore {
 
   final Map<Class<?>, Space<?>> spaces = Maps.newHashMap();
 
+  public <T extends Message> void map(T instance, String... primaryKey) {
+    Space<T> space = new Space<T>(instance, primaryKey);
+    spaces.put(instance.getClass(), space);
+  }
+
   private <T extends Message> Space<T> getSpace(T instance) {
     synchronized (spaces) {
       Class<T> clazz = (Class<T>) instance.getClass();
       Space<T> space = (Space<T>) spaces.get(clazz);
       if (space == null) {
-        space = new Space<T>(clazz);
-        spaces.put(clazz, space);
+        throw new IllegalStateException("Unmapped object: " + clazz.getSimpleName());
       }
       return space;
     }
@@ -93,15 +156,15 @@ public class InMemoryDataStore implements DataStore {
   }
 
   @Override
-  public <T extends Message> T insert(T data, Modifier... modifiers) throws DataStoreException {
+  public <T extends Message> void insert(T data, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(data);
-    return space.insert(data);
+    space.insert(data, modifiers);
   }
 
   @Override
   public <T extends Message> boolean update(T data, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(data);
-    throw new UnsupportedOperationException();
+    return space.update(data, modifiers);
   }
 
   @Override
