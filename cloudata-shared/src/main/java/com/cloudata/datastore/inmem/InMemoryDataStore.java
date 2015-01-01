@@ -90,6 +90,28 @@ public class InMemoryDataStore implements DataStore {
       return true;
     }
 
+    public boolean delete(T data, Modifier... modifiers) {
+      T key = toKey(data);
+      ByteString keyBytes = key.toByteString();
+      T existing = items.get(keyBytes);
+      if (existing == null) {
+        return false;
+      }
+      for (Modifier modifier : modifiers) {
+        if (modifier instanceof WhereModifier) {
+          WhereModifier where = (WhereModifier) modifier;
+          Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
+          if (!matches(matcherFields, existing)) {
+            return false;
+          }
+        } else {
+          throw new UnsupportedOperationException();
+        }
+      }
+      items.remove(keyBytes);
+      return true;
+    }
+
     private T toKey(T data) {
       Builder b = data.newBuilderForType();
       for (FieldDescriptor field : primaryKey) {
@@ -170,7 +192,7 @@ public class InMemoryDataStore implements DataStore {
   @Override
   public <T extends Message> boolean delete(T data, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(data);
-    throw new UnsupportedOperationException();
+    return space.delete(data, modifiers);
   }
 
 }

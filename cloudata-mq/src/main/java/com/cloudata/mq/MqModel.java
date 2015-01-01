@@ -1369,13 +1369,13 @@ public final class MqModel {
     com.google.protobuf.ByteString getQueueId();
 
     /**
-     * <code>optional bytes receipt_handle = 2;</code>
+     * <code>optional bytes receipt_handle_nonce = 2;</code>
      */
-    boolean hasReceiptHandle();
+    boolean hasReceiptHandleNonce();
     /**
-     * <code>optional bytes receipt_handle = 2;</code>
+     * <code>optional bytes receipt_handle_nonce = 2;</code>
      */
-    com.google.protobuf.ByteString getReceiptHandle();
+    com.google.protobuf.ByteString getReceiptHandleNonce();
 
     /**
      * <code>optional bytes message_id = 3;</code>
@@ -1487,7 +1487,7 @@ public final class MqModel {
             }
             case 18: {
               bitField0_ |= 0x00000002;
-              receiptHandle_ = input.readBytes();
+              receiptHandleNonce_ = input.readBytes();
               break;
             }
             case 26: {
@@ -1571,19 +1571,19 @@ public final class MqModel {
       return queueId_;
     }
 
-    public static final int RECEIPT_HANDLE_FIELD_NUMBER = 2;
-    private com.google.protobuf.ByteString receiptHandle_;
+    public static final int RECEIPT_HANDLE_NONCE_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString receiptHandleNonce_;
     /**
-     * <code>optional bytes receipt_handle = 2;</code>
+     * <code>optional bytes receipt_handle_nonce = 2;</code>
      */
-    public boolean hasReceiptHandle() {
+    public boolean hasReceiptHandleNonce() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional bytes receipt_handle = 2;</code>
+     * <code>optional bytes receipt_handle_nonce = 2;</code>
      */
-    public com.google.protobuf.ByteString getReceiptHandle() {
-      return receiptHandle_;
+    public com.google.protobuf.ByteString getReceiptHandleNonce() {
+      return receiptHandleNonce_;
     }
 
     public static final int MESSAGE_ID_FIELD_NUMBER = 3;
@@ -1668,7 +1668,7 @@ public final class MqModel {
 
     private void initFields() {
       queueId_ = com.google.protobuf.ByteString.EMPTY;
-      receiptHandle_ = com.google.protobuf.ByteString.EMPTY;
+      receiptHandleNonce_ = com.google.protobuf.ByteString.EMPTY;
       messageId_ = com.google.protobuf.ByteString.EMPTY;
       body_ = com.google.protobuf.ByteString.EMPTY;
       messageBodyMd5_ = com.google.protobuf.ByteString.EMPTY;
@@ -1691,7 +1691,7 @@ public final class MqModel {
         output.writeBytes(1, queueId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, receiptHandle_);
+        output.writeBytes(2, receiptHandleNonce_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(3, messageId_);
@@ -1720,7 +1720,7 @@ public final class MqModel {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, receiptHandle_);
+          .computeBytesSize(2, receiptHandleNonce_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -1858,7 +1858,7 @@ public final class MqModel {
         super.clear();
         queueId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        receiptHandle_ = com.google.protobuf.ByteString.EMPTY;
+        receiptHandleNonce_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000002);
         messageId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -1907,7 +1907,7 @@ public final class MqModel {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.receiptHandle_ = receiptHandle_;
+        result.receiptHandleNonce_ = receiptHandleNonce_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
@@ -1948,8 +1948,8 @@ public final class MqModel {
         if (other.hasQueueId()) {
           setQueueId(other.getQueueId());
         }
-        if (other.hasReceiptHandle()) {
-          setReceiptHandle(other.getReceiptHandle());
+        if (other.hasReceiptHandleNonce()) {
+          setReceiptHandleNonce(other.getReceiptHandleNonce());
         }
         if (other.hasMessageId()) {
           setMessageId(other.getMessageId());
@@ -2048,37 +2048,37 @@ public final class MqModel {
         return this;
       }
 
-      private com.google.protobuf.ByteString receiptHandle_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString receiptHandleNonce_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes receipt_handle = 2;</code>
+       * <code>optional bytes receipt_handle_nonce = 2;</code>
        */
-      public boolean hasReceiptHandle() {
+      public boolean hasReceiptHandleNonce() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional bytes receipt_handle = 2;</code>
+       * <code>optional bytes receipt_handle_nonce = 2;</code>
        */
-      public com.google.protobuf.ByteString getReceiptHandle() {
-        return receiptHandle_;
+      public com.google.protobuf.ByteString getReceiptHandleNonce() {
+        return receiptHandleNonce_;
       }
       /**
-       * <code>optional bytes receipt_handle = 2;</code>
+       * <code>optional bytes receipt_handle_nonce = 2;</code>
        */
-      public Builder setReceiptHandle(com.google.protobuf.ByteString value) {
+      public Builder setReceiptHandleNonce(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000002;
-        receiptHandle_ = value;
+        receiptHandleNonce_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes receipt_handle = 2;</code>
+       * <code>optional bytes receipt_handle_nonce = 2;</code>
        */
-      public Builder clearReceiptHandle() {
+      public Builder clearReceiptHandleNonce() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        receiptHandle_ = getDefaultInstance().getReceiptHandle();
+        receiptHandleNonce_ = getDefaultInstance().getReceiptHandleNonce();
         onChanged();
         return this;
       }
@@ -2439,6 +2439,487 @@ public final class MqModel {
     // @@protoc_insertion_point(class_scope:Message)
   }
 
+  public interface ReceiptHandleOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ReceiptHandle)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional bytes message_id = 1;</code>
+     */
+    boolean hasMessageId();
+    /**
+     * <code>optional bytes message_id = 1;</code>
+     */
+    com.google.protobuf.ByteString getMessageId();
+
+    /**
+     * <code>optional bytes nonce = 2;</code>
+     */
+    boolean hasNonce();
+    /**
+     * <code>optional bytes nonce = 2;</code>
+     */
+    com.google.protobuf.ByteString getNonce();
+  }
+  /**
+   * Protobuf type {@code ReceiptHandle}
+   */
+  public static final class ReceiptHandle extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:ReceiptHandle)
+      ReceiptHandleOrBuilder {
+    // Use ReceiptHandle.newBuilder() to construct.
+    private ReceiptHandle(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private ReceiptHandle(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final ReceiptHandle defaultInstance;
+    public static ReceiptHandle getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public ReceiptHandle getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ReceiptHandle(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              messageId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              nonce_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudata.mq.MqModel.internal_static_ReceiptHandle_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudata.mq.MqModel.internal_static_ReceiptHandle_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudata.mq.MqModel.ReceiptHandle.class, com.cloudata.mq.MqModel.ReceiptHandle.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<ReceiptHandle> PARSER =
+        new com.google.protobuf.AbstractParser<ReceiptHandle>() {
+      public ReceiptHandle parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ReceiptHandle(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ReceiptHandle> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    public static final int MESSAGE_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString messageId_;
+    /**
+     * <code>optional bytes message_id = 1;</code>
+     */
+    public boolean hasMessageId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes message_id = 1;</code>
+     */
+    public com.google.protobuf.ByteString getMessageId() {
+      return messageId_;
+    }
+
+    public static final int NONCE_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString nonce_;
+    /**
+     * <code>optional bytes nonce = 2;</code>
+     */
+    public boolean hasNonce() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes nonce = 2;</code>
+     */
+    public com.google.protobuf.ByteString getNonce() {
+      return nonce_;
+    }
+
+    private void initFields() {
+      messageId_ = com.google.protobuf.ByteString.EMPTY;
+      nonce_ = com.google.protobuf.ByteString.EMPTY;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, messageId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, nonce_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, messageId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, nonce_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.mq.MqModel.ReceiptHandle parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.cloudata.mq.MqModel.ReceiptHandle prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ReceiptHandle}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ReceiptHandle)
+        com.cloudata.mq.MqModel.ReceiptHandleOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudata.mq.MqModel.internal_static_ReceiptHandle_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudata.mq.MqModel.internal_static_ReceiptHandle_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudata.mq.MqModel.ReceiptHandle.class, com.cloudata.mq.MqModel.ReceiptHandle.Builder.class);
+      }
+
+      // Construct using com.cloudata.mq.MqModel.ReceiptHandle.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        messageId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        nonce_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudata.mq.MqModel.internal_static_ReceiptHandle_descriptor;
+      }
+
+      public com.cloudata.mq.MqModel.ReceiptHandle getDefaultInstanceForType() {
+        return com.cloudata.mq.MqModel.ReceiptHandle.getDefaultInstance();
+      }
+
+      public com.cloudata.mq.MqModel.ReceiptHandle build() {
+        com.cloudata.mq.MqModel.ReceiptHandle result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.cloudata.mq.MqModel.ReceiptHandle buildPartial() {
+        com.cloudata.mq.MqModel.ReceiptHandle result = new com.cloudata.mq.MqModel.ReceiptHandle(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.messageId_ = messageId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.nonce_ = nonce_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudata.mq.MqModel.ReceiptHandle) {
+          return mergeFrom((com.cloudata.mq.MqModel.ReceiptHandle)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudata.mq.MqModel.ReceiptHandle other) {
+        if (other == com.cloudata.mq.MqModel.ReceiptHandle.getDefaultInstance()) return this;
+        if (other.hasMessageId()) {
+          setMessageId(other.getMessageId());
+        }
+        if (other.hasNonce()) {
+          setNonce(other.getNonce());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudata.mq.MqModel.ReceiptHandle parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudata.mq.MqModel.ReceiptHandle) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes message_id = 1;</code>
+       */
+      public boolean hasMessageId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes message_id = 1;</code>
+       */
+      public com.google.protobuf.ByteString getMessageId() {
+        return messageId_;
+      }
+      /**
+       * <code>optional bytes message_id = 1;</code>
+       */
+      public Builder setMessageId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        messageId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes message_id = 1;</code>
+       */
+      public Builder clearMessageId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        messageId_ = getDefaultInstance().getMessageId();
+        onChanged();
+        return this;
+      }
+
+      private com.google.protobuf.ByteString nonce_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes nonce = 2;</code>
+       */
+      public boolean hasNonce() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes nonce = 2;</code>
+       */
+      public com.google.protobuf.ByteString getNonce() {
+        return nonce_;
+      }
+      /**
+       * <code>optional bytes nonce = 2;</code>
+       */
+      public Builder setNonce(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        nonce_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes nonce = 2;</code>
+       */
+      public Builder clearNonce() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        nonce_ = getDefaultInstance().getNonce();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:ReceiptHandle)
+    }
+
+    static {
+      defaultInstance = new ReceiptHandle(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:ReceiptHandle)
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_Queue_descriptor;
   private static
@@ -2454,6 +2935,11 @@ public final class MqModel {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_Message_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ReceiptHandle_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_ReceiptHandle_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2466,11 +2952,13 @@ public final class MqModel {
       "\n\034src/main/proto/MqModel.proto\"6\n\005Queue\022" +
       "\020\n\010queue_id\030\001 \001(\014\022\r\n\005scope\030\002 \001(\t\022\014\n\004name" +
       "\030\003 \001(\t\"/\n\020MessageAttribute\022\014\n\004name\030\001 \001(\t" +
-      "\022\r\n\005value\030\002 \001(\t\"\225\001\n\007Message\022\020\n\010queue_id\030" +
-      "\001 \001(\014\022\026\n\016receipt_handle\030\002 \001(\014\022\022\n\nmessage" +
-      "_id\030\003 \001(\014\022\014\n\004body\030\004 \001(\014\022\030\n\020message_body_" +
-      "md5\030\005 \001(\014\022$\n\tattribute\030\006 \003(\0132\021.MessageAt" +
-      "tributeB\021\n\017com.cloudata.mq"
+      "\022\r\n\005value\030\002 \001(\t\"\233\001\n\007Message\022\020\n\010queue_id\030" +
+      "\001 \001(\014\022\034\n\024receipt_handle_nonce\030\002 \001(\014\022\022\n\nm" +
+      "essage_id\030\003 \001(\014\022\014\n\004body\030\004 \001(\014\022\030\n\020message" +
+      "_body_md5\030\005 \001(\014\022$\n\tattribute\030\006 \003(\0132\021.Mes" +
+      "sageAttribute\"2\n\rReceiptHandle\022\022\n\nmessag" +
+      "e_id\030\001 \001(\014\022\r\n\005nonce\030\002 \001(\014B\021\n\017com.cloudat" +
+      "a.mq"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2501,7 +2989,13 @@ public final class MqModel {
     internal_static_Message_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Message_descriptor,
-        new java.lang.String[] { "QueueId", "ReceiptHandle", "MessageId", "Body", "MessageBodyMd5", "Attribute", });
+        new java.lang.String[] { "QueueId", "ReceiptHandleNonce", "MessageId", "Body", "MessageBodyMd5", "Attribute", });
+    internal_static_ReceiptHandle_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_ReceiptHandle_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_ReceiptHandle_descriptor,
+        new java.lang.String[] { "MessageId", "Nonce", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

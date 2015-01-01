@@ -11,6 +11,7 @@ import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.WhereModifier;
 import com.cloudata.mq.MqModel.Message;
 import com.cloudata.mq.MqModel.Queue;
+import com.cloudata.mq.MqModel.ReceiptHandle;
 import com.google.common.collect.Lists;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
@@ -78,7 +79,9 @@ public class QueueService {
 
     message.setQueueId(queue.getQueueId());
     message.setMessageId(Randoms.buildId());
-    message.setReceiptHandle(ByteString.EMPTY);
+
+    // TODO: Improve this .... (have 'where missing' modifier?)
+    message.setReceiptHandleNonce(ByteString.EMPTY);
 
     HashCode hc = Hashing.md5().newHasher().putBytes(message.getBody().toByteArray()).hash();
     message.setMessageBodyMd5(ByteString.copyFrom(hc.asBytes()));
@@ -91,7 +94,7 @@ public class QueueService {
   public List<Message> receiveMessages(Queue queue, int maxNumberOfMessages) throws DataStoreException {
     Message.Builder matcher = Message.newBuilder();
     matcher.setQueueId(queue.getQueueId());
-    matcher.setReceiptHandle(ByteString.EMPTY);
+    matcher.setReceiptHandleNonce(ByteString.EMPTY);
 
     List<Message> received = Lists.newArrayList();
 
@@ -99,10 +102,10 @@ public class QueueService {
     for (Message message : dataStore.find(matcher.build())) {
       ByteString receiptHandle = Randoms.buildId();
       Message.Builder update = Message.newBuilder(message);
-      update.setReceiptHandle(receiptHandle);
+      update.setReceiptHandleNonce(receiptHandle);
       Message updated = update.build();
-      Modifier whereReceiptHandleEmpty = WhereModifier.create(Message.newBuilder().setReceiptHandle(ByteString.EMPTY)
-          .build());
+      Modifier whereReceiptHandleEmpty = WhereModifier.create(Message.newBuilder()
+          .setReceiptHandleNonce(ByteString.EMPTY).build());
       if (dataStore.update(updated, whereReceiptHandleEmpty)) {
         received.add(updated);
         if (received.size() >= maxNumberOfMessages) {
@@ -112,5 +115,21 @@ public class QueueService {
     }
 
     return received;
+  }
+
+  public boolean deleteMessage(Queue queue, ReceiptHandle receiptHandle) throws DataStoreException {
+    Message.Builder matcher = Message.newBuilder();
+    matcher.setQueueId(queue.getQueueId());
+    matcher.setReceiptHandleNonce(receiptHandle.getNonce());
+    matcher.setMessageId(receiptHandle.getMessageId());
+
+    Message message = dataStore.findOne(matcher.build());
+    if (message == null) {
+      return false;
+    }
+
+    Modifier whereReceiptHandleMatches = WhereModifier.create(Message.newBuilder()
+        .setReceiptHandleNonce(receiptHandle.getNonce()).build());
+    return dataStore.delete(message, whereReceiptHandleMatches);
   }
 }

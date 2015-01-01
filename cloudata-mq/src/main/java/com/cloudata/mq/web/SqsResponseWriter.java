@@ -14,6 +14,7 @@ import javax.xml.stream.XMLStreamWriter;
 
 import com.cloudata.mq.MqModel.Message;
 import com.cloudata.mq.MqModel.Queue;
+import com.cloudata.mq.MqModel.ReceiptHandle;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
 
@@ -84,6 +85,19 @@ public class SqsResponseWriter implements Closeable {
     writer.writeEndDocument();
   }
 
+  public void writeDeleteMessageResponse() throws XMLStreamException {
+    writer.writeStartDocument();
+
+    writer.writeStartElement("DeleteMessageResponse");
+    writer.writeNamespace("", NS_URI);
+
+    writeResponseMetadata();
+
+    writer.writeEndElement();
+
+    writer.writeEndDocument();
+  }
+
   private void writeMessage(Message message) throws XMLStreamException {
 
     ByteString messageId = message.getMessageId();
@@ -100,7 +114,13 @@ public class SqsResponseWriter implements Closeable {
     ByteString messageBodyMd5 = message.getMessageBodyMd5();
     writeElement("MD5OfBody", BASE16_LOWERCASE.encode(messageBodyMd5.toByteArray()));
 
-    writeElement("ReceiptHandle", BaseEncoding.base64Url().encode(message.getReceiptHandle().toByteArray()));
+    if (message.hasReceiptHandleNonce()) {
+      ReceiptHandle.Builder b = ReceiptHandle.newBuilder();
+      b.setMessageId(message.getMessageId());
+      b.setNonce(message.getReceiptHandleNonce());
+
+      writeElement("ReceiptHandle", BaseEncoding.base64Url().encode(b.build().toByteArray()));
+    }
 
     ByteString messageId = message.getMessageId();
     UUID uuid = UUID.nameUUIDFromBytes(messageId.toByteArray());

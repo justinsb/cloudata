@@ -13,9 +13,14 @@ message MessageAttribute {
 
 message Message {
 	optional bytes queue_id = 1;
-	optional bytes receipt_handle = 2;
+	optional bytes receipt_handle_nonce = 2;
 	optional bytes message_id = 3;
 	optional bytes body = 4;
 	optional bytes message_body_md5 = 5;
 	repeated MessageAttribute attribute = 6;
+}
+
+message ReceiptHandle {
+	optional bytes message_id = 1;
+	optional bytes nonce = 2;
 }
