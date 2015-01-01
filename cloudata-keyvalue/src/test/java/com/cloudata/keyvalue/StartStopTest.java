@@ -27,6 +27,8 @@ public class StartStopTest extends HttpTestBase {
         ClusterState clusterState = ClusterState.fromSeeds(url);
         KeyValueClient client = new KeyValueClient(clusterState);
 
+        Thread.sleep(1000);
+        
         checkWrite(client, storeId, n);
         checkRead(client, storeId, n);
 

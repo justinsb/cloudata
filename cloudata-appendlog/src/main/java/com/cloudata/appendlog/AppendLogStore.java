@@ -2,6 +2,7 @@ package com.cloudata.appendlog;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import java.io.Closeable;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutionException;
@@ -12,16 +13,19 @@ import javax.annotation.concurrent.Immutable;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.StateMachine;
+import org.robotninjas.barge.proto.RaftEntry.SnapshotInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.appendlog.data.AppendLogProto.LogEntry;
 import com.cloudata.appendlog.log.LogFileSet;
 import com.cloudata.appendlog.log.LogMessageIterable;
+import com.cloudata.snapshots.SnapshotStorage;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -33,14 +37,15 @@ public class AppendLogStore implements StateMachine {
 
     final LoadingCache<Long, LogFileSet> logCache;
 
-    public AppendLogStore(File baseDir) {
+    public AppendLogStore(ListeningExecutorService executor, File baseDir, SnapshotStorage snapshotStorage) {
         this.baseDir = baseDir;
         LogCacheLoader loader = new LogCacheLoader();
         this.logCache = CacheBuilder.newBuilder().recordStats().build(loader);
     }
 
-    public void init(RaftService raft) {
-        this.raft = raft;
+    @Override
+    public void close() {
+        logCache.invalidateAll();
     }
 
     public LogMessageIterable readLog(long logId, long begin, int max) {
@@ -108,5 +113,20 @@ public class AppendLogStore implements StateMachine {
                 throw e;
             }
         }
+    }
+
+    @Override
+    public Snapshotter prepareSnapshot(long currentTerm, long currentIndex) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void gotSnapshot(SnapshotInfo snapshotInfo) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void init(RaftService raft) {
+      this.raft = raft;
     }
 }

@@ -4,20 +4,24 @@ import com.cloudata.git.GitModel.RepositoryData;
 
 public class GitRepository {
 
-    final String absolutePath;
-    final RepositoryData data;
+  final String objectPath;
+  final RepositoryData data;
 
-    public GitRepository(String absolutePath, RepositoryData data) {
-        this.absolutePath = absolutePath;
-        this.data = data;
-    }
+  public GitRepository(String objectPath, RepositoryData data) {
+    this.objectPath = objectPath;
+    this.data = data;
+  }
 
-    public boolean isPublicRead() {
-        return false;
-    }
+  public boolean isPublicRead() {
+    return false;
+  }
 
-    public String getAbsolutePath() {
-        return absolutePath;
-    }
+  public String getObjectPath() {
+    return objectPath;
+  }
+
+  public RepositoryData getData() {
+    return data;
+  }
 
 }

@@ -1,0 +1,14 @@
+option java_package = "com.cloudata.auth";
+
+message AuthUser {
+	optional string name = 1;
+	optional HashedPassword password_hashed = 2;
+}
+
+message HashedPassword {
+	//optional algorithm  = 1;
+	optional bytes salt = 2;
+	optional int32 iterations = 3;
+	optional bytes hashed = 4;
+}
+

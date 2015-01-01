@@ -17,7 +17,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.robotninjas.barge.NoLeaderException;
 import org.robotninjas.barge.NotLeaderException;
 import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
@@ -25,6 +24,7 @@ import org.robotninjas.barge.Replica;
 import com.cloudata.appendlog.AppendLogStore;
 import com.cloudata.appendlog.log.LogMessage;
 import com.cloudata.appendlog.log.LogMessageIterable;
+import com.google.common.base.Optional;
 import com.google.common.io.ByteStreams;
 
 @Path("/{logid}/")
@@ -68,14 +68,15 @@ public class AppendLogEndpoint {
             return Response.ok().build();
         } catch (InterruptedException e) {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
-        } catch (NoLeaderException e) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
         } catch (NotLeaderException e) {
-            Replica leader = e.getLeader();
-            InetSocketAddress address = (InetSocketAddress) leader.address();
-            URI uri = URI.create("http://" + address.getHostName() + ":" + address.getPort() /* + "/" + key */);
-            System.out.println(uri);
-            return Response.seeOther(uri).build();
+            Optional<Replica> leader = e.getLeader();
+            if (leader.isPresent()) {
+              InetSocketAddress address = (InetSocketAddress) leader.get().address();
+              URI uri = URI.create("http://" + address.getHostName() + ":" + address.getPort() /* + "/" + key */);
+              return Response.seeOther(uri).build();
+            } else {
+              return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
+            }
         } catch (RaftException e) {
             return Response.serverError().build();
         }

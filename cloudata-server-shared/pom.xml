@@ -11,49 +11,46 @@
 
 	<properties>
 		<jclouds.version>1.6.0</jclouds.version>
-		<jetty.version>9.1.0.v20131115</jetty.version>
 	</properties>
 
 	<artifactId>cloudata-server-shared</artifactId>
 
 	<dependencies>
 		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.9.13</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.6</version>
+		</dependency>
+
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.0.11</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>1.17.1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.sun.jersey.contribs</groupId>
 			<artifactId>jersey-guice</artifactId>
-			<version>1.17.1</version>
 		</dependency>
 
-		<dependency>
-			<groupId>com.cloudata</groupId>
-			<artifactId>cloudata-client</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.robotninjas.barge</groupId>
-			<artifactId>barge-core</artifactId>
-			<version>0.1.0-alpha2-SNAPSHOT</version>
-		</dependency>
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-core</artifactId>
-			<version>1.17.1</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.sun.jersey</groupId>
 			<artifactId>jersey-server</artifactId>
-			<version>1.17.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>asm</groupId>
@@ -61,11 +58,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!-- <dependency> <groupId>com.sun.jersey</groupId> <artifactId>jersey-grizzly</artifactId> 
-			<version>1.17.1</version> </dependency> <dependency> <groupId>com.sun.grizzly</groupId> 
-			<artifactId>grizzly-servlet-webserver</artifactId> <version>1.9.59</version> 
-			</dependency> -->
-
 
 		<dependency>
 			<groupId>org.jclouds.provider</groupId>
@@ -76,14 +68,13 @@
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
-			<version>${jetty.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
-			<version>${jetty.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>com.cloudata</groupId>
 			<artifactId>cloudata-shared</artifactId>

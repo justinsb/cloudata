@@ -5,6 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.Closeable;
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
@@ -17,6 +20,9 @@ import org.robotninjas.barge.RaftMembership;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
 import org.robotninjas.barge.StateMachine;
+import org.robotninjas.barge.proto.RaftEntry.AppDataKey;
+import org.robotninjas.barge.proto.RaftEntry.SnapshotFileInfo;
+import org.robotninjas.barge.proto.RaftEntry.SnapshotInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +32,7 @@ import com.cloudata.keyvalue.KeyValueProtocol.ActionResponse;
 import com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction;
 import com.cloudata.keyvalue.operation.KeyValueOperation;
 import com.cloudata.keyvalue.operation.KeyValueOperations;
+import com.cloudata.snapshots.SnapshotStorage;
 import com.cloudata.values.Value;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -34,6 +41,10 @@ import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import com.google.common.io.ByteSource;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -43,23 +54,32 @@ import com.google.protobuf.InvalidProtocolBufferException;
 public class KeyValueStateMachine implements StateMachine, Closeable {
     private static final Logger log = LoggerFactory.getLogger(KeyValueStateMachine.class);
 
-    private RaftService raft;
+//    private RaftService raft;
     private final File baseDir;
     final LoadingCache<Long, KeyValueStore> keyValueStoreCache;
+    final Set<Long> dirtyStoreIds;
 
     private final ListeningExecutorService executor;
 
-    public KeyValueStateMachine(ListeningExecutorService executor, File baseDir) {
+    final SnapshotStorage snapshotStorage;
+
+    final Map<Long, SnapshotFileInfo> lastSnapshots = Maps.newHashMap();
+
+    private RaftService raft;
+
+    public KeyValueStateMachine(ListeningExecutorService executor, File baseDir, SnapshotStorage snapshotStorage) {
         this.executor = executor;
         this.baseDir = baseDir;
+        this.snapshotStorage = snapshotStorage;
         KeyValueStoreCacheLoader loader = new KeyValueStoreCacheLoader();
         this.keyValueStoreCache = CacheBuilder.newBuilder().recordStats().removalListener(CloseOnRemoval.build())
                 .build(loader);
+        this.dirtyStoreIds = Sets.newHashSet();
     }
 
-    public void init(RaftService raft) {
-        this.raft = raft;
-    }
+//    public void init(RaftService raft) {
+//        this.raft = raft;
+//    }
 
     // public LogMessageIterable readLog(long logId, long begin, int max) {
     // LogFileSet logFileSet = getKeyValueStore(logId);
@@ -135,6 +155,10 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
 
             KeyValueOperation operation = KeyValueOperations.build(entry);
 
+            if (!operation.isReadOnly()) {
+              dirtyStoreIds.add(storeId);
+            }
+
             keyValueStore.doAction(operation);
 
             Object ret = operation.getResult();
@@ -148,6 +172,51 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
             throw new IllegalArgumentException("Error performing key value operation", e);
         }
     }
+    
+
+  @Override
+  public Snapshotter prepareSnapshot(final long currentTerm, final long currentIndex) {
+    final List<Long> snapshotting = Lists.newArrayList(this.dirtyStoreIds);
+
+    final Map<Long, ListenableFuture<SnapshotFileInfo.Builder>> snapshots = Maps.newHashMap();
+    for (long storeId : dirtyStoreIds) {
+      KeyValueStore keyValueStore = getKeyValueStore(storeId);
+      snapshots.put(storeId, keyValueStore.beginSnapshot(executor, snapshotStorage));
+    }
+    Snapshotter snapshotter = new Snapshotter() {
+
+      @Override
+      public SnapshotInfo finishSnapshot() throws InterruptedException, ExecutionException {
+        boolean success = false;
+        try {
+          SnapshotInfo.Builder snapshotInfo = SnapshotInfo.newBuilder();
+          snapshotInfo.setLastIncludedIndex(currentIndex);
+          snapshotInfo.setLastIncludedTerm(currentTerm);
+          for (Map.Entry<Long, ListenableFuture<SnapshotFileInfo.Builder>> entry : snapshots.entrySet()) {
+            SnapshotFileInfo.Builder fileInfo = entry.getValue().get();
+            if (fileInfo.hasKey()) {
+              throw new IllegalStateException();
+            }
+            fileInfo.setKey(entry.getKey() + "");
+            snapshotInfo.addFiles(fileInfo);
+          }
+          SnapshotInfo ret = snapshotInfo.build();
+          success = true;
+          return ret;
+        } finally {
+          if (!success) {
+            dirtyStoreIds.addAll(snapshotting);
+          }
+        }
+      }
+
+    };
+
+    this.dirtyStoreIds.clear();
+
+    return snapshotter;
+  }
+
 
     private KeyValueStore getKeyValueStore(long id) {
         try {
@@ -169,8 +238,12 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
 
                 dir.mkdirs();
 
+                SnapshotFileInfo snapshotFileInfo = lastSnapshots.get(id);
+                
                 boolean uniqueKeys = true;
-                return new KeyValueStore(dir, uniqueKeys);
+                KeyValueStore keyValueStore = new KeyValueStore(dir, uniqueKeys, snapshotStorage, snapshotFileInfo);
+                
+                return keyValueStore;
             } catch (Exception e) {
                 log.warn("Error building KeyValueStore", e);
                 throw e;
@@ -183,7 +256,7 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
         return keyValueStore.get(keyspace.mapToKey(key).asReadOnlyByteBuffer());
     }
-
+    
     // This function should really be an operation, but we want to support streaming
     public BtreeQuery scan(long storeId, Keyspace keyspace, ByteString keyPrefix) {
         KeyValueStore keyValueStore = getKeyValueStore(storeId);
@@ -207,6 +280,21 @@ public class KeyValueStateMachine implements StateMachine, Closeable {
       } else {
         return Optional.absent();
       }
+    }
+
+    @Override
+    public void gotSnapshot(SnapshotInfo snapshotInfo) {
+      log.info("Got snapshot {}", snapshotInfo);
+      for (SnapshotFileInfo snapshotFileInfo : snapshotInfo.getFilesList()) {
+        long storeId = Long.parseLong(snapshotFileInfo.getKey());
+        // TODO: Only if we don't have the data locally, and then only until we apply the snapshot??
+        lastSnapshots.put(storeId, snapshotFileInfo);
+      }
+    }
+
+    @Override
+    public void init(RaftService raft) {
+      this.raft = raft;
     }
 
 }

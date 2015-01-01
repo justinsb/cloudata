@@ -8,10 +8,10 @@ import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 
 public interface GitRepositoryStore {
-    GitRepository findRepo(GitUser user, String path) throws IOException;
+  GitRepository findRepo(String repoName) throws IOException;
 
-    Repository openRepository(GitUser user, GitRepository repo, boolean mustExist) throws IOException;
+  Repository openRepository(GitRepository repo, boolean mustExist) throws IOException;
 
-    GitRepository createRepo(GitUser owner, String path) throws IOException;
+  GitRepository createRepo(GitUser owner, String path) throws IOException;
 
 }

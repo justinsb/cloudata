@@ -11,7 +11,7 @@ import com.google.common.util.concurrent.Service;
 
 public abstract class CompoundService extends AbstractService {
 
-  private static final Logger log = LoggerFactory.getLogger(JettyService.class);
+  private static final Logger log = LoggerFactory.getLogger(CompoundService.class);
 
     List<Service> services;
 

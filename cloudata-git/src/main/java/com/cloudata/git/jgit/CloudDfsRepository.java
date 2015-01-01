@@ -9,35 +9,43 @@ import org.eclipse.jgit.internal.storage.dfs.DfsRepository;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryBuilder;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 
-import com.cloudata.clients.keyvalue.KeyValuePath;
+import com.cloudata.datastore.DataStore;
+import com.cloudata.git.GitModel.RepositoryData;
 import com.cloudata.objectstore.ObjectStorePath;
 
 public class CloudDfsRepository extends DfsRepository {
 
-    final CloudObjDatabase objdb;
-    final CloudRefDatabase refdb;
+  final RepositoryData data;
 
-    public CloudDfsRepository(DfsRepositoryDescription repoDesc, ObjectStorePath repoPath, KeyValuePath refsPath,
-            File tempDir) {
-        super(new DfsRepositoryBuilder<DfsRepositoryBuilder, CloudDfsRepository>() {
-            @Override
-            public CloudDfsRepository build() throws IOException {
-                throw new UnsupportedOperationException();
-            }
-        }.setRepositoryDescription(repoDesc));
+  final CloudObjDatabase objdb;
+  final CloudRefDatabase refdb;
 
-        this.objdb = new CloudObjDatabase(this, repoPath, tempDir);
-        this.refdb = new CloudRefDatabase(this, refsPath);
-    }
+  public CloudDfsRepository(RepositoryData data, DfsRepositoryDescription repoDesc, ObjectStorePath repoPath,
+      DataStore dataStore, File tempDir) {
+    super(new DfsRepositoryBuilder<DfsRepositoryBuilder, CloudDfsRepository>() {
+      @Override
+      public CloudDfsRepository build() throws IOException {
+        throw new UnsupportedOperationException();
+      }
+    }.setRepositoryDescription(repoDesc));
+    this.data = data;
 
-    @Override
-    public DfsObjDatabase getObjectDatabase() {
-        return objdb;
-    }
+    this.objdb = new CloudObjDatabase(this, repoPath, tempDir);
+    this.refdb = new CloudRefDatabase(this, dataStore);
+  }
 
-    @Override
-    public DfsRefDatabase getRefDatabase() {
-        return refdb;
-    }
+  @Override
+  public DfsObjDatabase getObjectDatabase() {
+    return objdb;
+  }
+
+  @Override
+  public DfsRefDatabase getRefDatabase() {
+    return refdb;
+  }
+
+  public RepositoryData getData() {
+    return this.data;
+  }
 
 }

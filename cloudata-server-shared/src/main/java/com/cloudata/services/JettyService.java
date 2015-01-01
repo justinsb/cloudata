@@ -72,10 +72,12 @@ public class JettyService extends AbstractService {
     protected void doStop() {
         try {
             if (jetty != null) {
+              log.debug("Stopping jetty");
                 jetty.stop();
                 while (true) {
                     String state = jetty.getState();
                     if (state.equals(AbstractLifeCycle.STOPPED)) {
+                      log.debug("Stopped jetty");
                         break;
                     } else if (state.equals(AbstractLifeCycle.STOPPING)) {
                         log.debug("Waiting for jetty; state={}", state);

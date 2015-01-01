@@ -1,7 +1,6 @@
 package com.cloudata.git.jgit;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.eclipse.jgit.internal.storage.dfs.DfsRefDatabase;
 import org.eclipse.jgit.lib.ObjectId;
@@ -13,223 +12,190 @@ import org.eclipse.jgit.lib.Ref.Storage;
 import org.eclipse.jgit.lib.SymbolicRef;
 import org.eclipse.jgit.util.RefList;
 
-import com.cloudata.clients.keyvalue.IfNotExists;
-import com.cloudata.clients.keyvalue.IfVersion;
-import com.cloudata.clients.keyvalue.KeyValueEntry;
-import com.cloudata.clients.keyvalue.KeyValuePath;
-import com.cloudata.clients.keyvalue.KeyValueStore;
+import com.cloudata.datastore.DataStore;
+import com.cloudata.datastore.IfVersion;
 import com.cloudata.git.GitModel.RefData;
+import com.cloudata.git.GitModel.RepositoryData;
 import com.google.protobuf.ByteString;
 
 public class CloudRefDatabase extends DfsRefDatabase {
-    private final KeyValueStore store;
-    private final ByteString prefix;
+  private final DataStore dataStore;
 
-    static final int SPACE_REFS = 0;
+  // private final ByteString prefix;
 
-    public CloudRefDatabase(CloudDfsRepository repository, KeyValuePath refsPath) {
-        super(repository);
-        this.store = refsPath.store;
-        this.prefix = refsPath.key;
+  // static final int SPACE_REFS = 0;
+
+  public CloudRefDatabase(CloudDfsRepository repository, DataStore dataStore) {
+    super(repository);
+    this.dataStore = dataStore;
+    // this.store = refsPath.store;
+    // this.prefix = refsPath.key;
+  }
+
+  @Override
+  protected CloudDfsRepository getRepository() {
+    return (CloudDfsRepository) super.getRepository();
+  }
+
+  @Override
+  protected RefCache scanAllRefs() throws IOException {
+    RefList.Builder<Ref> ids = new RefList.Builder<Ref>();
+    RefList.Builder<Ref> sym = new RefList.Builder<Ref>();
+
+    try {
+      RefData.Builder matcher = RefData.newBuilder();
+      matcher.setRepositoryId(getRepository().getData().getRepositoryId());
+
+      for (RefData refData : dataStore.find(matcher.build())) {
+        Ref ref = fromModel(refData);
+
+        if (ref.isSymbolic()) {
+          sym.add(ref);
+        }
+        ids.add(ref);
+      }
+    } catch (Exception e) {
+      throw new IOException("Error reading tags", e);
     }
 
-    @Override
-    protected RefCache scanAllRefs() throws IOException {
-        RefList.Builder<Ref> ids = new RefList.Builder<Ref>();
-        RefList.Builder<Ref> sym = new RefList.Builder<Ref>();
+    ids.sort();
+    sym.sort();
+    return new RefCache(ids.toRefList(), sym.toRefList());
+  }
 
-        try {
-            Iterator<KeyValueEntry> entriesWithPrefix = store.listEntriesWithPrefix(SPACE_REFS, prefix);
-            while (entriesWithPrefix.hasNext()) {
-                KeyValueEntry entry = entriesWithPrefix.next();
-                ByteString value = entry.getValue();
-                if (value == null) {
-                    // Key deleted concurrently
-                    continue;
-                }
+  @Override
+  protected boolean compareAndPut(Ref oldRef, Ref newRef) throws IOException {
+    RefData newModel = toModel(getRepository().getData(), newRef);
 
-                RefData refData = RefData.parseFrom(value);
+    try {
+      if (oldRef == null || oldRef.getStorage() == Storage.NEW) {
+        return dataStore.insert(newModel);
+      }
 
-                Ref ref = fromModel(refData);
+      CloudRef cur = find(newRef.getName());
+      if (cur == null || !cur.matches(oldRef)) {
+        // Current version already out of data
+        return false;
+      }
 
-                if (ref.isSymbolic()) {
-                    sym.add(ref);
-                }
-                ids.add(ref);
-            }
-        } catch (Exception e) {
-            throw new IOException("Error reading tags", e);
-        }
-
-        ids.sort();
-        sym.sort();
-        return new RefCache(ids.toRefList(), sym.toRefList());
+      return dataStore.update(newModel, new IfVersion(cur.data));
+    } catch (IOException e) {
+      throw new IOException("Error creating reference", e);
     }
 
-    @Override
-    protected boolean compareAndPut(Ref oldRef, Ref newRef) throws IOException {
-        String name = newRef.getName();
-        ByteString refPath = getRefPath(name);
+  }
 
-        if (oldRef == null || oldRef.getStorage() == Storage.NEW) {
-            CloudRef newCloudRef = new CloudRef(toModel(newRef), refPath, null);
-            return newCloudRef.putIfAbsent();
+  class CloudRef {
+    final RefData data;
+
+    public CloudRef(RefData data) {
+      this.data = data;
+    }
+
+    public boolean matches(Ref ref) {
+      RefData d2 = toModel(getRepository().getData(), ref);
+      return data.equals(d2);
+    }
+
+    public boolean delete() throws IOException {
+      try {
+        if (!dataStore.delete(data, new IfVersion(data))) {
+          return false;
         }
+        return true;
+      } catch (IOException e) {
+        throw new IOException("Error deleting node", e);
+      }
+    }
+  }
 
-        CloudRef cur = find(name);
-        if (cur != null && cur.matches(oldRef)) {
-            return cur.replace(toModel(newRef));
+  @Override
+  protected boolean compareAndRemove(Ref oldRef) throws IOException {
+    String name = oldRef.getName();
+    CloudRef cur = find(name);
+    if (cur != null && cur.matches(oldRef)) {
+      return cur.delete();
+    } else {
+      return false;
+    }
+  }
+
+  private CloudRef find(String name) throws IOException {
+    RefData.Builder matcher = RefData.newBuilder();
+    matcher.setRepositoryId(getRepository().getData().getRepositoryId());
+    matcher.setName(name);
+
+    try {
+      RefData ref = dataStore.findOne(matcher.build());
+      if (ref == null) {
+        return null;
+      }
+      return new CloudRef(ref);
+    } catch (IOException e) {
+      throw new IOException("Error while reading reference", e);
+    }
+  }
+
+  static RefData toModel(RepositoryData repositoryData, Ref ref) {
+    RefData.Builder data = RefData.newBuilder();
+
+    String name = ref.getName();
+    if (name != null) {
+      data.setName(name);
+    }
+
+    if (ref instanceof SymbolicRef) {
+      Ref target = ref.getTarget();
+      if (target == null) {
+        throw new IllegalStateException();
+      }
+
+      if (target instanceof Unpeeled) {
+        String targetName = target.getName();
+        if (targetName != null) {
+          data.setTargetName(targetName);
         } else {
-            return false;
+          throw new IllegalStateException();
         }
-
+      } else {
+        throw new IllegalArgumentException();
+      }
+    } else if (ref instanceof PeeledNonTag) {
+      ObjectId objectId = ref.getObjectId();
+      if (objectId != null) {
+        byte[] buf = new byte[20];
+        objectId.copyRawTo(buf, 0);
+        data.setObjectId(ByteString.copyFrom(buf));
+      } else {
+        throw new IllegalArgumentException();
+      }
+    } else {
+      throw new IllegalArgumentException();
     }
 
-    private ByteString getRefPath(String name) {
-        return prefix.concat(ByteString.copyFromUtf8(name));
+    data.setRepositoryId(repositoryData.getRepositoryId());
+    return data.build();
+  }
+
+  private Ref fromModel(RefData refData) {
+    if (refData.hasTargetName()) {
+      SymbolicRef ref = new SymbolicRef(refData.getName(), new ObjectIdRef.Unpeeled(Storage.NEW,
+          refData.getTargetName(), null));
+      return ref;
+    } else if (refData.hasObjectId()) {
+      Ref ref = new ObjectIdRef.PeeledNonTag(Storage.PACKED, refData.getName(), ObjectId.fromRaw(refData.getObjectId()
+          .toByteArray()));
+      return ref;
+    } else {
+      throw new IllegalStateException();
     }
+  }
 
-    class CloudRef {
-        final ByteString key;
-        final Object version;
-
-        final RefData data;
-
-        public CloudRef(RefData data, ByteString key, Object version) {
-            this.data = data;
-            this.key = key;
-            this.version = version;
-        }
-
-        public boolean replace(RefData newRef) throws IOException {
-            try {
-                ByteString value = newRef.toByteString();
-
-                if (!store.putSync(SPACE_REFS, key, value, new IfVersion(version))) {
-                    return false;
-                }
-                return true;
-            } catch (IOException e) {
-                throw new IOException("Error replacing node", e);
-            }
-        }
-
-        public boolean putIfAbsent() throws IOException {
-            try {
-                ByteString bytes = data.toByteString();
-
-                return store.putSync(SPACE_REFS, key, bytes, IfNotExists.INSTANCE);
-            } catch (IOException e) {
-                throw new IOException("Error creating reference", e);
-            }
-        }
-
-        public boolean matches(Ref ref) {
-            RefData d2 = toModel(ref);
-            return data.equals(d2);
-        }
-
-        public boolean delete() throws IOException {
-            try {
-                if (!store.delete(SPACE_REFS, key, new IfVersion(version))) {
-                    return false;
-                }
-                return true;
-            } catch (IOException e) {
-                throw new IOException("Error deleting node", e);
-            }
-        }
-    }
-
-    @Override
-    protected boolean compareAndRemove(Ref oldRef) throws IOException {
-        String name = oldRef.getName();
-        CloudRef cur = find(name);
-        if (cur != null && cur.matches(oldRef)) {
-            return cur.delete();
-        } else {
-            return false;
-        }
-    }
-
-    private CloudRef find(String name) throws IOException {
-        ByteString refPath = getRefPath(name);
-
-        try {
-            ByteString value = store.read(SPACE_REFS, refPath);
-
-            if (value == null) {
-                return null;
-            }
-
-            RefData ref = RefData.parseFrom(value);
-            return new CloudRef(ref, refPath, value);
-        } catch (IOException e) {
-            throw new IOException("Error while reading reference", e);
-        }
-    }
-
-    static RefData toModel(Ref ref) {
-        RefData.Builder data = RefData.newBuilder();
-
-        String name = ref.getName();
-        if (name != null) {
-            data.setName(name);
-        }
-
-        if (ref instanceof SymbolicRef) {
-            Ref target = ref.getTarget();
-            if (target == null) {
-                throw new IllegalStateException();
-            }
-
-            if (target instanceof Unpeeled) {
-                String targetName = target.getName();
-                if (targetName != null) {
-                    data.setTargetName(targetName);
-                } else {
-                    throw new IllegalStateException();
-                }
-            } else {
-                throw new IllegalArgumentException();
-            }
-        } else if (ref instanceof PeeledNonTag) {
-            ObjectId objectId = ref.getObjectId();
-            if (objectId != null) {
-                byte[] buf = new byte[20];
-                objectId.copyRawTo(buf, 0);
-                data.setObjectId(ByteString.copyFrom(buf));
-            } else {
-                throw new IllegalArgumentException();
-            }
-        } else {
-            throw new IllegalArgumentException();
-        }
-
-        return data.build();
-    }
-
-    private Ref fromModel(RefData refData) {
-        if (refData.hasTargetName()) {
-            SymbolicRef ref = new SymbolicRef(refData.getName(), new ObjectIdRef.Unpeeled(Storage.NEW,
-                    refData.getTargetName(), null));
-            return ref;
-        } else {
-            if (refData.hasObjectId()) {
-                Ref ref = new ObjectIdRef.PeeledNonTag(Storage.PACKED, refData.getName(), ObjectId.fromRaw(refData
-                        .getObjectId().toByteArray()));
-                return ref;
-            } else {
-                throw new IllegalStateException();
-            }
-        }
-    }
-
-    // private boolean eq(Ref a, Ref b) {
-    // if (a.getObjectId() == null && b.getObjectId() == null)
-    // return true;
-    // if (a.getObjectId() != null)
-    // return a.getObjectId().equals(b.getObjectId());
-    // return false;
-    // }
+  // private boolean eq(Ref a, Ref b) {
+  // if (a.getObjectId() == null && b.getObjectId() == null)
+  // return true;
+  // if (a.getObjectId() != null)
+  // return a.getObjectId().equals(b.getObjectId());
+  // return false;
+  // }
 }

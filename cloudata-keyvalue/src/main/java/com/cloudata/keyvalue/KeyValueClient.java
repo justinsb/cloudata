@@ -191,6 +191,19 @@ public class KeyValueClient {
     private RaftMembership raftMembership;
 
     public T call() throws IOException {
+      int maxAttempts = 2;
+      for (int attempt = 0; attempt < maxAttempts - 1; attempt++) {
+        try {
+          return call0();
+        } catch (IOException e) {
+          log.warn("Error during query; will retry", e);
+        }
+      }
+      
+      return call0();
+    }
+    
+    T call0() throws IOException {
       HashMultiset<String> serversQueried = HashMultiset.create();
 
       while (true) {

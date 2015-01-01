@@ -1,10 +1,13 @@
 package com.cloudata.keyvalue;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.junit.AfterClass;
 import org.robotninjas.barge.ClusterConfig;
+import org.robotninjas.barge.NotLeaderException;
+import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.Replica;
 import org.robotninjas.barge.proto.RaftEntry.ConfigTimeouts;
 import org.slf4j.Logger;
@@ -12,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.TestUtils;
 import com.cloudata.TimeSpan;
+import com.cloudata.snapshots.LocalSnapshotStorage;
+import com.cloudata.snapshots.SnapshotStorage;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.common.net.HostAndPort;
@@ -74,7 +79,7 @@ public class IntegrationTestBase {
     return needReconfigure;
   }
 
-  protected static KeyValueServer buildServer(int i, Iterable<KeyValueServer> seedMembers) {
+  protected static KeyValueServer buildServer(int i, Iterable<KeyValueServer> seedMembers) throws IOException {
     Replica local = Replica.fromString("localhost:" + (10000 + i));
 
     File baseDir = new File(TEMPDIR, "" + i);
@@ -101,7 +106,8 @@ public class IntegrationTestBase {
     ClusterConfig seedConfig = new ClusterConfig(local, allMembers, timeouts);
     config.seedConfig = seedConfig;
     
-    KeyValueServer server = new KeyValueServer(baseDir, local, config);
+    SnapshotStorage snapshotStore = new LocalSnapshotStorage(new File(TEMPDIR, "snapshots"));
+    KeyValueServer server = new KeyValueServer(baseDir, local, config, snapshotStore);
     return server;
   }
 
@@ -149,17 +155,30 @@ public class IntegrationTestBase {
     return leader;
   }
 
-  static void reconfigure() {
-    final KeyValueServer leader = getLeader();
-    List<String> serverKeys = Lists.newArrayList();
-    for (int i = 0; i < SERVERS.size(); i++) {
-      KeyValueServer server = SERVERS.get(i);
-      if (server == null) {
-        continue;
+  static void reconfigure() throws RaftException {
+    int attempt = 0;
+    int maxAttempts = 10;
+    while (true) {
+      attempt++;
+      final KeyValueServer leader = getLeader();
+      List<String> serverKeys = Lists.newArrayList();
+      for (int i = 0; i < SERVERS.size(); i++) {
+        KeyValueServer server = SERVERS.get(i);
+        if (server == null) {
+          continue;
+        }
+        serverKeys.add(server.getRaftServerKey());
       }
-      serverKeys.add(server.getRaftServerKey());
+      try {
+        leader.reconfigure(serverKeys);
+        return;
+      } catch (NotLeaderException e) {
+        if (attempt > maxAttempts) {
+          throw e;
+        }
+        log.warn("NotLeader during reconfigure; will retry");
+      }
     }
-    leader.reconfigure(serverKeys);
   }
 
   public static void stopServers() throws Exception {

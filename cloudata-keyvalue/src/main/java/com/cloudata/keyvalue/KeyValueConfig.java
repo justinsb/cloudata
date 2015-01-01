@@ -9,6 +9,8 @@ import com.cloudata.cluster.GossipConfig;
 import com.google.common.net.HostAndPort;
 
 public class KeyValueConfig implements Serializable {
+  private static final long serialVersionUID = 1L;
+  
     public HostAndPort redisEndpoint;
     public HostAndPort protobufEndpoint;
 

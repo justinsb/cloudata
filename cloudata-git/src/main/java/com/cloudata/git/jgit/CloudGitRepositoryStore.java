@@ -15,7 +15,6 @@
 package com.cloudata.git.jgit;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.SecureRandom;
 
@@ -27,12 +26,14 @@ import org.eclipse.jgit.lib.RepositoryCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudata.clients.keyvalue.KeyValuePath;
+import com.cloudata.datastore.DataStore;
 import com.cloudata.git.GitModel.RepositoryData;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 import com.cloudata.git.services.GitRepositoryStore;
+import com.cloudata.objectstore.ObjectStore;
 import com.cloudata.objectstore.ObjectStorePath;
+import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
 import com.google.inject.Singleton;
 import com.google.protobuf.ByteString;
@@ -40,114 +41,126 @@ import com.google.protobuf.ByteString;
 /** Manages Git repositories stored in the cloud */
 @Singleton
 public class CloudGitRepositoryStore implements GitRepositoryStore {
-    private static final String METADATA_KEY = "metadata";
+  private static final String METADATA_KEY = "metadata";
 
-    static final ByteString ZERO = ByteString.copyFrom(new byte[] { 0 });
+  static final ByteString ZERO = ByteString.copyFrom(new byte[] { 0 });
 
-    private static final Logger log = LoggerFactory.getLogger(CloudGitRepositoryStore.class);
+  private static final Logger log = LoggerFactory.getLogger(CloudGitRepositoryStore.class);
 
-    private final KeyValuePath refsBase;
+  private final DataStore dataStore;
 
-    private final File tempDir;
+  private final File tempDir;
 
-    static final SecureRandom random = new SecureRandom();
+  static final SecureRandom random = new SecureRandom();
 
-    public CloudGitRepositoryStore(KeyValuePath refsBase) {
-        this.refsBase = refsBase;
+  final ObjectStore objectStore;
 
-        log.warn("Using new random tempdir");
+  public CloudGitRepositoryStore(ObjectStore objectStore, DataStore dataStore) {
+    this.objectStore = objectStore;
+    this.dataStore = dataStore;
 
-        this.tempDir = Files.createTempDir();
-    }
+    log.warn("Using new random tempdir");
 
-    public static boolean canAccess(GitUser user, GitRepository repository) throws IOException {
-        String absolutePath = repository.getAbsolutePath();
-        ObjectStorePath repoPath = user.buildObjectStorePath(absolutePath);
-        return loadRepository(repoPath) != null;
-    }
+    this.tempDir = Files.createTempDir();
+  }
 
-    Repository openUncached(GitUser user, GitRepository repo, boolean mustExist) throws IOException {
-        String absolutePath = repo.getAbsolutePath();
-        ObjectStorePath repoPath = user.buildObjectStorePath(absolutePath);
+  // public static boolean canAccess(GitUser user, GitRepository repository) throws IOException {
+  // // ObjectStorePath repoPath = repository.getRepoPath();
+  // // return loadRepository(repoPath) != null;
+  // }
 
-        ByteString suffix = ZERO.concat(ByteString.copyFromUtf8(absolutePath)).concat(ZERO);
-        KeyValuePath refsPath = refsBase.child(suffix);
+  Repository openUncached(GitRepository repo, boolean mustExist) throws IOException {
+    String objectPath = repo.getObjectPath();
 
-        DfsRepositoryDescription description = new DfsRepositoryDescription(absolutePath);
-        CloudDfsRepository dfs = new CloudDfsRepository(description, repoPath, refsPath, tempDir);
+    // ByteString suffix = ZERO.concat(ByteString.copyFromUtf8(absolutePath)).concat(ZERO);
+    // KeyValuePath refsPath = refsBase.child(suffix);
 
-        try {
-            if (!dfs.exists()) {
-                if (mustExist) {
-                    throw new RepositoryNotFoundException(absolutePath);
-                }
-                dfs.create(true);
-                dfs.updateRef(Constants.HEAD).link("refs/heads/master");
-            }
-        } catch (IOException e) {
-            throw new IllegalStateException("Error creating repository", e);
+    DfsRepositoryDescription description = new DfsRepositoryDescription(objectPath);
+    ObjectStorePath repoPath = new ObjectStorePath(objectStore, objectPath);
+    CloudDfsRepository dfs = new CloudDfsRepository(repo.getData(), description, repoPath, dataStore, tempDir);
+
+    try {
+      if (!dfs.exists()) {
+        if (mustExist) {
+          throw new RepositoryNotFoundException(repo.getData().getName());
         }
-
-        dfs.getConfig().setBoolean("http", null, "receivepack", true);
-
-        return dfs;
+        dfs.create(true);
+        dfs.updateRef(Constants.HEAD).link("refs/heads/master");
+      }
+    } catch (IOException e) {
+      throw new IllegalStateException("Error creating repository", e);
     }
 
-    static GitRepository loadRepository(ObjectStorePath repoPath) throws IOException {
-        ObjectStorePath metadataPath = repoPath.child(METADATA_KEY);
+    dfs.getConfig().setBoolean("http", null, "receivepack", true);
 
-        try {
-            ByteString data = metadataPath.read();
-            RepositoryData repositoryData = RepositoryData.parseFrom(data);
-            return new GitRepository(repoPath.getPath(), repositoryData);
-        } catch (FileNotFoundException e) {
-            return null;
-        }
+    return dfs;
+  }
+
+  GitRepository loadRepository(String repoName) throws IOException {
+    RepositoryData.Builder matcher = RepositoryData.newBuilder();
+    matcher.setName(repoName);
+
+    RepositoryData repositoryData = dataStore.findOne(matcher.build());
+    if (repositoryData == null) {
+      return null;
     }
 
-    @Override
-    public GitRepository findRepo(GitUser user, String name) throws IOException {
-        if (user == null) {
-            // No public repos
-            return null;
-        }
+    String objectPath = toObjectPath(repositoryData);
 
-        String absolutePath = user.mapToAbsolutePath(name);
-        ObjectStorePath repoPath = user.buildObjectStorePath(absolutePath);
-        return loadRepository(repoPath);
+    return new GitRepository(objectPath, repositoryData);
+  }
+
+  @Override
+  public GitRepository findRepo(String repoName) throws IOException {
+    // if (user == null) {
+    // // No public repos
+    // return null;
+    // }
+
+    return loadRepository(repoName);
+  }
+
+  @Override
+  public Repository openRepository(GitRepository repo, boolean mustExist) throws IOException {
+    final CloudKey loc = new CloudKey(repo, this);
+    try {
+      return RepositoryCache.open(loc, mustExist);
+    } catch (IOException e1) {
+      RepositoryNotFoundException e2 = new RepositoryNotFoundException("Cannot open repository " + repo.getObjectPath());
+      e2.initCause(e1);
+      throw e2;
     }
+  }
 
-    @Override
-    public Repository openRepository(GitUser user, GitRepository repo, boolean mustExist) throws IOException {
-        final CloudKey loc = new CloudKey(user, repo, this);
-        try {
-            return RepositoryCache.open(loc, mustExist);
-        } catch (IOException e1) {
-            RepositoryNotFoundException e2 = new RepositoryNotFoundException("Cannot open repository "
-                    + repo.getAbsolutePath());
-            e2.initCause(e1);
-            throw e2;
-        }
+  @Override
+  public GitRepository createRepo(GitUser user, String name) throws IOException {
+    // String absolutePath = user.mapToAbsolutePath(name);
+    // ObjectStorePath repoPath = buildObjectStorePath(name);
+
+    RepositoryData.Builder repositoryDataBuilder = RepositoryData.newBuilder();
+
+    byte[] uniqueId = new byte[16];
+    synchronized (random) {
+      random.nextBytes(uniqueId);
     }
+    repositoryDataBuilder.setRepositoryId(ByteString.copyFrom(uniqueId));
+    repositoryDataBuilder.setName(name);
+    repositoryDataBuilder.setOwner(user.getId());
 
-    @Override
-    public GitRepository createRepo(GitUser user, String name) throws IOException {
-        String absolutePath = user.mapToAbsolutePath(name);
-        ObjectStorePath repoPath = user.buildObjectStorePath(absolutePath);
-        ObjectStorePath metadataPath = repoPath.child(METADATA_KEY);
+    RepositoryData repositoryData = repositoryDataBuilder.build();
+    dataStore.insert(repositoryData);
 
-        RepositoryData.Builder repositoryDataBuilder = RepositoryData.newBuilder();
+    String objectPath = toObjectPath(repositoryData);
 
-        byte[] uniqueId = new byte[128];
-        synchronized (random) {
-            random.nextBytes(uniqueId);
-        }
-        repositoryDataBuilder.setUniqueId(ByteString.copyFrom(uniqueId));
+    GitRepository gitRepository = new GitRepository(objectPath, repositoryData);
 
-        RepositoryData repositoryData = repositoryDataBuilder.build();
+    // Create the repo
+    openRepository(gitRepository, false);
 
-        metadataPath.create(repositoryData.toByteString());
+    return gitRepository;
+  }
 
-        return new GitRepository(absolutePath, repositoryData);
-    }
+  private String toObjectPath(RepositoryData repositoryData) {
+    return BaseEncoding.base64Url().encode(repositoryData.getRepositoryId().toByteArray());
+  }
 }

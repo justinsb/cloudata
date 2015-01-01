@@ -13,39 +13,48 @@ public final class GitModel {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
+     */
+    boolean hasRepositoryId();
+    /**
+     * <code>optional bytes repository_id = 1;</code>
+     */
+    com.google.protobuf.ByteString getRepositoryId();
+
+    /**
+     * <code>optional string name = 2;</code>
      */
     boolean hasName();
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string name = 2;</code>
      */
     java.lang.String getName();
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string name = 2;</code>
      */
     com.google.protobuf.ByteString
         getNameBytes();
 
     /**
-     * <code>optional string target_name = 2;</code>
+     * <code>optional string target_name = 3;</code>
      */
     boolean hasTargetName();
     /**
-     * <code>optional string target_name = 2;</code>
+     * <code>optional string target_name = 3;</code>
      */
     java.lang.String getTargetName();
     /**
-     * <code>optional string target_name = 2;</code>
+     * <code>optional string target_name = 3;</code>
      */
     com.google.protobuf.ByteString
         getTargetNameBytes();
 
     /**
-     * <code>optional bytes object_id = 3;</code>
+     * <code>optional bytes object_id = 4;</code>
      */
     boolean hasObjectId();
     /**
-     * <code>optional bytes object_id = 3;</code>
+     * <code>optional bytes object_id = 4;</code>
      */
     com.google.protobuf.ByteString getObjectId();
   }
@@ -102,19 +111,24 @@ public final class GitModel {
               break;
             }
             case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              name_ = bs;
+              repositoryId_ = input.readBytes();
               break;
             }
             case 18: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              targetName_ = bs;
+              name_ = bs;
               break;
             }
             case 26: {
+              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
+              targetName_ = bs;
+              break;
+            }
+            case 34: {
+              bitField0_ |= 0x00000008;
               objectId_ = input.readBytes();
               break;
             }
@@ -158,16 +172,31 @@ public final class GitModel {
     }
 
     private int bitField0_;
-    public static final int NAME_FIELD_NUMBER = 1;
-    private java.lang.Object name_;
+    public static final int REPOSITORY_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString repositoryId_;
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
      */
-    public boolean hasName() {
+    public boolean hasRepositoryId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
+     */
+    public com.google.protobuf.ByteString getRepositoryId() {
+      return repositoryId_;
+    }
+
+    public static final int NAME_FIELD_NUMBER = 2;
+    private java.lang.Object name_;
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional string name = 2;</code>
      */
     public java.lang.String getName() {
       java.lang.Object ref = name_;
@@ -184,7 +213,7 @@ public final class GitModel {
       }
     }
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string name = 2;</code>
      */
     public com.google.protobuf.ByteString
         getNameBytes() {
@@ -200,16 +229,16 @@ public final class GitModel {
       }
     }
 
-    public static final int TARGET_NAME_FIELD_NUMBER = 2;
+    public static final int TARGET_NAME_FIELD_NUMBER = 3;
     private java.lang.Object targetName_;
     /**
-     * <code>optional string target_name = 2;</code>
+     * <code>optional string target_name = 3;</code>
      */
     public boolean hasTargetName() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
+      return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string target_name = 2;</code>
+     * <code>optional string target_name = 3;</code>
      */
     public java.lang.String getTargetName() {
       java.lang.Object ref = targetName_;
@@ -226,7 +255,7 @@ public final class GitModel {
       }
     }
     /**
-     * <code>optional string target_name = 2;</code>
+     * <code>optional string target_name = 3;</code>
      */
     public com.google.protobuf.ByteString
         getTargetNameBytes() {
@@ -242,22 +271,23 @@ public final class GitModel {
       }
     }
 
-    public static final int OBJECT_ID_FIELD_NUMBER = 3;
+    public static final int OBJECT_ID_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString objectId_;
     /**
-     * <code>optional bytes object_id = 3;</code>
+     * <code>optional bytes object_id = 4;</code>
      */
     public boolean hasObjectId() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional bytes object_id = 3;</code>
+     * <code>optional bytes object_id = 4;</code>
      */
     public com.google.protobuf.ByteString getObjectId() {
       return objectId_;
     }
 
     private void initFields() {
+      repositoryId_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
       targetName_ = "";
       objectId_ = com.google.protobuf.ByteString.EMPTY;
@@ -276,13 +306,16 @@ public final class GitModel {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getNameBytes());
+        output.writeBytes(1, repositoryId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getTargetNameBytes());
+        output.writeBytes(2, getNameBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, objectId_);
+        output.writeBytes(3, getTargetNameBytes());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBytes(4, objectId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -295,15 +328,19 @@ public final class GitModel {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getNameBytes());
+          .computeBytesSize(1, repositoryId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getTargetNameBytes());
+          .computeBytesSize(2, getNameBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, objectId_);
+          .computeBytesSize(3, getTargetNameBytes());
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(4, objectId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -422,12 +459,14 @@ public final class GitModel {
 
       public Builder clear() {
         super.clear();
-        name_ = "";
+        repositoryId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        targetName_ = "";
+        name_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        objectId_ = com.google.protobuf.ByteString.EMPTY;
+        targetName_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
+        objectId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -459,13 +498,17 @@ public final class GitModel {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.name_ = name_;
+        result.repositoryId_ = repositoryId_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.targetName_ = targetName_;
+        result.name_ = name_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
+        }
+        result.targetName_ = targetName_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
         }
         result.objectId_ = objectId_;
         result.bitField0_ = to_bitField0_;
@@ -484,13 +527,16 @@ public final class GitModel {
 
       public Builder mergeFrom(com.cloudata.git.GitModel.RefData other) {
         if (other == com.cloudata.git.GitModel.RefData.getDefaultInstance()) return this;
+        if (other.hasRepositoryId()) {
+          setRepositoryId(other.getRepositoryId());
+        }
         if (other.hasName()) {
-          bitField0_ |= 0x00000001;
+          bitField0_ |= 0x00000002;
           name_ = other.name_;
           onChanged();
         }
         if (other.hasTargetName()) {
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000004;
           targetName_ = other.targetName_;
           onChanged();
         }
@@ -524,15 +570,50 @@ public final class GitModel {
       }
       private int bitField0_;
 
-      private java.lang.Object name_ = "";
+      private com.google.protobuf.ByteString repositoryId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional bytes repository_id = 1;</code>
        */
-      public boolean hasName() {
+      public boolean hasRepositoryId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional bytes repository_id = 1;</code>
+       */
+      public com.google.protobuf.ByteString getRepositoryId() {
+        return repositoryId_;
+      }
+      /**
+       * <code>optional bytes repository_id = 1;</code>
+       */
+      public Builder setRepositoryId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        repositoryId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes repository_id = 1;</code>
+       */
+      public Builder clearRepositoryId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        repositoryId_ = getDefaultInstance().getRepositoryId();
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional string name = 2;</code>
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -549,7 +630,7 @@ public final class GitModel {
         }
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -565,36 +646,36 @@ public final class GitModel {
         }
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder setName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder clearName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
@@ -602,13 +683,13 @@ public final class GitModel {
 
       private java.lang.Object targetName_ = "";
       /**
-       * <code>optional string target_name = 2;</code>
+       * <code>optional string target_name = 3;</code>
        */
       public boolean hasTargetName() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
+        return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string target_name = 2;</code>
+       * <code>optional string target_name = 3;</code>
        */
       public java.lang.String getTargetName() {
         java.lang.Object ref = targetName_;
@@ -625,7 +706,7 @@ public final class GitModel {
         }
       }
       /**
-       * <code>optional string target_name = 2;</code>
+       * <code>optional string target_name = 3;</code>
        */
       public com.google.protobuf.ByteString
           getTargetNameBytes() {
@@ -641,36 +722,36 @@ public final class GitModel {
         }
       }
       /**
-       * <code>optional string target_name = 2;</code>
+       * <code>optional string target_name = 3;</code>
        */
       public Builder setTargetName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         targetName_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string target_name = 2;</code>
+       * <code>optional string target_name = 3;</code>
        */
       public Builder clearTargetName() {
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000004);
         targetName_ = getDefaultInstance().getTargetName();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string target_name = 2;</code>
+       * <code>optional string target_name = 3;</code>
        */
       public Builder setTargetNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000002;
+  bitField0_ |= 0x00000004;
         targetName_ = value;
         onChanged();
         return this;
@@ -678,34 +759,34 @@ public final class GitModel {
 
       private com.google.protobuf.ByteString objectId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes object_id = 3;</code>
+       * <code>optional bytes object_id = 4;</code>
        */
       public boolean hasObjectId() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional bytes object_id = 3;</code>
+       * <code>optional bytes object_id = 4;</code>
        */
       public com.google.protobuf.ByteString getObjectId() {
         return objectId_;
       }
       /**
-       * <code>optional bytes object_id = 3;</code>
+       * <code>optional bytes object_id = 4;</code>
        */
       public Builder setObjectId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         objectId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes object_id = 3;</code>
+       * <code>optional bytes object_id = 4;</code>
        */
       public Builder clearObjectId() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         objectId_ = getDefaultInstance().getObjectId();
         onChanged();
         return this;
@@ -727,13 +808,41 @@ public final class GitModel {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional bytes unique_id = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
      */
-    boolean hasUniqueId();
+    boolean hasRepositoryId();
     /**
-     * <code>optional bytes unique_id = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
      */
-    com.google.protobuf.ByteString getUniqueId();
+    com.google.protobuf.ByteString getRepositoryId();
+
+    /**
+     * <code>optional string owner = 2;</code>
+     */
+    boolean hasOwner();
+    /**
+     * <code>optional string owner = 2;</code>
+     */
+    java.lang.String getOwner();
+    /**
+     * <code>optional string owner = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getOwnerBytes();
+
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    boolean hasName();
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    java.lang.String getName();
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
   }
   /**
    * Protobuf type {@code RepositoryData}
@@ -789,7 +898,19 @@ public final class GitModel {
             }
             case 10: {
               bitField0_ |= 0x00000001;
-              uniqueId_ = input.readBytes();
+              repositoryId_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000002;
+              owner_ = bs;
+              break;
+            }
+            case 26: {
+              com.google.protobuf.ByteString bs = input.readBytes();
+              bitField0_ |= 0x00000004;
+              name_ = bs;
               break;
             }
           }
@@ -832,23 +953,109 @@ public final class GitModel {
     }
 
     private int bitField0_;
-    public static final int UNIQUE_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString uniqueId_;
+    public static final int REPOSITORY_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString repositoryId_;
     /**
-     * <code>optional bytes unique_id = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
      */
-    public boolean hasUniqueId() {
+    public boolean hasRepositoryId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes unique_id = 1;</code>
+     * <code>optional bytes repository_id = 1;</code>
      */
-    public com.google.protobuf.ByteString getUniqueId() {
-      return uniqueId_;
+    public com.google.protobuf.ByteString getRepositoryId() {
+      return repositoryId_;
+    }
+
+    public static final int OWNER_FIELD_NUMBER = 2;
+    private java.lang.Object owner_;
+    /**
+     * <code>optional string owner = 2;</code>
+     */
+    public boolean hasOwner() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional string owner = 2;</code>
+     */
+    public java.lang.String getOwner() {
+      java.lang.Object ref = owner_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          owner_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string owner = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOwnerBytes() {
+      java.lang.Object ref = owner_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        owner_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int NAME_FIELD_NUMBER = 3;
+    private java.lang.Object name_;
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string name = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
     }
 
     private void initFields() {
-      uniqueId_ = com.google.protobuf.ByteString.EMPTY;
+      repositoryId_ = com.google.protobuf.ByteString.EMPTY;
+      owner_ = "";
+      name_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -864,7 +1071,13 @@ public final class GitModel {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, uniqueId_);
+        output.writeBytes(1, repositoryId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getOwnerBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, getNameBytes());
       }
       getUnknownFields().writeTo(output);
     }
@@ -877,7 +1090,15 @@ public final class GitModel {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, uniqueId_);
+          .computeBytesSize(1, repositoryId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getOwnerBytes());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, getNameBytes());
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -996,8 +1217,12 @@ public final class GitModel {
 
       public Builder clear() {
         super.clear();
-        uniqueId_ = com.google.protobuf.ByteString.EMPTY;
+        repositoryId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
+        owner_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1029,7 +1254,15 @@ public final class GitModel {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.uniqueId_ = uniqueId_;
+        result.repositoryId_ = repositoryId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.owner_ = owner_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.name_ = name_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1046,8 +1279,18 @@ public final class GitModel {
 
       public Builder mergeFrom(com.cloudata.git.GitModel.RepositoryData other) {
         if (other == com.cloudata.git.GitModel.RepositoryData.getDefaultInstance()) return this;
-        if (other.hasUniqueId()) {
-          setUniqueId(other.getUniqueId());
+        if (other.hasRepositoryId()) {
+          setRepositoryId(other.getRepositoryId());
+        }
+        if (other.hasOwner()) {
+          bitField0_ |= 0x00000002;
+          owner_ = other.owner_;
+          onChanged();
+        }
+        if (other.hasName()) {
+          bitField0_ |= 0x00000004;
+          name_ = other.name_;
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1076,37 +1319,189 @@ public final class GitModel {
       }
       private int bitField0_;
 
-      private com.google.protobuf.ByteString uniqueId_ = com.google.protobuf.ByteString.EMPTY;
+      private com.google.protobuf.ByteString repositoryId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes unique_id = 1;</code>
+       * <code>optional bytes repository_id = 1;</code>
        */
-      public boolean hasUniqueId() {
+      public boolean hasRepositoryId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bytes unique_id = 1;</code>
+       * <code>optional bytes repository_id = 1;</code>
        */
-      public com.google.protobuf.ByteString getUniqueId() {
-        return uniqueId_;
+      public com.google.protobuf.ByteString getRepositoryId() {
+        return repositoryId_;
       }
       /**
-       * <code>optional bytes unique_id = 1;</code>
+       * <code>optional bytes repository_id = 1;</code>
        */
-      public Builder setUniqueId(com.google.protobuf.ByteString value) {
+      public Builder setRepositoryId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        uniqueId_ = value;
+        repositoryId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes unique_id = 1;</code>
+       * <code>optional bytes repository_id = 1;</code>
        */
-      public Builder clearUniqueId() {
+      public Builder clearRepositoryId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        uniqueId_ = getDefaultInstance().getUniqueId();
+        repositoryId_ = getDefaultInstance().getRepositoryId();
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object owner_ = "";
+      /**
+       * <code>optional string owner = 2;</code>
+       */
+      public boolean hasOwner() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional string owner = 2;</code>
+       */
+      public java.lang.String getOwner() {
+        java.lang.Object ref = owner_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            owner_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string owner = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOwnerBytes() {
+        java.lang.Object ref = owner_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          owner_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string owner = 2;</code>
+       */
+      public Builder setOwner(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        owner_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string owner = 2;</code>
+       */
+      public Builder clearOwner() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        owner_ = getDefaultInstance().getOwner();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string owner = 2;</code>
+       */
+      public Builder setOwnerBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        owner_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public java.lang.String getName() {
+        java.lang.Object ref = name_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          if (bs.isValidUtf8()) {
+            name_ = s;
+          }
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getNameBytes() {
+        java.lang.Object ref = name_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          name_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public Builder setName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        name_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public Builder clearName() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        name_ = getDefaultInstance().getName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string name = 3;</code>
+       */
+      public Builder setNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        name_ = value;
         onChanged();
         return this;
       }
@@ -1141,10 +1536,12 @@ public final class GitModel {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\035src/main/proto/GitModel.proto\"?\n\007RefDa" +
-      "ta\022\014\n\004name\030\001 \001(\t\022\023\n\013target_name\030\002 \001(\t\022\021\n" +
-      "\tobject_id\030\003 \001(\014\"#\n\016RepositoryData\022\021\n\tun" +
-      "ique_id\030\001 \001(\014B\022\n\020com.cloudata.git"
+      "\n\035src/main/proto/GitModel.proto\"V\n\007RefDa" +
+      "ta\022\025\n\rrepository_id\030\001 \001(\014\022\014\n\004name\030\002 \001(\t\022" +
+      "\023\n\013target_name\030\003 \001(\t\022\021\n\tobject_id\030\004 \001(\014\"" +
+      "D\n\016RepositoryData\022\025\n\rrepository_id\030\001 \001(\014" +
+      "\022\r\n\005owner\030\002 \001(\t\022\014\n\004name\030\003 \001(\tB\022\n\020com.clo" +
+      "udata.git"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1163,13 +1560,13 @@ public final class GitModel {
     internal_static_RefData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RefData_descriptor,
-        new java.lang.String[] { "Name", "TargetName", "ObjectId", });
+        new java.lang.String[] { "RepositoryId", "Name", "TargetName", "ObjectId", });
     internal_static_RepositoryData_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_RepositoryData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_RepositoryData_descriptor,
-        new java.lang.String[] { "UniqueId", });
+        new java.lang.String[] { "RepositoryId", "Owner", "Name", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

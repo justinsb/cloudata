@@ -3,30 +3,34 @@ package com.cloudata.keyvalue;
 import io.netty.util.concurrent.DefaultThreadFactory;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
-import org.robotninjas.barge.ClusterConfig;
+import org.robotninjas.barge.RaftException;
 import org.robotninjas.barge.RaftMembership;
 import org.robotninjas.barge.RaftService;
 import org.robotninjas.barge.Replica;
+import org.robotninjas.barge.log.journalio.JournalRaftLog;
 import org.robotninjas.barge.proto.RaftEntry.Membership;
+import org.robotninjas.barge.proto.RaftEntry.SnapshotInfo;
 import org.robotninjas.barge.rpc.netty.NettyRaftService;
-import org.robotninjas.barge.rpc.netty.NettyRaftService.Builder;
+import org.robotninjas.barge.state.ConfigurationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.ProtobufServer;
 import com.cloudata.cluster.ClusterService;
+import com.cloudata.cluster.RepairService;
 import com.cloudata.keyvalue.protobuf.KeyValueProtobufEndpoint;
 import com.cloudata.keyvalue.redis.RedisEndpoint;
 import com.cloudata.keyvalue.redis.RedisServer;
 import com.cloudata.keyvalue.web.WebModule;
+import com.cloudata.services.CloseableService;
 import com.cloudata.services.CompoundService;
 import com.cloudata.services.JettyService;
+import com.cloudata.snapshots.LocalSnapshotStorage;
+import com.cloudata.snapshots.SnapshotStorage;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.net.HostAndPort;
@@ -49,7 +53,7 @@ public class KeyValueServer extends CompoundService {
 
   private final KeyValueConfig config;
 
-  public KeyValueServer(File baseDir, Replica local, KeyValueConfig config) {
+  public KeyValueServer(File baseDir, Replica local, KeyValueConfig config, SnapshotStorage snapshotStorage) {
     Preconditions.checkNotNull(config);
     Preconditions.checkNotNull(config.seedConfig);
 
@@ -66,14 +70,19 @@ public class KeyValueServer extends CompoundService {
 
     ListeningExecutorService executor = MoreExecutors.listeningDecorator(Executors
         .newCachedThreadPool(new DefaultThreadFactory("pool-worker-keyvalue")));
-    this.stateMachine = new KeyValueStateMachine(executor, stateDir);
+    this.stateMachine = new KeyValueStateMachine(executor, stateDir, snapshotStorage);
 
     {
+      JournalRaftLog.Builder logBuilder = new JournalRaftLog.Builder();
+      logBuilder.logDirectory = logDir;
+      logBuilder.stateMachine = stateMachine;
+      logBuilder.config = ConfigurationState.buildSeed(config.seedConfig);
+      
       NettyRaftService.Builder b = NettyRaftService.newBuilder();
-      b.seedConfig = config.seedConfig;
-      b.logDir = logDir;
+//      b.seedConfig = config.seedConfig;
+      b.log = logBuilder;
       // b.listener = groupOfCounters;
-      b.stateMachine = stateMachine;
+      
       this.raft = b.build();
     }
 
@@ -103,7 +112,9 @@ public class KeyValueServer extends CompoundService {
     config.redisEndpoint = HostAndPort.fromParts("", redisPort);
     config.protobufEndpoint = HostAndPort.fromParts("", protobufPort);
 
-    final KeyValueServer server = new KeyValueServer(baseDir, local, config);
+    SnapshotStorage snapshotStore = new LocalSnapshotStorage(new File(baseDir, "snapshots"));
+
+    final KeyValueServer server = new KeyValueServer(baseDir, local, config, snapshotStore);
     server.start();
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
@@ -130,11 +141,11 @@ public class KeyValueServer extends CompoundService {
     return raft.getServerKey();
   }
 
-  public void reconfigure(List<String> servers) {
+  public void reconfigure(List<String> servers) throws RaftException {
     RaftMembership oldMembership = raft.getClusterMembership();
     RaftMembership newMembership = new RaftMembership(-1, servers);
     ListenableFuture<Boolean> future = raft.setConfiguration(oldMembership, newMembership);
-    Boolean result = Futures.getUnchecked(future);
+    Boolean result = Futures.get(future, RaftException.class);
     if (!Boolean.TRUE.equals(result)) {
       throw new IllegalStateException();
     }
@@ -149,8 +160,6 @@ public class KeyValueServer extends CompoundService {
     Injector injector = Guice.createInjector(new KeyValueModule(stateMachine), new WebModule());
 
     List<com.google.common.util.concurrent.Service> services = Lists.newArrayList();
-
-    services.add(new StateMachineService(stateMachine, raft));
 
     services.add(raft);
 
@@ -197,6 +206,10 @@ public class KeyValueServer extends CompoundService {
 
   public Replica getReplica() {
     return this.raft.self();
+  }
+
+  public SnapshotInfo getLastSnapshotInfo() {
+    return this.raft.getLastSnapshotInfo();
   }
 
 }

@@ -7,9 +7,12 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.robotninjas.barge.ClusterConfig;
 import org.robotninjas.barge.Replica;
 
 import com.cloudata.appendlog.AppendLogClient.AppendLogEntry;
+import com.cloudata.snapshots.LocalSnapshotStorage;
+import com.cloudata.snapshots.SnapshotStorage;
 import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.sun.jersey.api.client.Client;
@@ -26,17 +29,22 @@ public class AppendLogIntegrationTest {
         SERVERS = new AppendLogServer[3];
 
         for (int i = 0; i < SERVERS.length; i++) {
-            Replica local = Replica.fromString("localhost:" + (10000 + i));
-            List<Replica> members = Lists.newArrayList();
+            Replica self = Replica.fromString("localhost:" + (10000 + i));
+            List<Replica> allMembers = Lists.newArrayList();
             for (int j = 0; j < SERVERS.length; j++) {
-                members.add(Replica.fromString("localhost:" + (10000 + j)));
+              allMembers.add(Replica.fromString("localhost:" + (10000 + j)));
             }
-            members.remove(local);
 
             int httpPort = 9990 + i;
 
             File baseDir = new File(TEMPDIR, "" + i);
-            SERVERS[i] = new AppendLogServer(baseDir, local, members, httpPort);
+            
+            AppendLogConfig config = new AppendLogConfig();
+            config.httpPort = httpPort;
+            config.seedConfig = new ClusterConfig(self, allMembers, ClusterConfig.buildDefaultTimeouts());
+            
+            SnapshotStorage snapshotStorage = new LocalSnapshotStorage(new File(TEMPDIR, "snapshots"));
+            SERVERS[i] = new AppendLogServer(baseDir, self, config, snapshotStorage);
 
             SERVERS[i].start();
         }
