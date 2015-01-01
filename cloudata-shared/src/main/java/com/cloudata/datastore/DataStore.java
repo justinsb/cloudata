@@ -4,9 +4,9 @@ import com.google.protobuf.Message;
 
 public interface DataStore {
 
-  <T extends Message> Iterable<T> find(T matcher) throws DataStoreException;
+  <T extends Message> Iterable<T> find(T matcher, Modifier... modifiers) throws DataStoreException;
 
-  <T extends Message> T findOne(T matcher) throws DataStoreException;
+  <T extends Message> T findOne(T matcher, Modifier... modifiers) throws DataStoreException;
 
   <T extends Message> void insert(T data, Modifier... modifiers) throws DataStoreException;
 

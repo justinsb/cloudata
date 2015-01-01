@@ -5,6 +5,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.cloudata.datastore.ComparatorModifier;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
 import com.cloudata.datastore.Modifier;
@@ -79,9 +80,10 @@ public class QueueService {
 
     message.setQueueId(queue.getQueueId());
     message.setMessageId(Randoms.buildId());
+    // The message is immediately visible
+    message.setInvisibleUntil(now() - 1000);
 
-    // TODO: Improve this .... (have 'where missing' modifier?)
-    message.setReceiptHandleNonce(ByteString.EMPTY);
+    message.setVersion(1);
 
     HashCode hc = Hashing.md5().newHasher().putBytes(message.getBody().toByteArray()).hash();
     message.setMessageBodyMd5(ByteString.copyFrom(hc.asBytes()));
@@ -91,21 +93,32 @@ public class QueueService {
     return insert;
   }
 
+  private static long now() {
+    return System.currentTimeMillis();
+  }
+
   public List<Message> receiveMessages(Queue queue, int maxNumberOfMessages) throws DataStoreException {
     Message.Builder matcher = Message.newBuilder();
     matcher.setQueueId(queue.getQueueId());
-    matcher.setReceiptHandleNonce(ByteString.EMPTY);
+
+    long now = now();
+    Modifier invisibleUntilFilter = new ComparatorModifier(Message.INVISIBLE_UNTIL_FIELD_NUMBER,
+        ComparatorModifier.Operator.LESS_THAN, Message.newBuilder().setInvisibleUntil(now).build());
 
     List<Message> received = Lists.newArrayList();
 
     // TODO: Limit or iterable
-    for (Message message : dataStore.find(matcher.build())) {
-      ByteString receiptHandle = Randoms.buildId();
+    for (Message message : dataStore.find(matcher.build(), invisibleUntilFilter)) {
       Message.Builder update = Message.newBuilder(message);
-      update.setReceiptHandleNonce(receiptHandle);
+      update.setReceiptHandleNonce(Randoms.buildId());
+      update.setVersion(message.getVersion() + 1);
+
+      long visibilityTimeout = 30000;
+      update.setInvisibleUntil(now() + visibilityTimeout);
+
       Message updated = update.build();
-      Modifier whereReceiptHandleEmpty = WhereModifier.create(Message.newBuilder()
-          .setReceiptHandleNonce(ByteString.EMPTY).build());
+      Modifier whereReceiptHandleEmpty = WhereModifier.create(Message.newBuilder().setVersion(message.getVersion())
+          .build());
       if (dataStore.update(updated, whereReceiptHandleEmpty)) {
         received.add(updated);
         if (received.size() >= maxNumberOfMessages) {
@@ -128,8 +141,8 @@ public class QueueService {
       return false;
     }
 
-    Modifier whereReceiptHandleMatches = WhereModifier.create(Message.newBuilder()
-        .setReceiptHandleNonce(receiptHandle.getNonce()).build());
+    Modifier whereReceiptHandleMatches = WhereModifier.create(Message.newBuilder().setVersion(matcher.getVersion())
+        .build());
     return dataStore.delete(message, whereReceiptHandleMatches);
   }
 }

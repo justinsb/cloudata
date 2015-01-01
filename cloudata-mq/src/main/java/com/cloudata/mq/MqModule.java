@@ -18,7 +18,7 @@ public class MqModule extends AbstractModule {
 
     InMemoryDataStore dataStore = new InMemoryDataStore();
 
-    dataStore.map(Queue.getDefaultInstance(), "queue_id");
+    dataStore.map(Queue.getDefaultInstance(), "queue_id").withIndex("scope", "name");
     dataStore.map(Message.getDefaultInstance(), "queue_id", "message_id");
 
     bind(DataStore.class).toInstance(dataStore);

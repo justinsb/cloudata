@@ -48,14 +48,14 @@ public class SqlDataStore implements DataStore {
   }
 
   @Override
-  public <T extends Message> Iterable<T> find(T matcher) throws DataStoreException {
-    List<T> results = findMatching(matcher);
+  public <T extends Message> Iterable<T> find(T matcher, Modifier... modifiers) throws DataStoreException {
+    List<T> results = findMatching(matcher, modifiers);
     return results;
   }
 
   @Override
-  public <T extends Message> T findOne(T matcher) throws DataStoreException {
-    List<T> results = findMatching(matcher);
+  public <T extends Message> T findOne(T matcher, Modifier... modifiers) throws DataStoreException {
+    List<T> results = findMatching(matcher, modifiers);
 
     if (results.size() == 0) {
       return null;
@@ -66,7 +66,7 @@ public class SqlDataStore implements DataStore {
     return results.get(0);
   }
 
-  private <T extends Message> List<T> findMatching(T matcher) throws DataStoreException {
+  private <T extends Message> List<T> findMatching(T matcher, Modifier... modifiers) throws DataStoreException {
     TableInfo<T> tableInfo = getTableInfo((Class<T>) matcher.getClass());
 
     String sql;
@@ -87,6 +87,9 @@ public class SqlDataStore implements DataStore {
         sb.append(column.getSqlColumnName());
         sb.append("=?");
         n++;
+      }
+      for (Modifier modifier : modifiers) {
+        throw new UnsupportedOperationException();
       }
       sql = sb.toString();
     }

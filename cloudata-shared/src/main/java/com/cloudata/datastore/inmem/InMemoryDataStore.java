@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.cloudata.datastore.ComparatorModifier;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
 import com.cloudata.datastore.Modifier;
@@ -20,58 +21,152 @@ import com.google.protobuf.Message.Builder;
 
 public class InMemoryDataStore implements DataStore {
 
-  class Space<T extends Message> {
+  public class Space<T extends Message> {
     final T instance;
-    final Map<ByteString, T> items = Maps.newHashMap();
-    final FieldDescriptor[] primaryKey;
+    final Index primaryKey;
+    final List<Index> secondaryIndexes = Lists.newArrayList();
+    final Descriptor descriptorForType;
+
+    class Index {
+      final FieldDescriptor[] fields;
+      final Map<ByteString, T> items = Maps.newHashMap();
+
+      public Index(Descriptor descriptorForType, String[] columns) {
+        FieldDescriptor[] fields = new FieldDescriptor[columns.length];
+        for (int i = 0; i < columns.length; i++) {
+          fields[i] = descriptorForType.findFieldByName(columns[i]);
+          if (fields[i] == null) {
+            throw new IllegalArgumentException("Unknown field: " + columns[i]);
+          }
+        }
+        this.fields = fields;
+      }
+
+      public T buildKey(T data) {
+        Builder b = data.newBuilderForType();
+        for (FieldDescriptor field : fields) {
+          Object value = data.getField(field);
+          b.setField(field, value);
+        }
+        return (T) b.build();
+      }
+    }
 
     public Space(T instance, String[] primaryKey) {
       this.instance = instance;
-      Descriptor descriptorForType = instance.getDescriptorForType();
+      this.descriptorForType = instance.getDescriptorForType();
 
-      FieldDescriptor[] primaryKeyFields = new FieldDescriptor[primaryKey.length];
-      for (int i = 0; i < primaryKey.length; i++) {
-        primaryKeyFields[i] = descriptorForType.findFieldByName(primaryKey[i]);
-        if (primaryKeyFields[i] == null) {
-          throw new IllegalArgumentException("Unknown field: " + primaryKey);
-        }
-      }
-      this.primaryKey = primaryKeyFields;
+      this.primaryKey = new Index(descriptorForType, primaryKey);
     }
 
-    public List<T> findAll(T matcher) {
+    public synchronized List<T> findAll(T matcher, Modifier... modifiers) {
       List<T> matches = Lists.newArrayList();
       Map<FieldDescriptor, Object> matcherFields = matcher.getAllFields();
 
-      for (T item : items.values()) {
+      for (T item : primaryKey.items.values()) {
         if (matches(matcherFields, item)) {
-          matches.add(item);
+          boolean isMatch = true;
+
+          for (Modifier modifier : modifiers) {
+            if (modifier instanceof ComparatorModifier) {
+              ComparatorModifier comparator = (ComparatorModifier) modifier;
+              if (!comparator.matches(item)) {
+                isMatch = false;
+                continue;
+              }
+              // Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
+              // if (!matches(matcherFields, existing)) {
+              // return false;
+              // }
+            } else {
+              throw new UnsupportedOperationException();
+            }
+          }
+
+          if (isMatch) {
+            matches.add(item);
+          }
         }
       }
       return matches;
     }
 
-    public boolean insert(T data, Modifier... modifiers) throws UniqueIndexViolation {
-      T key = toKey(data);
-      ByteString keyBytes = key.toByteString();
+    public synchronized boolean insert(T data, Modifier... modifiers) throws UniqueIndexViolation {
+      ByteString primaryKeyBytes = primaryKey.buildKey(data).toByteString();
 
-      T existing = items.get(keyBytes);
+      T existing = primaryKey.items.get(primaryKeyBytes);
       if (existing != null) {
         throw new UniqueIndexViolation(null);
+      }
+
+      for (Index index : secondaryIndexes) {
+        ByteString indexKey = index.buildKey(data).toByteString();
+        existing = index.items.get(indexKey);
+        if (existing != null) {
+          throw new UniqueIndexViolation(null);
+        }
       }
 
       for (Modifier modifier : modifiers) {
         throw new UnsupportedOperationException();
       }
 
-      items.put(keyBytes, data);
+      primaryKey.items.put(primaryKeyBytes, data);
+      for (Index index : secondaryIndexes) {
+        ByteString indexKey = index.buildKey(data).toByteString();
+        index.items.put(indexKey, data);
+      }
+
       return true;
     }
 
-    public boolean update(T data, Modifier... modifiers) {
-      T key = toKey(data);
-      ByteString keyBytes = key.toByteString();
-      T existing = items.get(keyBytes);
+    public synchronized boolean update(T data, Modifier... modifiers) throws UniqueIndexViolation {
+      ByteString primaryKeyBytes = primaryKey.buildKey(data).toByteString();
+
+      T existing = primaryKey.items.get(primaryKeyBytes);
+      if (existing == null) {
+        return false;
+      }
+
+      for (Modifier modifier : modifiers) {
+        if (modifier instanceof WhereModifier) {
+          WhereModifier where = (WhereModifier) modifier;
+          Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
+          if (!matches(matcherFields, existing)) {
+            return false;
+          }
+        } else {
+          throw new UnsupportedOperationException();
+        }
+      }
+
+      for (Index secondaryIndex : secondaryIndexes) {
+        ByteString indexKey = secondaryIndex.buildKey(data).toByteString();
+        existing = secondaryIndex.items.get(indexKey);
+        if (existing != null) {
+          throw new UniqueIndexViolation(null);
+        }
+      }
+
+      primaryKey.items.put(primaryKeyBytes, data);
+      for (Index index : secondaryIndexes) {
+        ByteString oldKey = index.buildKey(existing).toByteString();
+        index.items.remove(oldKey);
+        ByteString newKey = index.buildKey(existing).toByteString();
+        index.items.put(newKey, data);
+      }
+
+      return true;
+    }
+
+    public synchronized boolean delete(T data, Modifier... modifiers) {
+      ByteString primaryKeyBytes = primaryKey.buildKey(data).toByteString();
+
+      T existing = primaryKey.items.get(primaryKeyBytes);
+      if (existing == null) {
+        return false;
+      }
+
       if (existing == null) {
         return false;
       }
@@ -86,39 +181,16 @@ public class InMemoryDataStore implements DataStore {
           throw new UnsupportedOperationException();
         }
       }
-      items.put(keyBytes, data);
+      primaryKey.items.remove(primaryKeyBytes);
+      for (Index secondaryIndex : secondaryIndexes) {
+        ByteString oldKey = secondaryIndex.buildKey(existing).toByteString();
+        secondaryIndex.items.remove(oldKey);
+      }
       return true;
     }
 
-    public boolean delete(T data, Modifier... modifiers) {
-      T key = toKey(data);
-      ByteString keyBytes = key.toByteString();
-      T existing = items.get(keyBytes);
-      if (existing == null) {
-        return false;
-      }
-      for (Modifier modifier : modifiers) {
-        if (modifier instanceof WhereModifier) {
-          WhereModifier where = (WhereModifier) modifier;
-          Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
-          if (!matches(matcherFields, existing)) {
-            return false;
-          }
-        } else {
-          throw new UnsupportedOperationException();
-        }
-      }
-      items.remove(keyBytes);
-      return true;
-    }
-
-    private T toKey(T data) {
-      Builder b = data.newBuilderForType();
-      for (FieldDescriptor field : primaryKey) {
-        Object value = data.getField(field);
-        b.setField(field, value);
-      }
-      return (T) b.build();
+    public void withIndex(String... columns) {
+      secondaryIndexes.add(new Index(descriptorForType, columns));
     }
 
   }
@@ -142,9 +214,10 @@ public class InMemoryDataStore implements DataStore {
 
   final Map<Class<?>, Space<?>> spaces = Maps.newHashMap();
 
-  public <T extends Message> void map(T instance, String... primaryKey) {
+  public <T extends Message> Space<T> map(T instance, String... primaryKey) {
     Space<T> space = new Space<T>(instance, primaryKey);
     spaces.put(instance.getClass(), space);
+    return space;
   }
 
   private <T extends Message> Space<T> getSpace(T instance) {
@@ -159,15 +232,15 @@ public class InMemoryDataStore implements DataStore {
   }
 
   @Override
-  public <T extends Message> Iterable<T> find(T matcher) throws DataStoreException {
+  public <T extends Message> Iterable<T> find(T matcher, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(matcher);
-    return space.findAll(matcher);
+    return space.findAll(matcher, modifiers);
   }
 
   @Override
-  public <T extends Message> T findOne(T matcher) throws DataStoreException {
+  public <T extends Message> T findOne(T matcher, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(matcher);
-    List<T> matches = space.findAll(matcher);
+    List<T> matches = space.findAll(matcher, modifiers);
     if (matches.size() == 1) {
       return matches.get(0);
     }
