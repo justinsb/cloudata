@@ -1,6 +1,0 @@
-[submodule "barge"]
-	path = barge
-	url = git@github.com:justinsb/barge.git
-[submodule "openstack-java-sdk"]
-	path = openstack-java-sdk
-	url = https://github.com/justinsb/openstack-java-sdk.git
