@@ -118,7 +118,7 @@ public class SqlDataStore implements DataStore {
   }
 
   @Override
-  public <T extends Message> boolean insert(T data, Modifier... modifiers) throws DataStoreException {
+  public <T extends Message> T insert(T data, Modifier... modifiers) throws DataStoreException {
     TableInfo<T> tableInfo = getTableInfo((Class<T>) data.getClass());
 
     String sql;
@@ -177,7 +177,10 @@ public class SqlDataStore implements DataStore {
         if (rowCount > 1) {
           throw new IllegalStateException("Multiple rows inserted");
         }
-        return rowCount != 0;
+        if (rowCount != 0) {
+          return data;
+        }
+        throw new IllegalStateException();
       }
     } catch (SQLException e) {
       throw new DataStoreException("Error querying database", e);

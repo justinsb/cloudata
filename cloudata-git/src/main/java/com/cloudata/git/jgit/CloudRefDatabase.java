@@ -14,6 +14,7 @@ import org.eclipse.jgit.util.RefList;
 
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.IfVersion;
+import com.cloudata.datastore.UniqueIndexViolation;
 import com.cloudata.git.GitModel.RefData;
 import com.cloudata.git.GitModel.RepositoryData;
 import com.google.protobuf.ByteString;
@@ -69,7 +70,12 @@ public class CloudRefDatabase extends DfsRefDatabase {
 
     try {
       if (oldRef == null || oldRef.getStorage() == Storage.NEW) {
-        return dataStore.insert(newModel);
+        try {
+          dataStore.insert(newModel);
+        } catch (UniqueIndexViolation e) {
+          return false;
+        }
+        return true;
       }
 
       CloudRef cur = find(newRef.getName());
