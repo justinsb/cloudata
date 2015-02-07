@@ -8,10 +8,10 @@ public final class GitModel {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface RefDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:RefData)
-      com.google.protobuf.MessageOrBuilder {
+  public interface RefDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes repository_id = 1;
     /**
      * <code>optional bytes repository_id = 1;</code>
      */
@@ -21,6 +21,7 @@ public final class GitModel {
      */
     com.google.protobuf.ByteString getRepositoryId();
 
+    // optional string name = 2;
     /**
      * <code>optional string name = 2;</code>
      */
@@ -35,6 +36,7 @@ public final class GitModel {
     com.google.protobuf.ByteString
         getNameBytes();
 
+    // optional string target_name = 3;
     /**
      * <code>optional string target_name = 3;</code>
      */
@@ -49,6 +51,7 @@ public final class GitModel {
     com.google.protobuf.ByteString
         getTargetNameBytes();
 
+    // optional bytes object_id = 4;
     /**
      * <code>optional bytes object_id = 4;</code>
      */
@@ -62,9 +65,8 @@ public final class GitModel {
    * Protobuf type {@code RefData}
    */
   public static final class RefData extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:RefData)
-      RefDataOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements RefDataOrBuilder {
     // Use RefData.newBuilder() to construct.
     private RefData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -116,15 +118,13 @@ public final class GitModel {
               break;
             }
             case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              name_ = bs;
+              name_ = input.readBytes();
               break;
             }
             case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
-              targetName_ = bs;
+              targetName_ = input.readBytes();
               break;
             }
             case 34: {
@@ -172,6 +172,7 @@ public final class GitModel {
     }
 
     private int bitField0_;
+    // optional bytes repository_id = 1;
     public static final int REPOSITORY_ID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString repositoryId_;
     /**
@@ -187,6 +188,7 @@ public final class GitModel {
       return repositoryId_;
     }
 
+    // optional string name = 2;
     public static final int NAME_FIELD_NUMBER = 2;
     private java.lang.Object name_;
     /**
@@ -229,6 +231,7 @@ public final class GitModel {
       }
     }
 
+    // optional string target_name = 3;
     public static final int TARGET_NAME_FIELD_NUMBER = 3;
     private java.lang.Object targetName_;
     /**
@@ -271,6 +274,7 @@ public final class GitModel {
       }
     }
 
+    // optional bytes object_id = 4;
     public static final int OBJECT_ID_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString objectId_;
     /**
@@ -295,8 +299,7 @@ public final class GitModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -424,9 +427,8 @@ public final class GitModel {
      * Protobuf type {@code RefData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:RefData)
-        com.cloudata.git.GitModel.RefDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.git.GitModel.RefDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.git.GitModel.internal_static_RefData_descriptor;
@@ -570,6 +572,7 @@ public final class GitModel {
       }
       private int bitField0_;
 
+      // optional bytes repository_id = 1;
       private com.google.protobuf.ByteString repositoryId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes repository_id = 1;</code>
@@ -605,6 +608,7 @@ public final class GitModel {
         return this;
       }
 
+      // optional string name = 2;
       private java.lang.Object name_ = "";
       /**
        * <code>optional string name = 2;</code>
@@ -618,12 +622,9 @@ public final class GitModel {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            name_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -681,6 +682,7 @@ public final class GitModel {
         return this;
       }
 
+      // optional string target_name = 3;
       private java.lang.Object targetName_ = "";
       /**
        * <code>optional string target_name = 3;</code>
@@ -694,12 +696,9 @@ public final class GitModel {
       public java.lang.String getTargetName() {
         java.lang.Object ref = targetName_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            targetName_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          targetName_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -757,6 +756,7 @@ public final class GitModel {
         return this;
       }
 
+      // optional bytes object_id = 4;
       private com.google.protobuf.ByteString objectId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes object_id = 4;</code>
@@ -803,10 +803,10 @@ public final class GitModel {
     // @@protoc_insertion_point(class_scope:RefData)
   }
 
-  public interface RepositoryDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:RepositoryData)
-      com.google.protobuf.MessageOrBuilder {
+  public interface RepositoryDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes repository_id = 1;
     /**
      * <code>optional bytes repository_id = 1;</code>
      */
@@ -816,6 +816,7 @@ public final class GitModel {
      */
     com.google.protobuf.ByteString getRepositoryId();
 
+    // optional string owner = 2;
     /**
      * <code>optional string owner = 2;</code>
      */
@@ -830,6 +831,7 @@ public final class GitModel {
     com.google.protobuf.ByteString
         getOwnerBytes();
 
+    // optional string name = 3;
     /**
      * <code>optional string name = 3;</code>
      */
@@ -848,9 +850,8 @@ public final class GitModel {
    * Protobuf type {@code RepositoryData}
    */
   public static final class RepositoryData extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:RepositoryData)
-      RepositoryDataOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements RepositoryDataOrBuilder {
     // Use RepositoryData.newBuilder() to construct.
     private RepositoryData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -902,15 +903,13 @@ public final class GitModel {
               break;
             }
             case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              owner_ = bs;
+              owner_ = input.readBytes();
               break;
             }
             case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
-              name_ = bs;
+              name_ = input.readBytes();
               break;
             }
           }
@@ -953,6 +952,7 @@ public final class GitModel {
     }
 
     private int bitField0_;
+    // optional bytes repository_id = 1;
     public static final int REPOSITORY_ID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString repositoryId_;
     /**
@@ -968,6 +968,7 @@ public final class GitModel {
       return repositoryId_;
     }
 
+    // optional string owner = 2;
     public static final int OWNER_FIELD_NUMBER = 2;
     private java.lang.Object owner_;
     /**
@@ -1010,6 +1011,7 @@ public final class GitModel {
       }
     }
 
+    // optional string name = 3;
     public static final int NAME_FIELD_NUMBER = 3;
     private java.lang.Object name_;
     /**
@@ -1060,8 +1062,7 @@ public final class GitModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1182,9 +1183,8 @@ public final class GitModel {
      * Protobuf type {@code RepositoryData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:RepositoryData)
-        com.cloudata.git.GitModel.RepositoryDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.git.GitModel.RepositoryDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.git.GitModel.internal_static_RepositoryData_descriptor;
@@ -1319,6 +1319,7 @@ public final class GitModel {
       }
       private int bitField0_;
 
+      // optional bytes repository_id = 1;
       private com.google.protobuf.ByteString repositoryId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes repository_id = 1;</code>
@@ -1354,6 +1355,7 @@ public final class GitModel {
         return this;
       }
 
+      // optional string owner = 2;
       private java.lang.Object owner_ = "";
       /**
        * <code>optional string owner = 2;</code>
@@ -1367,12 +1369,9 @@ public final class GitModel {
       public java.lang.String getOwner() {
         java.lang.Object ref = owner_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            owner_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          owner_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1430,6 +1429,7 @@ public final class GitModel {
         return this;
       }
 
+      // optional string name = 3;
       private java.lang.Object name_ = "";
       /**
        * <code>optional string name = 3;</code>
@@ -1443,12 +1443,9 @@ public final class GitModel {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            name_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1517,12 +1514,12 @@ public final class GitModel {
     // @@protoc_insertion_point(class_scope:RepositoryData)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_RefData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_RefData_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_RepositoryData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -1544,29 +1541,29 @@ public final class GitModel {
       "udata.git"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_RefData_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_RefData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_RefData_descriptor,
+              new java.lang.String[] { "RepositoryId", "Name", "TargetName", "ObjectId", });
+          internal_static_RepositoryData_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_RepositoryData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_RepositoryData_descriptor,
+              new java.lang.String[] { "RepositoryId", "Owner", "Name", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_RefData_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_RefData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_RefData_descriptor,
-        new java.lang.String[] { "RepositoryId", "Name", "TargetName", "ObjectId", });
-    internal_static_RepositoryData_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_RepositoryData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_RepositoryData_descriptor,
-        new java.lang.String[] { "RepositoryId", "Owner", "Name", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

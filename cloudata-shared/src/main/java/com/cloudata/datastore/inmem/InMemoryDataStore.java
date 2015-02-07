@@ -1,5 +1,6 @@
 package com.cloudata.datastore.inmem;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -7,6 +8,7 @@ import java.util.Map.Entry;
 import com.cloudata.datastore.ComparatorModifier;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
+import com.cloudata.datastore.LimitModifier;
 import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.UniqueIndexViolation;
 import com.cloudata.datastore.WhereModifier;
@@ -30,8 +32,10 @@ public class InMemoryDataStore implements DataStore {
     class Index {
       final FieldDescriptor[] fields;
       final Map<ByteString, T> items = Maps.newHashMap();
+      final boolean requireFields;
 
-      public Index(Descriptor descriptorForType, String[] columns) {
+      public Index(Descriptor descriptorForType, String[] columns, boolean requireFields) {
+        this.requireFields = requireFields;
         FieldDescriptor[] fields = new FieldDescriptor[columns.length];
         for (int i = 0; i < columns.length; i++) {
           fields[i] = descriptorForType.findFieldByName(columns[i]);
@@ -45,6 +49,13 @@ public class InMemoryDataStore implements DataStore {
       public T buildKey(T data) {
         Builder b = data.newBuilderForType();
         for (FieldDescriptor field : fields) {
+          if (!data.hasField(field)) {
+            if (requireFields) {
+              throw new IllegalStateException("Field not set: " + field.getFullName());
+            } else {
+              continue;
+            }
+          }
           Object value = data.getField(field);
           b.setField(field, value);
         }
@@ -52,19 +63,34 @@ public class InMemoryDataStore implements DataStore {
       }
     }
 
-    public Space(T instance, String[] primaryKey) {
-      this.instance = instance;
-      this.descriptorForType = instance.getDescriptorForType();
-
-      this.primaryKey = new Index(descriptorForType, primaryKey);
+    public Space(DataStore.Mapping<T> builder) {
+      throw new UnsupportedOperationException();
+      // this.instance = instance;
+      // this.descriptorForType = instance.getDescriptorForType();
+      //
+      // this.primaryKey = new Index(descriptorForType, primaryKey, true);
     }
 
-    public synchronized List<T> findAll(T matcher, Modifier... modifiers) {
+    public synchronized List<T> findAll(T matcher, List<Modifier> modifiers) {
       List<T> matches = Lists.newArrayList();
       Map<FieldDescriptor, Object> matcherFields = matcher.getAllFields();
 
+      int limit = Integer.MAX_VALUE;
+
+      // We could optimize this further, but this is not really production code!
+      for (Modifier modifier : modifiers) {
+        if (modifier instanceof ComparatorModifier) {
+          continue;
+        } else if (modifier instanceof LimitModifier) {
+          LimitModifier limitModifier = (LimitModifier) modifier;
+          limit = limitModifier.getLimit();
+        } else {
+          throw new UnsupportedOperationException();
+        }
+      }
+
       for (T item : primaryKey.items.values()) {
-        if (matches(matcherFields, item)) {
+        if (DataStore.matches(matcherFields, item)) {
           boolean isMatch = true;
 
           for (Modifier modifier : modifiers) {
@@ -78,13 +104,14 @@ public class InMemoryDataStore implements DataStore {
               // if (!matches(matcherFields, existing)) {
               // return false;
               // }
-            } else {
-              throw new UnsupportedOperationException();
             }
           }
 
           if (isMatch) {
             matches.add(item);
+            if (matches.size() >= limit) {
+              break;
+            }
           }
         }
       }
@@ -120,6 +147,12 @@ public class InMemoryDataStore implements DataStore {
       return true;
     }
 
+    public synchronized void upsert(T data) throws UniqueIndexViolation {
+      if (!update(data)) {
+        insert(data);
+      }
+    }
+
     public synchronized boolean update(T data, Modifier... modifiers) throws UniqueIndexViolation {
       ByteString primaryKeyBytes = primaryKey.buildKey(data).toByteString();
 
@@ -132,7 +165,7 @@ public class InMemoryDataStore implements DataStore {
         if (modifier instanceof WhereModifier) {
           WhereModifier where = (WhereModifier) modifier;
           Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
-          if (!matches(matcherFields, existing)) {
+          if (!DataStore.matches(matcherFields, existing)) {
             return false;
           }
         } else {
@@ -174,7 +207,7 @@ public class InMemoryDataStore implements DataStore {
         if (modifier instanceof WhereModifier) {
           WhereModifier where = (WhereModifier) modifier;
           Map<FieldDescriptor, Object> matcherFields = where.getMatcher().getAllFields();
-          if (!matches(matcherFields, existing)) {
+          if (!DataStore.matches(matcherFields, existing)) {
             return false;
           }
         } else {
@@ -190,34 +223,16 @@ public class InMemoryDataStore implements DataStore {
     }
 
     public void withIndex(String... columns) {
-      secondaryIndexes.add(new Index(descriptorForType, columns));
+      secondaryIndexes.add(new Index(descriptorForType, columns, false));
     }
 
-  }
-
-  private static <T extends Message> boolean matches(Map<FieldDescriptor, Object> matcherFields, T item) {
-    for (Entry<FieldDescriptor, Object> entry : matcherFields.entrySet()) {
-      FieldDescriptor field = entry.getKey();
-      Object matcherValue = entry.getValue();
-
-      if (!item.hasField(field)) {
-        return false;
-      }
-
-      Object itemValue = item.getField(field);
-      if (!Objects.equal(itemValue, matcherValue)) {
-        return false;
-      }
-    }
-    return true;
   }
 
   final Map<Class<?>, Space<?>> spaces = Maps.newHashMap();
 
-  public <T extends Message> Space<T> map(T instance, String... primaryKey) {
-    Space<T> space = new Space<T>(instance, primaryKey);
-    spaces.put(instance.getClass(), space);
-    return space;
+  public <T extends Message> void addMapping(DataStore.Mapping<T> builder) {
+    Space<T> space = new Space<T>(builder);
+    spaces.put(space.instance.getClass(), space);
   }
 
   private <T extends Message> Space<T> getSpace(T instance) {
@@ -233,6 +248,11 @@ public class InMemoryDataStore implements DataStore {
 
   @Override
   public <T extends Message> Iterable<T> find(T matcher, Modifier... modifiers) throws DataStoreException {
+    return find(matcher, Arrays.asList(modifiers));
+  }
+
+  @Override
+  public <T extends Message> Iterable<T> find(T matcher, List<Modifier> modifiers) throws DataStoreException {
     Space<T> space = getSpace(matcher);
     return space.findAll(matcher, modifiers);
   }
@@ -240,7 +260,11 @@ public class InMemoryDataStore implements DataStore {
   @Override
   public <T extends Message> T findOne(T matcher, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(matcher);
-    List<T> matches = space.findAll(matcher, modifiers);
+
+    List<Modifier> modifiersWithLimit = Lists.newArrayList(modifiers);
+    modifiersWithLimit.add(new LimitModifier(2));
+    List<T> matches = space.findAll(matcher, modifiersWithLimit);
+
     if (matches.size() == 1) {
       return matches.get(0);
     }
@@ -266,6 +290,18 @@ public class InMemoryDataStore implements DataStore {
   public <T extends Message> boolean delete(T data, Modifier... modifiers) throws DataStoreException {
     Space<T> space = getSpace(data);
     return space.delete(data, modifiers);
+  }
+
+  @Override
+  public <T extends Message> void upsert(T data) throws DataStoreException {
+    Space<T> space = getSpace(data);
+    space.upsert(data);
+  }
+
+  @Override
+  public <T extends Message> void addMap(DataStore.Mapping<T> builder) {
+    throw new UnsupportedOperationException();
+
   }
 
 }

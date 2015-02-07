@@ -11,8 +11,7 @@ public class DeleteMessageAction extends SqsAction {
     ReceiptHandle receiptHandle = ReceiptHandle.parseFrom(BaseEncoding.base64Url().decode(
         getRequiredParameter("ReceiptHandle")));
 
-    QueueUser user = getQueueUser();
-    Queue queue = getQueue(user);
+    Queue queue = getQueue();
 
     queueService.deleteMessage(queue, receiptHandle);
 

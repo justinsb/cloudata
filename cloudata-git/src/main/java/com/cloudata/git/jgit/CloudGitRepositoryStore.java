@@ -27,6 +27,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.datastore.DataStore;
+import com.cloudata.datastore.DataStoreException;
+import com.cloudata.git.GitModel.RefData;
 import com.cloudata.git.GitModel.RepositoryData;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
@@ -162,5 +164,11 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
 
   private String toObjectPath(RepositoryData repositoryData) {
     return BaseEncoding.base64Url().encode(repositoryData.getRepositoryId().toByteArray());
+  }
+
+  public static void addMappings(DataStore dataStore) throws DataStoreException {
+    dataStore.addMap(DataStore.Mapping.create(RepositoryData.getDefaultInstance()).hashKey("name"));
+    dataStore.addMap(DataStore.Mapping.create(RefData.getDefaultInstance()).hashKey("repository_id").rangeKey("name")
+        .filterable("object_id"));
   }
 }

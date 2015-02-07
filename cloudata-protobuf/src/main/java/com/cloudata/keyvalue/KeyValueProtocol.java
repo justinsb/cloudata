@@ -144,10 +144,10 @@ public final class KeyValueProtocol {
     // @@protoc_insertion_point(enum_scope:ActionType)
   }
 
-  public interface ResponseEntryOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:ResponseEntry)
-      com.google.protobuf.MessageOrBuilder {
+  public interface ResponseEntryOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes key = 1;
     /**
      * <code>optional bytes key = 1;</code>
      */
@@ -157,6 +157,7 @@ public final class KeyValueProtocol {
      */
     com.google.protobuf.ByteString getKey();
 
+    // optional bytes value = 2;
     /**
      * <code>optional bytes value = 2;</code>
      */
@@ -166,6 +167,7 @@ public final class KeyValueProtocol {
      */
     com.google.protobuf.ByteString getValue();
 
+    // optional bool changed = 3;
     /**
      * <code>optional bool changed = 3;</code>
      */
@@ -179,9 +181,8 @@ public final class KeyValueProtocol {
    * Protobuf type {@code ResponseEntry}
    */
   public static final class ResponseEntry extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:ResponseEntry)
-      ResponseEntryOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements ResponseEntryOrBuilder {
     // Use ResponseEntry.newBuilder() to construct.
     private ResponseEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -282,6 +283,7 @@ public final class KeyValueProtocol {
     }
 
     private int bitField0_;
+    // optional bytes key = 1;
     public static final int KEY_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString key_;
     /**
@@ -297,6 +299,7 @@ public final class KeyValueProtocol {
       return key_;
     }
 
+    // optional bytes value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString value_;
     /**
@@ -312,6 +315,7 @@ public final class KeyValueProtocol {
       return value_;
     }
 
+    // optional bool changed = 3;
     public static final int CHANGED_FIELD_NUMBER = 3;
     private boolean changed_;
     /**
@@ -335,8 +339,7 @@ public final class KeyValueProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -457,9 +460,8 @@ public final class KeyValueProtocol {
      * Protobuf type {@code ResponseEntry}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:ResponseEntry)
-        com.cloudata.keyvalue.KeyValueProtocol.ResponseEntryOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.keyvalue.KeyValueProtocol.ResponseEntryOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.keyvalue.KeyValueProtocol.internal_static_ResponseEntry_descriptor;
@@ -590,6 +592,7 @@ public final class KeyValueProtocol {
       }
       private int bitField0_;
 
+      // optional bytes key = 1;
       private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes key = 1;</code>
@@ -625,6 +628,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional bytes value = 2;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes value = 2;</code>
@@ -660,6 +664,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional bool changed = 3;
       private boolean changed_ ;
       /**
        * <code>optional bool changed = 3;</code>
@@ -703,10 +708,10 @@ public final class KeyValueProtocol {
     // @@protoc_insertion_point(class_scope:ResponseEntry)
   }
 
-  public interface KeyValueActionOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:KeyValueAction)
-      com.google.protobuf.MessageOrBuilder {
+  public interface KeyValueActionOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional uint64 store_id = 1;
     /**
      * <code>optional uint64 store_id = 1;</code>
      */
@@ -716,6 +721,7 @@ public final class KeyValueProtocol {
      */
     long getStoreId();
 
+    // optional uint32 keyspace_id = 2;
     /**
      * <code>optional uint32 keyspace_id = 2;</code>
      */
@@ -725,6 +731,7 @@ public final class KeyValueProtocol {
      */
     int getKeyspaceId();
 
+    // optional .ActionType action = 3;
     /**
      * <code>optional .ActionType action = 3;</code>
      */
@@ -734,6 +741,7 @@ public final class KeyValueProtocol {
      */
     com.cloudata.keyvalue.KeyValueProtocol.ActionType getAction();
 
+    // optional bytes key = 4;
     /**
      * <code>optional bytes key = 4;</code>
      */
@@ -743,6 +751,7 @@ public final class KeyValueProtocol {
      */
     com.google.protobuf.ByteString getKey();
 
+    // optional bytes value = 5;
     /**
      * <code>optional bytes value = 5;</code>
      */
@@ -752,6 +761,7 @@ public final class KeyValueProtocol {
      */
     com.google.protobuf.ByteString getValue();
 
+    // repeated .KeyValueAction children = 6;
     /**
      * <code>repeated .KeyValueAction children = 6;</code>
      */
@@ -776,6 +786,7 @@ public final class KeyValueProtocol {
     com.cloudata.keyvalue.KeyValueProtocol.KeyValueActionOrBuilder getChildrenOrBuilder(
         int index);
 
+    // optional bool if_not_exists = 10;
     /**
      * <code>optional bool if_not_exists = 10;</code>
      */
@@ -785,6 +796,7 @@ public final class KeyValueProtocol {
      */
     boolean getIfNotExists();
 
+    // optional bytes if_value = 11;
     /**
      * <code>optional bytes if_value = 11;</code>
      */
@@ -798,9 +810,8 @@ public final class KeyValueProtocol {
    * Protobuf type {@code KeyValueAction}
    */
   public static final class KeyValueAction extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:KeyValueAction)
-      KeyValueActionOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements KeyValueActionOrBuilder {
     // Use KeyValueAction.newBuilder() to construct.
     private KeyValueAction(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -938,6 +949,7 @@ public final class KeyValueProtocol {
     }
 
     private int bitField0_;
+    // optional uint64 store_id = 1;
     public static final int STORE_ID_FIELD_NUMBER = 1;
     private long storeId_;
     /**
@@ -953,6 +965,7 @@ public final class KeyValueProtocol {
       return storeId_;
     }
 
+    // optional uint32 keyspace_id = 2;
     public static final int KEYSPACE_ID_FIELD_NUMBER = 2;
     private int keyspaceId_;
     /**
@@ -968,6 +981,7 @@ public final class KeyValueProtocol {
       return keyspaceId_;
     }
 
+    // optional .ActionType action = 3;
     public static final int ACTION_FIELD_NUMBER = 3;
     private com.cloudata.keyvalue.KeyValueProtocol.ActionType action_;
     /**
@@ -983,6 +997,7 @@ public final class KeyValueProtocol {
       return action_;
     }
 
+    // optional bytes key = 4;
     public static final int KEY_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString key_;
     /**
@@ -998,6 +1013,7 @@ public final class KeyValueProtocol {
       return key_;
     }
 
+    // optional bytes value = 5;
     public static final int VALUE_FIELD_NUMBER = 5;
     private com.google.protobuf.ByteString value_;
     /**
@@ -1013,6 +1029,7 @@ public final class KeyValueProtocol {
       return value_;
     }
 
+    // repeated .KeyValueAction children = 6;
     public static final int CHILDREN_FIELD_NUMBER = 6;
     private java.util.List<com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction> children_;
     /**
@@ -1048,6 +1065,7 @@ public final class KeyValueProtocol {
       return children_.get(index);
     }
 
+    // optional bool if_not_exists = 10;
     public static final int IF_NOT_EXISTS_FIELD_NUMBER = 10;
     private boolean ifNotExists_;
     /**
@@ -1063,6 +1081,7 @@ public final class KeyValueProtocol {
       return ifNotExists_;
     }
 
+    // optional bytes if_value = 11;
     public static final int IF_VALUE_FIELD_NUMBER = 11;
     private com.google.protobuf.ByteString ifValue_;
     /**
@@ -1091,8 +1110,7 @@ public final class KeyValueProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1248,9 +1266,8 @@ public final class KeyValueProtocol {
      * Protobuf type {@code KeyValueAction}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:KeyValueAction)
-        com.cloudata.keyvalue.KeyValueProtocol.KeyValueActionOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.keyvalue.KeyValueProtocol.KeyValueActionOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.keyvalue.KeyValueProtocol.internal_static_KeyValueAction_descriptor;
@@ -1459,6 +1476,7 @@ public final class KeyValueProtocol {
       }
       private int bitField0_;
 
+      // optional uint64 store_id = 1;
       private long storeId_ ;
       /**
        * <code>optional uint64 store_id = 1;</code>
@@ -1491,6 +1509,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional uint32 keyspace_id = 2;
       private int keyspaceId_ ;
       /**
        * <code>optional uint32 keyspace_id = 2;</code>
@@ -1523,6 +1542,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional .ActionType action = 3;
       private com.cloudata.keyvalue.KeyValueProtocol.ActionType action_ = com.cloudata.keyvalue.KeyValueProtocol.ActionType.GET;
       /**
        * <code>optional .ActionType action = 3;</code>
@@ -1558,6 +1578,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional bytes key = 4;
       private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes key = 4;</code>
@@ -1593,6 +1614,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional bytes value = 5;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes value = 5;</code>
@@ -1628,6 +1650,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // repeated .KeyValueAction children = 6;
       private java.util.List<com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction> children_ =
         java.util.Collections.emptyList();
       private void ensureChildrenIsMutable() {
@@ -1769,8 +1792,7 @@ public final class KeyValueProtocol {
           java.lang.Iterable<? extends com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction> values) {
         if (childrenBuilder_ == null) {
           ensureChildrenIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, children_);
+          super.addAll(values, children_);
           onChanged();
         } else {
           childrenBuilder_.addAllMessages(values);
@@ -1868,6 +1890,7 @@ public final class KeyValueProtocol {
         return childrenBuilder_;
       }
 
+      // optional bool if_not_exists = 10;
       private boolean ifNotExists_ ;
       /**
        * <code>optional bool if_not_exists = 10;</code>
@@ -1900,6 +1923,7 @@ public final class KeyValueProtocol {
         return this;
       }
 
+      // optional bytes if_value = 11;
       private com.google.protobuf.ByteString ifValue_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes if_value = 11;</code>
@@ -1946,10 +1970,10 @@ public final class KeyValueProtocol {
     // @@protoc_insertion_point(class_scope:KeyValueAction)
   }
 
-  public interface KeyValueRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:KeyValueRequest)
-      com.google.protobuf.MessageOrBuilder {
+  public interface KeyValueRequestOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional .KeyValueAction action = 1;
     /**
      * <code>optional .KeyValueAction action = 1;</code>
      */
@@ -1967,9 +1991,8 @@ public final class KeyValueProtocol {
    * Protobuf type {@code KeyValueRequest}
    */
   public static final class KeyValueRequest extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:KeyValueRequest)
-      KeyValueRequestOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements KeyValueRequestOrBuilder {
     // Use KeyValueRequest.newBuilder() to construct.
     private KeyValueRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -2068,6 +2091,7 @@ public final class KeyValueProtocol {
     }
 
     private int bitField0_;
+    // optional .KeyValueAction action = 1;
     public static final int ACTION_FIELD_NUMBER = 1;
     private com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction action_;
     /**
@@ -2095,8 +2119,7 @@ public final class KeyValueProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -2203,9 +2226,8 @@ public final class KeyValueProtocol {
      * Protobuf type {@code KeyValueRequest}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:KeyValueRequest)
-        com.cloudata.keyvalue.KeyValueProtocol.KeyValueRequestOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.keyvalue.KeyValueProtocol.KeyValueRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.keyvalue.KeyValueProtocol.internal_static_KeyValueRequest_descriptor;
@@ -2327,6 +2349,7 @@ public final class KeyValueProtocol {
       }
       private int bitField0_;
 
+      // optional .KeyValueAction action = 1;
       private com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction action_ = com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction, com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction.Builder, com.cloudata.keyvalue.KeyValueProtocol.KeyValueActionOrBuilder> actionBuilder_;
@@ -2435,7 +2458,7 @@ public final class KeyValueProtocol {
         if (actionBuilder_ == null) {
           actionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction, com.cloudata.keyvalue.KeyValueProtocol.KeyValueAction.Builder, com.cloudata.keyvalue.KeyValueProtocol.KeyValueActionOrBuilder>(
-                  getAction(),
+                  action_,
                   getParentForChildren(),
                   isClean());
           action_ = null;
@@ -2454,10 +2477,10 @@ public final class KeyValueProtocol {
     // @@protoc_insertion_point(class_scope:KeyValueRequest)
   }
 
-  public interface ActionResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:ActionResponse)
-      com.google.protobuf.MessageOrBuilder {
+  public interface ActionResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // repeated .ResponseEntry entry = 1;
     /**
      * <code>repeated .ResponseEntry entry = 1;</code>
      */
@@ -2482,6 +2505,7 @@ public final class KeyValueProtocol {
     com.cloudata.keyvalue.KeyValueProtocol.ResponseEntryOrBuilder getEntryOrBuilder(
         int index);
 
+    // repeated .ActionResponse children = 2;
     /**
      * <code>repeated .ActionResponse children = 2;</code>
      */
@@ -2510,9 +2534,8 @@ public final class KeyValueProtocol {
    * Protobuf type {@code ActionResponse}
    */
   public static final class ActionResponse extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:ActionResponse)
-      ActionResponseOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements ActionResponseOrBuilder {
     // Use ActionResponse.newBuilder() to construct.
     private ActionResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -2619,6 +2642,7 @@ public final class KeyValueProtocol {
       return PARSER;
     }
 
+    // repeated .ResponseEntry entry = 1;
     public static final int ENTRY_FIELD_NUMBER = 1;
     private java.util.List<com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry> entry_;
     /**
@@ -2654,6 +2678,7 @@ public final class KeyValueProtocol {
       return entry_.get(index);
     }
 
+    // repeated .ActionResponse children = 2;
     public static final int CHILDREN_FIELD_NUMBER = 2;
     private java.util.List<com.cloudata.keyvalue.KeyValueProtocol.ActionResponse> children_;
     /**
@@ -2696,8 +2721,7 @@ public final class KeyValueProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -2811,9 +2835,8 @@ public final class KeyValueProtocol {
      * Protobuf type {@code ActionResponse}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:ActionResponse)
-        com.cloudata.keyvalue.KeyValueProtocol.ActionResponseOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.keyvalue.KeyValueProtocol.ActionResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.keyvalue.KeyValueProtocol.internal_static_ActionResponse_descriptor;
@@ -2999,6 +3022,7 @@ public final class KeyValueProtocol {
       }
       private int bitField0_;
 
+      // repeated .ResponseEntry entry = 1;
       private java.util.List<com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry> entry_ =
         java.util.Collections.emptyList();
       private void ensureEntryIsMutable() {
@@ -3140,8 +3164,7 @@ public final class KeyValueProtocol {
           java.lang.Iterable<? extends com.cloudata.keyvalue.KeyValueProtocol.ResponseEntry> values) {
         if (entryBuilder_ == null) {
           ensureEntryIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, entry_);
+          super.addAll(values, entry_);
           onChanged();
         } else {
           entryBuilder_.addAllMessages(values);
@@ -3239,6 +3262,7 @@ public final class KeyValueProtocol {
         return entryBuilder_;
       }
 
+      // repeated .ActionResponse children = 2;
       private java.util.List<com.cloudata.keyvalue.KeyValueProtocol.ActionResponse> children_ =
         java.util.Collections.emptyList();
       private void ensureChildrenIsMutable() {
@@ -3380,8 +3404,7 @@ public final class KeyValueProtocol {
           java.lang.Iterable<? extends com.cloudata.keyvalue.KeyValueProtocol.ActionResponse> values) {
         if (childrenBuilder_ == null) {
           ensureChildrenIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, children_);
+          super.addAll(values, children_);
           onChanged();
         } else {
           childrenBuilder_.addAllMessages(values);
@@ -3490,10 +3513,10 @@ public final class KeyValueProtocol {
     // @@protoc_insertion_point(class_scope:ActionResponse)
   }
 
-  public interface KeyValueResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:KeyValueResponse)
-      com.google.protobuf.MessageOrBuilder {
+  public interface KeyValueResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional .ActionResponse action_response = 1;
     /**
      * <code>optional .ActionResponse action_response = 1;</code>
      */
@@ -3511,9 +3534,8 @@ public final class KeyValueProtocol {
    * Protobuf type {@code KeyValueResponse}
    */
   public static final class KeyValueResponse extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:KeyValueResponse)
-      KeyValueResponseOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements KeyValueResponseOrBuilder {
     // Use KeyValueResponse.newBuilder() to construct.
     private KeyValueResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -3612,6 +3634,7 @@ public final class KeyValueProtocol {
     }
 
     private int bitField0_;
+    // optional .ActionResponse action_response = 1;
     public static final int ACTION_RESPONSE_FIELD_NUMBER = 1;
     private com.cloudata.keyvalue.KeyValueProtocol.ActionResponse actionResponse_;
     /**
@@ -3639,8 +3662,7 @@ public final class KeyValueProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -3747,9 +3769,8 @@ public final class KeyValueProtocol {
      * Protobuf type {@code KeyValueResponse}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:KeyValueResponse)
-        com.cloudata.keyvalue.KeyValueProtocol.KeyValueResponseOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.keyvalue.KeyValueProtocol.KeyValueResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.keyvalue.KeyValueProtocol.internal_static_KeyValueResponse_descriptor;
@@ -3871,6 +3892,7 @@ public final class KeyValueProtocol {
       }
       private int bitField0_;
 
+      // optional .ActionResponse action_response = 1;
       private com.cloudata.keyvalue.KeyValueProtocol.ActionResponse actionResponse_ = com.cloudata.keyvalue.KeyValueProtocol.ActionResponse.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.cloudata.keyvalue.KeyValueProtocol.ActionResponse, com.cloudata.keyvalue.KeyValueProtocol.ActionResponse.Builder, com.cloudata.keyvalue.KeyValueProtocol.ActionResponseOrBuilder> actionResponseBuilder_;
@@ -3979,7 +4001,7 @@ public final class KeyValueProtocol {
         if (actionResponseBuilder_ == null) {
           actionResponseBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               com.cloudata.keyvalue.KeyValueProtocol.ActionResponse, com.cloudata.keyvalue.KeyValueProtocol.ActionResponse.Builder, com.cloudata.keyvalue.KeyValueProtocol.ActionResponseOrBuilder>(
-                  getActionResponse(),
+                  actionResponse_,
                   getParentForChildren(),
                   isClean());
           actionResponse_ = null;
@@ -4230,27 +4252,27 @@ public final class KeyValueProtocol {
     // @@protoc_insertion_point(class_scope:KeyValueService)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_ResponseEntry_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_ResponseEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_KeyValueAction_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_KeyValueAction_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_KeyValueRequest_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_KeyValueRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_ActionResponse_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_ActionResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_KeyValueResponse_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -4285,47 +4307,47 @@ public final class KeyValueProtocol {
       "value\210\001\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_ResponseEntry_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_ResponseEntry_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_ResponseEntry_descriptor,
+              new java.lang.String[] { "Key", "Value", "Changed", });
+          internal_static_KeyValueAction_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_KeyValueAction_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_KeyValueAction_descriptor,
+              new java.lang.String[] { "StoreId", "KeyspaceId", "Action", "Key", "Value", "Children", "IfNotExists", "IfValue", });
+          internal_static_KeyValueRequest_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_KeyValueRequest_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_KeyValueRequest_descriptor,
+              new java.lang.String[] { "Action", });
+          internal_static_ActionResponse_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_ActionResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_ActionResponse_descriptor,
+              new java.lang.String[] { "Entry", "Children", });
+          internal_static_KeyValueResponse_descriptor =
+            getDescriptor().getMessageTypes().get(4);
+          internal_static_KeyValueResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_KeyValueResponse_descriptor,
+              new java.lang.String[] { "ActionResponse", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_ResponseEntry_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_ResponseEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_ResponseEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", "Changed", });
-    internal_static_KeyValueAction_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_KeyValueAction_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_KeyValueAction_descriptor,
-        new java.lang.String[] { "StoreId", "KeyspaceId", "Action", "Key", "Value", "Children", "IfNotExists", "IfValue", });
-    internal_static_KeyValueRequest_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_KeyValueRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_KeyValueRequest_descriptor,
-        new java.lang.String[] { "Action", });
-    internal_static_ActionResponse_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_ActionResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_ActionResponse_descriptor,
-        new java.lang.String[] { "Entry", "Children", });
-    internal_static_KeyValueResponse_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_KeyValueResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_KeyValueResponse_descriptor,
-        new java.lang.String[] { "ActionResponse", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

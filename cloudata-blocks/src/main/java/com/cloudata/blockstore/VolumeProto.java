@@ -8,10 +8,10 @@ public final class VolumeProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface VolumeDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:VolumeData)
-      com.google.protobuf.MessageOrBuilder {
+  public interface VolumeDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional uint32 segment_count = 2;
     /**
      * <code>optional uint32 segment_count = 2;</code>
      */
@@ -21,6 +21,7 @@ public final class VolumeProto {
      */
     int getSegmentCount();
 
+    // optional uint32 segment_size = 3;
     /**
      * <code>optional uint32 segment_size = 3;</code>
      */
@@ -30,6 +31,7 @@ public final class VolumeProto {
      */
     int getSegmentSize();
 
+    // optional bytes segment_store_id = 4;
     /**
      * <code>optional bytes segment_store_id = 4;</code>
      */
@@ -39,6 +41,7 @@ public final class VolumeProto {
      */
     com.google.protobuf.ByteString getSegmentStoreId();
 
+    // optional bytes blob_store_id = 5;
     /**
      * <code>optional bytes blob_store_id = 5;</code>
      */
@@ -52,9 +55,8 @@ public final class VolumeProto {
    * Protobuf type {@code VolumeData}
    */
   public static final class VolumeData extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:VolumeData)
-      VolumeDataOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements VolumeDataOrBuilder {
     // Use VolumeData.newBuilder() to construct.
     private VolumeData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -160,6 +162,7 @@ public final class VolumeProto {
     }
 
     private int bitField0_;
+    // optional uint32 segment_count = 2;
     public static final int SEGMENT_COUNT_FIELD_NUMBER = 2;
     private int segmentCount_;
     /**
@@ -175,6 +178,7 @@ public final class VolumeProto {
       return segmentCount_;
     }
 
+    // optional uint32 segment_size = 3;
     public static final int SEGMENT_SIZE_FIELD_NUMBER = 3;
     private int segmentSize_;
     /**
@@ -190,6 +194,7 @@ public final class VolumeProto {
       return segmentSize_;
     }
 
+    // optional bytes segment_store_id = 4;
     public static final int SEGMENT_STORE_ID_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString segmentStoreId_;
     /**
@@ -205,6 +210,7 @@ public final class VolumeProto {
       return segmentStoreId_;
     }
 
+    // optional bytes blob_store_id = 5;
     public static final int BLOB_STORE_ID_FIELD_NUMBER = 5;
     private com.google.protobuf.ByteString blobStoreId_;
     /**
@@ -229,8 +235,7 @@ public final class VolumeProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -358,9 +363,8 @@ public final class VolumeProto {
      * Protobuf type {@code VolumeData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:VolumeData)
-        com.cloudata.blockstore.VolumeProto.VolumeDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.blockstore.VolumeProto.VolumeDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.blockstore.VolumeProto.internal_static_VolumeData_descriptor;
@@ -500,6 +504,7 @@ public final class VolumeProto {
       }
       private int bitField0_;
 
+      // optional uint32 segment_count = 2;
       private int segmentCount_ ;
       /**
        * <code>optional uint32 segment_count = 2;</code>
@@ -532,6 +537,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // optional uint32 segment_size = 3;
       private int segmentSize_ ;
       /**
        * <code>optional uint32 segment_size = 3;</code>
@@ -564,6 +570,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // optional bytes segment_store_id = 4;
       private com.google.protobuf.ByteString segmentStoreId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes segment_store_id = 4;</code>
@@ -599,6 +606,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // optional bytes blob_store_id = 5;
       private com.google.protobuf.ByteString blobStoreId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes blob_store_id = 5;</code>
@@ -645,10 +653,10 @@ public final class VolumeProto {
     // @@protoc_insertion_point(class_scope:VolumeData)
   }
 
-  public interface SegmentDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:SegmentData)
-      com.google.protobuf.MessageOrBuilder {
+  public interface SegmentDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional uint64 offset = 1;
     /**
      * <code>optional uint64 offset = 1;</code>
      */
@@ -658,6 +666,7 @@ public final class VolumeProto {
      */
     long getOffset();
 
+    // repeated .ChunkData chunk = 2;
     /**
      * <code>repeated .ChunkData chunk = 2;</code>
      */
@@ -686,9 +695,8 @@ public final class VolumeProto {
    * Protobuf type {@code SegmentData}
    */
   public static final class SegmentData extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:SegmentData)
-      SegmentDataOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements SegmentDataOrBuilder {
     // Use SegmentData.newBuilder() to construct.
     private SegmentData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -790,6 +798,7 @@ public final class VolumeProto {
     }
 
     private int bitField0_;
+    // optional uint64 offset = 1;
     public static final int OFFSET_FIELD_NUMBER = 1;
     private long offset_;
     /**
@@ -805,6 +814,7 @@ public final class VolumeProto {
       return offset_;
     }
 
+    // repeated .ChunkData chunk = 2;
     public static final int CHUNK_FIELD_NUMBER = 2;
     private java.util.List<com.cloudata.blockstore.VolumeProto.ChunkData> chunk_;
     /**
@@ -847,8 +857,7 @@ public final class VolumeProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -962,9 +971,8 @@ public final class VolumeProto {
      * Protobuf type {@code SegmentData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:SegmentData)
-        com.cloudata.blockstore.VolumeProto.SegmentDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.blockstore.VolumeProto.SegmentDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.blockstore.VolumeProto.internal_static_SegmentData_descriptor;
@@ -1119,6 +1127,7 @@ public final class VolumeProto {
       }
       private int bitField0_;
 
+      // optional uint64 offset = 1;
       private long offset_ ;
       /**
        * <code>optional uint64 offset = 1;</code>
@@ -1151,6 +1160,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // repeated .ChunkData chunk = 2;
       private java.util.List<com.cloudata.blockstore.VolumeProto.ChunkData> chunk_ =
         java.util.Collections.emptyList();
       private void ensureChunkIsMutable() {
@@ -1292,8 +1302,7 @@ public final class VolumeProto {
           java.lang.Iterable<? extends com.cloudata.blockstore.VolumeProto.ChunkData> values) {
         if (chunkBuilder_ == null) {
           ensureChunkIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, chunk_);
+          super.addAll(values, chunk_);
           onChanged();
         } else {
           chunkBuilder_.addAllMessages(values);
@@ -1402,10 +1411,10 @@ public final class VolumeProto {
     // @@protoc_insertion_point(class_scope:SegmentData)
   }
 
-  public interface ChunkDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:ChunkData)
-      com.google.protobuf.MessageOrBuilder {
+  public interface ChunkDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional uint32 start = 1;
     /**
      * <code>optional uint32 start = 1;</code>
      */
@@ -1415,6 +1424,7 @@ public final class VolumeProto {
      */
     int getStart();
 
+    // optional uint32 length = 2;
     /**
      * <code>optional uint32 length = 2;</code>
      */
@@ -1424,6 +1434,7 @@ public final class VolumeProto {
      */
     int getLength();
 
+    // optional bytes hash = 3;
     /**
      * <code>optional bytes hash = 3;</code>
      */
@@ -1433,6 +1444,7 @@ public final class VolumeProto {
      */
     com.google.protobuf.ByteString getHash();
 
+    // optional uint32 skip = 4;
     /**
      * <code>optional uint32 skip = 4;</code>
      */
@@ -1446,9 +1458,8 @@ public final class VolumeProto {
    * Protobuf type {@code ChunkData}
    */
   public static final class ChunkData extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:ChunkData)
-      ChunkDataOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements ChunkDataOrBuilder {
     // Use ChunkData.newBuilder() to construct.
     private ChunkData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1554,6 +1565,7 @@ public final class VolumeProto {
     }
 
     private int bitField0_;
+    // optional uint32 start = 1;
     public static final int START_FIELD_NUMBER = 1;
     private int start_;
     /**
@@ -1569,6 +1581,7 @@ public final class VolumeProto {
       return start_;
     }
 
+    // optional uint32 length = 2;
     public static final int LENGTH_FIELD_NUMBER = 2;
     private int length_;
     /**
@@ -1584,6 +1597,7 @@ public final class VolumeProto {
       return length_;
     }
 
+    // optional bytes hash = 3;
     public static final int HASH_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString hash_;
     /**
@@ -1599,6 +1613,7 @@ public final class VolumeProto {
       return hash_;
     }
 
+    // optional uint32 skip = 4;
     public static final int SKIP_FIELD_NUMBER = 4;
     private int skip_;
     /**
@@ -1623,8 +1638,7 @@ public final class VolumeProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1752,9 +1766,8 @@ public final class VolumeProto {
      * Protobuf type {@code ChunkData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:ChunkData)
-        com.cloudata.blockstore.VolumeProto.ChunkDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.blockstore.VolumeProto.ChunkDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.blockstore.VolumeProto.internal_static_ChunkData_descriptor;
@@ -1894,6 +1907,7 @@ public final class VolumeProto {
       }
       private int bitField0_;
 
+      // optional uint32 start = 1;
       private int start_ ;
       /**
        * <code>optional uint32 start = 1;</code>
@@ -1926,6 +1940,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // optional uint32 length = 2;
       private int length_ ;
       /**
        * <code>optional uint32 length = 2;</code>
@@ -1958,6 +1973,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // optional bytes hash = 3;
       private com.google.protobuf.ByteString hash_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes hash = 3;</code>
@@ -1993,6 +2009,7 @@ public final class VolumeProto {
         return this;
       }
 
+      // optional uint32 skip = 4;
       private int skip_ ;
       /**
        * <code>optional uint32 skip = 4;</code>
@@ -2036,17 +2053,17 @@ public final class VolumeProto {
     // @@protoc_insertion_point(class_scope:ChunkData)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_VolumeData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_VolumeData_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_SegmentData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_SegmentData_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_ChunkData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -2070,35 +2087,35 @@ public final class VolumeProto {
       "cloudata.blockstore"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_VolumeData_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_VolumeData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_VolumeData_descriptor,
+              new java.lang.String[] { "SegmentCount", "SegmentSize", "SegmentStoreId", "BlobStoreId", });
+          internal_static_SegmentData_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_SegmentData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_SegmentData_descriptor,
+              new java.lang.String[] { "Offset", "Chunk", });
+          internal_static_ChunkData_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_ChunkData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_ChunkData_descriptor,
+              new java.lang.String[] { "Start", "Length", "Hash", "Skip", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_VolumeData_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_VolumeData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_VolumeData_descriptor,
-        new java.lang.String[] { "SegmentCount", "SegmentSize", "SegmentStoreId", "BlobStoreId", });
-    internal_static_SegmentData_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_SegmentData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_SegmentData_descriptor,
-        new java.lang.String[] { "Offset", "Chunk", });
-    internal_static_ChunkData_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_ChunkData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_ChunkData_descriptor,
-        new java.lang.String[] { "Start", "Length", "Hash", "Skip", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

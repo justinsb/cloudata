@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
@@ -23,6 +24,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.cloudata.objectstore.ObjectInfo;
 import com.cloudata.objectstore.ObjectStore;
 import com.cloudata.util.ByteBufferOutputStream;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.ByteSink;
 import com.google.common.io.ByteStreams;
@@ -33,17 +35,15 @@ public class S3ObjectStore implements ObjectStore {
   private static final Logger log = LoggerFactory.getLogger(S3ObjectStore.class);
 
   final String bucket;
-  final String username;
-  final String password;
 
   final AmazonS3Client s3Client;
 
-  public S3ObjectStore(String bucket, String username, String password) {
+  public S3ObjectStore(String bucket, AWSCredentialsProvider awsCredentials) {
     this.bucket = bucket.startsWith("/") ? bucket.substring(1) : bucket;
-    this.username = username;
-    this.password = password;
-
-    this.s3Client = new AmazonS3Client(new BasicAWSCredentials(username, password));
+    if (Strings.isNullOrEmpty(this.bucket)) {
+      throw new IllegalArgumentException();
+    }
+    this.s3Client = new AmazonS3Client(awsCredentials);
   }
 
   @Override

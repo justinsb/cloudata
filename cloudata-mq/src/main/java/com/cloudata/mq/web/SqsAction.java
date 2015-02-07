@@ -3,14 +3,17 @@ package com.cloudata.mq.web;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.xml.stream.XMLStreamException;
 
+import com.cloudata.auth.Project;
 import com.cloudata.datastore.DataStoreException;
 import com.cloudata.mq.MqModel.Queue;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.protobuf.ByteString;
 
 public abstract class SqsAction extends Action {
   @Inject
@@ -23,12 +26,13 @@ public abstract class SqsAction extends Action {
     return sqsResponseWriterFactory.get(response);
   }
 
-  protected QueueUser getQueueUser() {
-    String scope = "test";
-    return new QueueUser(scope);
+  protected Project getProject() {
+    String project = "test";
+    return new Project(ByteString.copyFromUtf8(project));
   }
 
-  protected Queue getQueue(QueueUser user) throws AwsException, DataStoreException {
+  protected Queue getQueue() throws AwsException, DataStoreException {
+    Project project = getProject();
     String queueUrl = getRequiredParameter("QueueUrl");
     URI uri = URI.create(queueUrl);
     List<String> tokens = Splitter.on("/").omitEmptyStrings().splitToList(uri.getPath());
@@ -36,10 +40,15 @@ public abstract class SqsAction extends Action {
       throw new IllegalArgumentException();
     }
 
-    String scope = tokens.get(0);
+    String projectToken = tokens.get(0);
     String queueName = tokens.get(1);
 
-    Queue queue = queueService.findQueue(user, scope, queueName);
+    if (!project.getId().toStringUtf8().equals(projectToken)) {
+      // TODO: Permission denied?
+      return null;
+    }
+
+    Queue queue = queueService.findQueue(project, queueName);
     if (queue == null) {
       throw new IllegalArgumentException();
     }
@@ -68,5 +77,13 @@ public abstract class SqsAction extends Action {
       return defaultValue;
     }
     return value;
+  }
+
+  protected Optional<String> getOptionalParameter(String key) {
+    String value = request.getParameter(key);
+    if (Strings.isNullOrEmpty(value)) {
+      return Optional.empty();
+    }
+    return Optional.of(value);
   }
 }

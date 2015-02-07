@@ -1,9 +1,9 @@
 option java_package = "com.cloudata.mq";
 
 message Queue {
-	optional bytes queue_id = 1;
-	optional string scope = 2;
-	optional string name = 3;
+	optional bytes project_id = 1;
+	optional string name = 2;
+	optional bytes queue_id = 3;
 }
 
 message MessageAttribute {

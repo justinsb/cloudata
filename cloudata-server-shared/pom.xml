@@ -18,14 +18,17 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-dynamodb</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk-s3</artifactId>
-			<version>1.9.13</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.3.6</version>
 		</dependency>
 
 		<dependency>
@@ -59,12 +62,8 @@
 			</exclusions>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jclouds.provider</groupId>
-			<artifactId>cloudfiles-us</artifactId>
-			<version>${jclouds.version}</version>
-		</dependency>
-
+		<!-- <dependency> <groupId>org.jclouds.provider</groupId> <artifactId>cloudfiles-us</artifactId> 
+			<version>${jclouds.version}</version> </dependency> -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>

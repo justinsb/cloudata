@@ -1,4 +1,4 @@
-package com.cloudata.mq.web;
+package com.cloudata;
 
 import java.security.SecureRandom;
 
@@ -11,7 +11,11 @@ public class Randoms {
   private static final int ID_LENGTH = 16;
 
   public static ByteString buildId() {
-    byte[] data = new byte[ID_LENGTH];
+    return build(ID_LENGTH);
+  }
+
+  public static ByteString build(int length) {
+    byte[] data = new byte[length];
 
     synchronized (random) {
       random.nextBytes(data);

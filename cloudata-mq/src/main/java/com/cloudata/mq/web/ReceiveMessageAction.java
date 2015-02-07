@@ -11,8 +11,7 @@ public class ReceiveMessageAction extends SqsAction {
   public void run() throws Exception {
     int maxNumberOfMessages = getParameter("MaxNumberOfMessages", 1);
 
-    QueueUser user = getQueueUser();
-    Queue queue = getQueue(user);
+    Queue queue = getQueue();
 
     List<Message> received = queueService.receiveMessages(queue, maxNumberOfMessages);
 

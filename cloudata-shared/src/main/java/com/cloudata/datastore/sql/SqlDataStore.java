@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
+import com.cloudata.datastore.LimitModifier;
 import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.WhereModifier;
 import com.google.common.collect.Lists;
@@ -49,13 +51,22 @@ public class SqlDataStore implements DataStore {
 
   @Override
   public <T extends Message> Iterable<T> find(T matcher, Modifier... modifiers) throws DataStoreException {
+    List<T> results = findMatching(matcher, Arrays.asList(modifiers));
+    return results;
+  }
+
+  @Override
+  public <T extends Message> Iterable<T> find(T matcher, List<Modifier> modifiers) throws DataStoreException {
     List<T> results = findMatching(matcher, modifiers);
     return results;
   }
 
   @Override
   public <T extends Message> T findOne(T matcher, Modifier... modifiers) throws DataStoreException {
-    List<T> results = findMatching(matcher, modifiers);
+    List<Modifier> modifiersWithLimit = Lists.newArrayList(modifiers);
+    modifiersWithLimit.add(new LimitModifier(2));
+
+    List<T> results = findMatching(matcher, modifiersWithLimit);
 
     if (results.size() == 0) {
       return null;
@@ -66,7 +77,7 @@ public class SqlDataStore implements DataStore {
     return results.get(0);
   }
 
-  private <T extends Message> List<T> findMatching(T matcher, Modifier... modifiers) throws DataStoreException {
+  private <T extends Message> List<T> findMatching(T matcher, List<Modifier> modifiers) throws DataStoreException {
     TableInfo<T> tableInfo = getTableInfo((Class<T>) matcher.getClass());
 
     String sql;
@@ -330,5 +341,15 @@ public class SqlDataStore implements DataStore {
     } catch (SQLException e) {
       throw new DataStoreException("Error establishing database connection", e);
     }
+  }
+
+  @Override
+  public <T extends Message> void upsert(T data) throws DataStoreException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public <T extends Message> void addMap(DataStore.Mapping<T> builder) {
+    throw new UnsupportedOperationException();
   }
 }

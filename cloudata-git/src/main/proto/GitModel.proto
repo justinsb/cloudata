@@ -12,4 +12,3 @@ message RepositoryData {
 	optional string owner = 2;
 	optional string name = 3;
 }
-

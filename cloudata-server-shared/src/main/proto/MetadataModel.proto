@@ -1,0 +1,10 @@
+option java_package = "com.cloudata";
+
+import "google/protobuf/descriptor.proto";
+
+message TypeMetadata {
+	optional int32 id = 1;
+	optional string name = 2;
+	
+	optional google.protobuf.DescriptorProto type_descriptor = 3;
+}

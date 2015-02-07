@@ -8,10 +8,10 @@ public final class AuthModel {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface AuthUserOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:AuthUser)
-      com.google.protobuf.MessageOrBuilder {
+  public interface AuthUserOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional string name = 1;
     /**
      * <code>optional string name = 1;</code>
      */
@@ -26,6 +26,7 @@ public final class AuthModel {
     com.google.protobuf.ByteString
         getNameBytes();
 
+    // optional .HashedPassword password_hashed = 2;
     /**
      * <code>optional .HashedPassword password_hashed = 2;</code>
      */
@@ -43,9 +44,8 @@ public final class AuthModel {
    * Protobuf type {@code AuthUser}
    */
   public static final class AuthUser extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:AuthUser)
-      AuthUserOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements AuthUserOrBuilder {
     // Use AuthUser.newBuilder() to construct.
     private AuthUser(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -92,9 +92,8 @@ public final class AuthModel {
               break;
             }
             case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              name_ = bs;
+              name_ = input.readBytes();
               break;
             }
             case 18: {
@@ -150,6 +149,7 @@ public final class AuthModel {
     }
 
     private int bitField0_;
+    // optional string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
     /**
@@ -192,6 +192,7 @@ public final class AuthModel {
       }
     }
 
+    // optional .HashedPassword password_hashed = 2;
     public static final int PASSWORD_HASHED_FIELD_NUMBER = 2;
     private com.cloudata.auth.AuthModel.HashedPassword passwordHashed_;
     /**
@@ -220,8 +221,7 @@ public final class AuthModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -335,9 +335,8 @@ public final class AuthModel {
      * Protobuf type {@code AuthUser}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:AuthUser)
-        com.cloudata.auth.AuthModel.AuthUserOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.auth.AuthModel.AuthUserOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.auth.AuthModel.internal_static_AuthUser_descriptor;
@@ -470,6 +469,7 @@ public final class AuthModel {
       }
       private int bitField0_;
 
+      // optional string name = 1;
       private java.lang.Object name_ = "";
       /**
        * <code>optional string name = 1;</code>
@@ -483,12 +483,9 @@ public final class AuthModel {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            name_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -546,6 +543,7 @@ public final class AuthModel {
         return this;
       }
 
+      // optional .HashedPassword password_hashed = 2;
       private com.cloudata.auth.AuthModel.HashedPassword passwordHashed_ = com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.cloudata.auth.AuthModel.HashedPassword, com.cloudata.auth.AuthModel.HashedPassword.Builder, com.cloudata.auth.AuthModel.HashedPasswordOrBuilder> passwordHashedBuilder_;
@@ -654,7 +652,7 @@ public final class AuthModel {
         if (passwordHashedBuilder_ == null) {
           passwordHashedBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               com.cloudata.auth.AuthModel.HashedPassword, com.cloudata.auth.AuthModel.HashedPassword.Builder, com.cloudata.auth.AuthModel.HashedPasswordOrBuilder>(
-                  getPasswordHashed(),
+                  passwordHashed_,
                   getParentForChildren(),
                   isClean());
           passwordHashed_ = null;
@@ -673,10 +671,10 @@ public final class AuthModel {
     // @@protoc_insertion_point(class_scope:AuthUser)
   }
 
-  public interface HashedPasswordOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:HashedPassword)
-      com.google.protobuf.MessageOrBuilder {
+  public interface HashedPasswordOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes salt = 2;
     /**
      * <code>optional bytes salt = 2;</code>
      *
@@ -694,6 +692,7 @@ public final class AuthModel {
      */
     com.google.protobuf.ByteString getSalt();
 
+    // optional int32 iterations = 3;
     /**
      * <code>optional int32 iterations = 3;</code>
      */
@@ -703,6 +702,7 @@ public final class AuthModel {
      */
     int getIterations();
 
+    // optional bytes hashed = 4;
     /**
      * <code>optional bytes hashed = 4;</code>
      */
@@ -716,9 +716,8 @@ public final class AuthModel {
    * Protobuf type {@code HashedPassword}
    */
   public static final class HashedPassword extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:HashedPassword)
-      HashedPasswordOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements HashedPasswordOrBuilder {
     // Use HashedPassword.newBuilder() to construct.
     private HashedPassword(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -819,6 +818,7 @@ public final class AuthModel {
     }
 
     private int bitField0_;
+    // optional bytes salt = 2;
     public static final int SALT_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString salt_;
     /**
@@ -842,6 +842,7 @@ public final class AuthModel {
       return salt_;
     }
 
+    // optional int32 iterations = 3;
     public static final int ITERATIONS_FIELD_NUMBER = 3;
     private int iterations_;
     /**
@@ -857,6 +858,7 @@ public final class AuthModel {
       return iterations_;
     }
 
+    // optional bytes hashed = 4;
     public static final int HASHED_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString hashed_;
     /**
@@ -880,8 +882,7 @@ public final class AuthModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1002,9 +1003,8 @@ public final class AuthModel {
      * Protobuf type {@code HashedPassword}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:HashedPassword)
-        com.cloudata.auth.AuthModel.HashedPasswordOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.auth.AuthModel.HashedPasswordOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.auth.AuthModel.internal_static_HashedPassword_descriptor;
@@ -1135,6 +1135,7 @@ public final class AuthModel {
       }
       private int bitField0_;
 
+      // optional bytes salt = 2;
       private com.google.protobuf.ByteString salt_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes salt = 2;</code>
@@ -1186,6 +1187,7 @@ public final class AuthModel {
         return this;
       }
 
+      // optional int32 iterations = 3;
       private int iterations_ ;
       /**
        * <code>optional int32 iterations = 3;</code>
@@ -1218,6 +1220,7 @@ public final class AuthModel {
         return this;
       }
 
+      // optional bytes hashed = 4;
       private com.google.protobuf.ByteString hashed_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes hashed = 4;</code>
@@ -1264,12 +1267,12 @@ public final class AuthModel {
     // @@protoc_insertion_point(class_scope:HashedPassword)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_AuthUser_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_AuthUser_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_HashedPassword_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -1290,29 +1293,29 @@ public final class AuthModel {
       "ed\030\004 \001(\014B\023\n\021com.cloudata.auth"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_AuthUser_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_AuthUser_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_AuthUser_descriptor,
+              new java.lang.String[] { "Name", "PasswordHashed", });
+          internal_static_HashedPassword_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_HashedPassword_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_HashedPassword_descriptor,
+              new java.lang.String[] { "Salt", "Iterations", "Hashed", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_AuthUser_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_AuthUser_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_AuthUser_descriptor,
-        new java.lang.String[] { "Name", "PasswordHashed", });
-    internal_static_HashedPassword_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_HashedPassword_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_HashedPassword_descriptor,
-        new java.lang.String[] { "Salt", "Iterations", "Hashed", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

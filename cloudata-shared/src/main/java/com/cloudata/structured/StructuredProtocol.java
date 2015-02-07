@@ -290,10 +290,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(enum_scope:KeyspaceType)
   }
 
-  public interface StructuredResponseEntryOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:StructuredResponseEntry)
-      com.google.protobuf.MessageOrBuilder {
+  public interface StructuredResponseEntryOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes key = 1;
     /**
      * <code>optional bytes key = 1;</code>
      */
@@ -303,6 +303,7 @@ public final class StructuredProtocol {
      */
     com.google.protobuf.ByteString getKey();
 
+    // optional bytes value = 2;
     /**
      * <code>optional bytes value = 2;</code>
      */
@@ -312,6 +313,7 @@ public final class StructuredProtocol {
      */
     com.google.protobuf.ByteString getValue();
 
+    // optional .ActionResponseCode code = 5;
     /**
      * <code>optional .ActionResponseCode code = 5;</code>
      */
@@ -325,9 +327,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code StructuredResponseEntry}
    */
   public static final class StructuredResponseEntry extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:StructuredResponseEntry)
-      StructuredResponseEntryOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements StructuredResponseEntryOrBuilder {
     // Use StructuredResponseEntry.newBuilder() to construct.
     private StructuredResponseEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -434,6 +435,7 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
+    // optional bytes key = 1;
     public static final int KEY_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString key_;
     /**
@@ -449,6 +451,7 @@ public final class StructuredProtocol {
       return key_;
     }
 
+    // optional bytes value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString value_;
     /**
@@ -464,6 +467,7 @@ public final class StructuredProtocol {
       return value_;
     }
 
+    // optional .ActionResponseCode code = 5;
     public static final int CODE_FIELD_NUMBER = 5;
     private com.cloudata.structured.StructuredProtocol.ActionResponseCode code_;
     /**
@@ -487,8 +491,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -609,9 +612,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code StructuredResponseEntry}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:StructuredResponseEntry)
-        com.cloudata.structured.StructuredProtocol.StructuredResponseEntryOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.StructuredResponseEntryOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_StructuredResponseEntry_descriptor;
@@ -742,6 +744,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // optional bytes key = 1;
       private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes key = 1;</code>
@@ -777,6 +780,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional bytes value = 2;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes value = 2;</code>
@@ -812,6 +816,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional .ActionResponseCode code = 5;
       private com.cloudata.structured.StructuredProtocol.ActionResponseCode code_ = com.cloudata.structured.StructuredProtocol.ActionResponseCode.DONE;
       /**
        * <code>optional .ActionResponseCode code = 5;</code>
@@ -858,10 +863,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:StructuredResponseEntry)
   }
 
-  public interface StructuredActionOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:StructuredAction)
-      com.google.protobuf.MessageOrBuilder {
+  public interface StructuredActionOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional uint64 store_id = 1;
     /**
      * <code>optional uint64 store_id = 1;</code>
      */
@@ -871,6 +876,7 @@ public final class StructuredProtocol {
      */
     long getStoreId();
 
+    // optional uint32 keyspace_id = 2;
     /**
      * <code>optional uint32 keyspace_id = 2;</code>
      */
@@ -880,6 +886,7 @@ public final class StructuredProtocol {
      */
     int getKeyspaceId();
 
+    // optional .StructuredActionType action = 3;
     /**
      * <code>optional .StructuredActionType action = 3;</code>
      */
@@ -889,6 +896,7 @@ public final class StructuredProtocol {
      */
     com.cloudata.structured.StructuredProtocol.StructuredActionType getAction();
 
+    // optional bytes key = 4;
     /**
      * <code>optional bytes key = 4;</code>
      */
@@ -898,6 +906,7 @@ public final class StructuredProtocol {
      */
     com.google.protobuf.ByteString getKey();
 
+    // optional bytes value = 5;
     /**
      * <code>optional bytes value = 5;</code>
      */
@@ -907,6 +916,7 @@ public final class StructuredProtocol {
      */
     com.google.protobuf.ByteString getValue();
 
+    // optional uint64 version = 6;
     /**
      * <code>optional uint64 version = 6;</code>
      */
@@ -916,6 +926,7 @@ public final class StructuredProtocol {
      */
     long getVersion();
 
+    // repeated .StructuredAction children = 7;
     /**
      * <code>repeated .StructuredAction children = 7;</code>
      */
@@ -940,6 +951,7 @@ public final class StructuredProtocol {
     com.cloudata.structured.StructuredProtocol.StructuredActionOrBuilder getChildrenOrBuilder(
         int index);
 
+    // optional bool if_not_exists = 10;
     /**
      * <code>optional bool if_not_exists = 10;</code>
      */
@@ -949,6 +961,7 @@ public final class StructuredProtocol {
      */
     boolean getIfNotExists();
 
+    // optional uint64 if_version = 11;
     /**
      * <code>optional uint64 if_version = 11;</code>
      */
@@ -958,6 +971,7 @@ public final class StructuredProtocol {
      */
     long getIfVersion();
 
+    // repeated uint32 suppress_fields = 12;
     /**
      * <code>repeated uint32 suppress_fields = 12;</code>
      */
@@ -975,9 +989,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code StructuredAction}
    */
   public static final class StructuredAction extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:StructuredAction)
-      StructuredActionOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements StructuredActionOrBuilder {
     // Use StructuredAction.newBuilder() to construct.
     private StructuredAction(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1144,6 +1157,7 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
+    // optional uint64 store_id = 1;
     public static final int STORE_ID_FIELD_NUMBER = 1;
     private long storeId_;
     /**
@@ -1159,6 +1173,7 @@ public final class StructuredProtocol {
       return storeId_;
     }
 
+    // optional uint32 keyspace_id = 2;
     public static final int KEYSPACE_ID_FIELD_NUMBER = 2;
     private int keyspaceId_;
     /**
@@ -1174,6 +1189,7 @@ public final class StructuredProtocol {
       return keyspaceId_;
     }
 
+    // optional .StructuredActionType action = 3;
     public static final int ACTION_FIELD_NUMBER = 3;
     private com.cloudata.structured.StructuredProtocol.StructuredActionType action_;
     /**
@@ -1189,6 +1205,7 @@ public final class StructuredProtocol {
       return action_;
     }
 
+    // optional bytes key = 4;
     public static final int KEY_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString key_;
     /**
@@ -1204,6 +1221,7 @@ public final class StructuredProtocol {
       return key_;
     }
 
+    // optional bytes value = 5;
     public static final int VALUE_FIELD_NUMBER = 5;
     private com.google.protobuf.ByteString value_;
     /**
@@ -1219,6 +1237,7 @@ public final class StructuredProtocol {
       return value_;
     }
 
+    // optional uint64 version = 6;
     public static final int VERSION_FIELD_NUMBER = 6;
     private long version_;
     /**
@@ -1234,6 +1253,7 @@ public final class StructuredProtocol {
       return version_;
     }
 
+    // repeated .StructuredAction children = 7;
     public static final int CHILDREN_FIELD_NUMBER = 7;
     private java.util.List<com.cloudata.structured.StructuredProtocol.StructuredAction> children_;
     /**
@@ -1269,6 +1289,7 @@ public final class StructuredProtocol {
       return children_.get(index);
     }
 
+    // optional bool if_not_exists = 10;
     public static final int IF_NOT_EXISTS_FIELD_NUMBER = 10;
     private boolean ifNotExists_;
     /**
@@ -1284,6 +1305,7 @@ public final class StructuredProtocol {
       return ifNotExists_;
     }
 
+    // optional uint64 if_version = 11;
     public static final int IF_VERSION_FIELD_NUMBER = 11;
     private long ifVersion_;
     /**
@@ -1299,6 +1321,7 @@ public final class StructuredProtocol {
       return ifVersion_;
     }
 
+    // repeated uint32 suppress_fields = 12;
     public static final int SUPPRESS_FIELDS_FIELD_NUMBER = 12;
     private java.util.List<java.lang.Integer> suppressFields_;
     /**
@@ -1336,8 +1359,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1512,9 +1534,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code StructuredAction}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:StructuredAction)
-        com.cloudata.structured.StructuredProtocol.StructuredActionOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.StructuredActionOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_StructuredAction_descriptor;
@@ -1749,6 +1770,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // optional uint64 store_id = 1;
       private long storeId_ ;
       /**
        * <code>optional uint64 store_id = 1;</code>
@@ -1781,6 +1803,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional uint32 keyspace_id = 2;
       private int keyspaceId_ ;
       /**
        * <code>optional uint32 keyspace_id = 2;</code>
@@ -1813,6 +1836,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional .StructuredActionType action = 3;
       private com.cloudata.structured.StructuredProtocol.StructuredActionType action_ = com.cloudata.structured.StructuredProtocol.StructuredActionType.STRUCTURED_GET;
       /**
        * <code>optional .StructuredActionType action = 3;</code>
@@ -1848,6 +1872,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional bytes key = 4;
       private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes key = 4;</code>
@@ -1883,6 +1908,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional bytes value = 5;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes value = 5;</code>
@@ -1918,6 +1944,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional uint64 version = 6;
       private long version_ ;
       /**
        * <code>optional uint64 version = 6;</code>
@@ -1950,6 +1977,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // repeated .StructuredAction children = 7;
       private java.util.List<com.cloudata.structured.StructuredProtocol.StructuredAction> children_ =
         java.util.Collections.emptyList();
       private void ensureChildrenIsMutable() {
@@ -2091,8 +2119,7 @@ public final class StructuredProtocol {
           java.lang.Iterable<? extends com.cloudata.structured.StructuredProtocol.StructuredAction> values) {
         if (childrenBuilder_ == null) {
           ensureChildrenIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, children_);
+          super.addAll(values, children_);
           onChanged();
         } else {
           childrenBuilder_.addAllMessages(values);
@@ -2190,6 +2217,7 @@ public final class StructuredProtocol {
         return childrenBuilder_;
       }
 
+      // optional bool if_not_exists = 10;
       private boolean ifNotExists_ ;
       /**
        * <code>optional bool if_not_exists = 10;</code>
@@ -2222,6 +2250,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional uint64 if_version = 11;
       private long ifVersion_ ;
       /**
        * <code>optional uint64 if_version = 11;</code>
@@ -2254,6 +2283,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // repeated uint32 suppress_fields = 12;
       private java.util.List<java.lang.Integer> suppressFields_ = java.util.Collections.emptyList();
       private void ensureSuppressFieldsIsMutable() {
         if (!((bitField0_ & 0x00000200) == 0x00000200)) {
@@ -2305,8 +2335,7 @@ public final class StructuredProtocol {
       public Builder addAllSuppressFields(
           java.lang.Iterable<? extends java.lang.Integer> values) {
         ensureSuppressFieldsIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, suppressFields_);
+        super.addAll(values, suppressFields_);
         onChanged();
         return this;
       }
@@ -2331,10 +2360,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:StructuredAction)
   }
 
-  public interface StructuredRequestOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:StructuredRequest)
-      com.google.protobuf.MessageOrBuilder {
+  public interface StructuredRequestOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional .StructuredAction action = 1;
     /**
      * <code>optional .StructuredAction action = 1;</code>
      */
@@ -2352,9 +2381,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code StructuredRequest}
    */
   public static final class StructuredRequest extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:StructuredRequest)
-      StructuredRequestOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements StructuredRequestOrBuilder {
     // Use StructuredRequest.newBuilder() to construct.
     private StructuredRequest(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -2453,6 +2481,7 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
+    // optional .StructuredAction action = 1;
     public static final int ACTION_FIELD_NUMBER = 1;
     private com.cloudata.structured.StructuredProtocol.StructuredAction action_;
     /**
@@ -2480,8 +2509,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -2588,9 +2616,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code StructuredRequest}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:StructuredRequest)
-        com.cloudata.structured.StructuredProtocol.StructuredRequestOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.StructuredRequestOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_StructuredRequest_descriptor;
@@ -2712,6 +2739,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // optional .StructuredAction action = 1;
       private com.cloudata.structured.StructuredProtocol.StructuredAction action_ = com.cloudata.structured.StructuredProtocol.StructuredAction.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.cloudata.structured.StructuredProtocol.StructuredAction, com.cloudata.structured.StructuredProtocol.StructuredAction.Builder, com.cloudata.structured.StructuredProtocol.StructuredActionOrBuilder> actionBuilder_;
@@ -2820,7 +2848,7 @@ public final class StructuredProtocol {
         if (actionBuilder_ == null) {
           actionBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               com.cloudata.structured.StructuredProtocol.StructuredAction, com.cloudata.structured.StructuredProtocol.StructuredAction.Builder, com.cloudata.structured.StructuredProtocol.StructuredActionOrBuilder>(
-                  getAction(),
+                  action_,
                   getParentForChildren(),
                   isClean());
           action_ = null;
@@ -2839,10 +2867,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:StructuredRequest)
   }
 
-  public interface StructuredActionResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:StructuredActionResponse)
-      com.google.protobuf.MessageOrBuilder {
+  public interface StructuredActionResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // repeated .StructuredResponseEntry entry = 1;
     /**
      * <code>repeated .StructuredResponseEntry entry = 1;</code>
      */
@@ -2867,6 +2895,7 @@ public final class StructuredProtocol {
     com.cloudata.structured.StructuredProtocol.StructuredResponseEntryOrBuilder getEntryOrBuilder(
         int index);
 
+    // repeated .StructuredActionResponse children = 2;
     /**
      * <code>repeated .StructuredActionResponse children = 2;</code>
      */
@@ -2895,9 +2924,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code StructuredActionResponse}
    */
   public static final class StructuredActionResponse extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:StructuredActionResponse)
-      StructuredActionResponseOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements StructuredActionResponseOrBuilder {
     // Use StructuredActionResponse.newBuilder() to construct.
     private StructuredActionResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -3004,6 +3032,7 @@ public final class StructuredProtocol {
       return PARSER;
     }
 
+    // repeated .StructuredResponseEntry entry = 1;
     public static final int ENTRY_FIELD_NUMBER = 1;
     private java.util.List<com.cloudata.structured.StructuredProtocol.StructuredResponseEntry> entry_;
     /**
@@ -3039,6 +3068,7 @@ public final class StructuredProtocol {
       return entry_.get(index);
     }
 
+    // repeated .StructuredActionResponse children = 2;
     public static final int CHILDREN_FIELD_NUMBER = 2;
     private java.util.List<com.cloudata.structured.StructuredProtocol.StructuredActionResponse> children_;
     /**
@@ -3081,8 +3111,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -3196,9 +3225,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code StructuredActionResponse}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:StructuredActionResponse)
-        com.cloudata.structured.StructuredProtocol.StructuredActionResponseOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.StructuredActionResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_StructuredActionResponse_descriptor;
@@ -3384,6 +3412,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // repeated .StructuredResponseEntry entry = 1;
       private java.util.List<com.cloudata.structured.StructuredProtocol.StructuredResponseEntry> entry_ =
         java.util.Collections.emptyList();
       private void ensureEntryIsMutable() {
@@ -3525,8 +3554,7 @@ public final class StructuredProtocol {
           java.lang.Iterable<? extends com.cloudata.structured.StructuredProtocol.StructuredResponseEntry> values) {
         if (entryBuilder_ == null) {
           ensureEntryIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, entry_);
+          super.addAll(values, entry_);
           onChanged();
         } else {
           entryBuilder_.addAllMessages(values);
@@ -3624,6 +3652,7 @@ public final class StructuredProtocol {
         return entryBuilder_;
       }
 
+      // repeated .StructuredActionResponse children = 2;
       private java.util.List<com.cloudata.structured.StructuredProtocol.StructuredActionResponse> children_ =
         java.util.Collections.emptyList();
       private void ensureChildrenIsMutable() {
@@ -3765,8 +3794,7 @@ public final class StructuredProtocol {
           java.lang.Iterable<? extends com.cloudata.structured.StructuredProtocol.StructuredActionResponse> values) {
         if (childrenBuilder_ == null) {
           ensureChildrenIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, children_);
+          super.addAll(values, children_);
           onChanged();
         } else {
           childrenBuilder_.addAllMessages(values);
@@ -3875,10 +3903,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:StructuredActionResponse)
   }
 
-  public interface StructuredResponseOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:StructuredResponse)
-      com.google.protobuf.MessageOrBuilder {
+  public interface StructuredResponseOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional .StructuredActionResponse action_response = 1;
     /**
      * <code>optional .StructuredActionResponse action_response = 1;</code>
      */
@@ -3896,9 +3924,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code StructuredResponse}
    */
   public static final class StructuredResponse extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:StructuredResponse)
-      StructuredResponseOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements StructuredResponseOrBuilder {
     // Use StructuredResponse.newBuilder() to construct.
     private StructuredResponse(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -3997,6 +4024,7 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
+    // optional .StructuredActionResponse action_response = 1;
     public static final int ACTION_RESPONSE_FIELD_NUMBER = 1;
     private com.cloudata.structured.StructuredProtocol.StructuredActionResponse actionResponse_;
     /**
@@ -4024,8 +4052,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -4132,9 +4159,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code StructuredResponse}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:StructuredResponse)
-        com.cloudata.structured.StructuredProtocol.StructuredResponseOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.StructuredResponseOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_StructuredResponse_descriptor;
@@ -4256,6 +4282,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // optional .StructuredActionResponse action_response = 1;
       private com.cloudata.structured.StructuredProtocol.StructuredActionResponse actionResponse_ = com.cloudata.structured.StructuredProtocol.StructuredActionResponse.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.cloudata.structured.StructuredProtocol.StructuredActionResponse, com.cloudata.structured.StructuredProtocol.StructuredActionResponse.Builder, com.cloudata.structured.StructuredProtocol.StructuredActionResponseOrBuilder> actionResponseBuilder_;
@@ -4364,7 +4391,7 @@ public final class StructuredProtocol {
         if (actionResponseBuilder_ == null) {
           actionResponseBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               com.cloudata.structured.StructuredProtocol.StructuredActionResponse, com.cloudata.structured.StructuredProtocol.StructuredActionResponse.Builder, com.cloudata.structured.StructuredProtocol.StructuredActionResponseOrBuilder>(
-                  getActionResponse(),
+                  actionResponse_,
                   getParentForChildren(),
                   isClean());
           actionResponse_ = null;
@@ -4383,10 +4410,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:StructuredResponse)
   }
 
-  public interface KeyspaceNameOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:KeyspaceName)
-      com.google.protobuf.MessageOrBuilder {
+  public interface KeyspaceNameOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional .KeyspaceType type = 1;
     /**
      * <code>optional .KeyspaceType type = 1;</code>
      */
@@ -4396,6 +4423,7 @@ public final class StructuredProtocol {
      */
     com.cloudata.structured.StructuredProtocol.KeyspaceType getType();
 
+    // optional bytes name = 2;
     /**
      * <code>optional bytes name = 2;</code>
      */
@@ -4409,9 +4437,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code KeyspaceName}
    */
   public static final class KeyspaceName extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:KeyspaceName)
-      KeyspaceNameOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements KeyspaceNameOrBuilder {
     // Use KeyspaceName.newBuilder() to construct.
     private KeyspaceName(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -4513,6 +4540,7 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
+    // optional .KeyspaceType type = 1;
     public static final int TYPE_FIELD_NUMBER = 1;
     private com.cloudata.structured.StructuredProtocol.KeyspaceType type_;
     /**
@@ -4528,6 +4556,7 @@ public final class StructuredProtocol {
       return type_;
     }
 
+    // optional bytes name = 2;
     public static final int NAME_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString name_;
     /**
@@ -4550,8 +4579,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -4665,9 +4693,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code KeyspaceName}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:KeyspaceName)
-        com.cloudata.structured.StructuredProtocol.KeyspaceNameOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.KeyspaceNameOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_KeyspaceName_descriptor;
@@ -4789,6 +4816,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // optional .KeyspaceType type = 1;
       private com.cloudata.structured.StructuredProtocol.KeyspaceType type_ = com.cloudata.structured.StructuredProtocol.KeyspaceType.USER_DATA;
       /**
        * <code>optional .KeyspaceType type = 1;</code>
@@ -4824,6 +4852,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional bytes name = 2;
       private com.google.protobuf.ByteString name_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes name = 2;</code>
@@ -4870,10 +4899,10 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:KeyspaceName)
   }
 
-  public interface KeyspaceDataOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:KeyspaceData)
-      com.google.protobuf.MessageOrBuilder {
+  public interface KeyspaceDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional uint32 id = 1;
     /**
      * <code>optional uint32 id = 1;</code>
      */
@@ -4883,6 +4912,7 @@ public final class StructuredProtocol {
      */
     int getId();
 
+    // optional .KeyspaceName name = 2;
     /**
      * <code>optional .KeyspaceName name = 2;</code>
      */
@@ -4896,6 +4926,7 @@ public final class StructuredProtocol {
      */
     com.cloudata.structured.StructuredProtocol.KeyspaceNameOrBuilder getNameOrBuilder();
 
+    // optional bytes protobuf_schema = 3;
     /**
      * <code>optional bytes protobuf_schema = 3;</code>
      */
@@ -4905,6 +4936,7 @@ public final class StructuredProtocol {
      */
     com.google.protobuf.ByteString getProtobufSchema();
 
+    // repeated int32 primary_key_fields = 4;
     /**
      * <code>repeated int32 primary_key_fields = 4;</code>
      */
@@ -4922,9 +4954,8 @@ public final class StructuredProtocol {
    * Protobuf type {@code KeyspaceData}
    */
   public static final class KeyspaceData extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:KeyspaceData)
-      KeyspaceDataOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements KeyspaceDataOrBuilder {
     // Use KeyspaceData.newBuilder() to construct.
     private KeyspaceData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -5057,6 +5088,7 @@ public final class StructuredProtocol {
     }
 
     private int bitField0_;
+    // optional uint32 id = 1;
     public static final int ID_FIELD_NUMBER = 1;
     private int id_;
     /**
@@ -5072,6 +5104,7 @@ public final class StructuredProtocol {
       return id_;
     }
 
+    // optional .KeyspaceName name = 2;
     public static final int NAME_FIELD_NUMBER = 2;
     private com.cloudata.structured.StructuredProtocol.KeyspaceName name_;
     /**
@@ -5093,6 +5126,7 @@ public final class StructuredProtocol {
       return name_;
     }
 
+    // optional bytes protobuf_schema = 3;
     public static final int PROTOBUF_SCHEMA_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString protobufSchema_;
     /**
@@ -5108,6 +5142,7 @@ public final class StructuredProtocol {
       return protobufSchema_;
     }
 
+    // repeated int32 primary_key_fields = 4;
     public static final int PRIMARY_KEY_FIELDS_FIELD_NUMBER = 4;
     private java.util.List<java.lang.Integer> primaryKeyFields_;
     /**
@@ -5139,8 +5174,7 @@ public final class StructuredProtocol {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -5273,9 +5307,8 @@ public final class StructuredProtocol {
      * Protobuf type {@code KeyspaceData}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:KeyspaceData)
-        com.cloudata.structured.StructuredProtocol.KeyspaceDataOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.structured.StructuredProtocol.KeyspaceDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.structured.StructuredProtocol.internal_static_KeyspaceData_descriptor;
@@ -5432,6 +5465,7 @@ public final class StructuredProtocol {
       }
       private int bitField0_;
 
+      // optional uint32 id = 1;
       private int id_ ;
       /**
        * <code>optional uint32 id = 1;</code>
@@ -5464,6 +5498,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // optional .KeyspaceName name = 2;
       private com.cloudata.structured.StructuredProtocol.KeyspaceName name_ = com.cloudata.structured.StructuredProtocol.KeyspaceName.getDefaultInstance();
       private com.google.protobuf.SingleFieldBuilder<
           com.cloudata.structured.StructuredProtocol.KeyspaceName, com.cloudata.structured.StructuredProtocol.KeyspaceName.Builder, com.cloudata.structured.StructuredProtocol.KeyspaceNameOrBuilder> nameBuilder_;
@@ -5572,7 +5607,7 @@ public final class StructuredProtocol {
         if (nameBuilder_ == null) {
           nameBuilder_ = new com.google.protobuf.SingleFieldBuilder<
               com.cloudata.structured.StructuredProtocol.KeyspaceName, com.cloudata.structured.StructuredProtocol.KeyspaceName.Builder, com.cloudata.structured.StructuredProtocol.KeyspaceNameOrBuilder>(
-                  getName(),
+                  name_,
                   getParentForChildren(),
                   isClean());
           name_ = null;
@@ -5580,6 +5615,7 @@ public final class StructuredProtocol {
         return nameBuilder_;
       }
 
+      // optional bytes protobuf_schema = 3;
       private com.google.protobuf.ByteString protobufSchema_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes protobuf_schema = 3;</code>
@@ -5615,6 +5651,7 @@ public final class StructuredProtocol {
         return this;
       }
 
+      // repeated int32 primary_key_fields = 4;
       private java.util.List<java.lang.Integer> primaryKeyFields_ = java.util.Collections.emptyList();
       private void ensurePrimaryKeyFieldsIsMutable() {
         if (!((bitField0_ & 0x00000008) == 0x00000008)) {
@@ -5666,8 +5703,7 @@ public final class StructuredProtocol {
       public Builder addAllPrimaryKeyFields(
           java.lang.Iterable<? extends java.lang.Integer> values) {
         ensurePrimaryKeyFieldsIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, primaryKeyFields_);
+        super.addAll(values, primaryKeyFields_);
         onChanged();
         return this;
       }
@@ -5924,37 +5960,37 @@ public final class StructuredProtocol {
     // @@protoc_insertion_point(class_scope:StructuredRpcService)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_StructuredResponseEntry_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_StructuredResponseEntry_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_StructuredAction_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_StructuredAction_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_StructuredRequest_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_StructuredRequest_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_StructuredActionResponse_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_StructuredActionResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_StructuredResponse_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_StructuredResponse_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_KeyspaceName_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_KeyspaceName_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_KeyspaceData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -5999,59 +6035,59 @@ public final class StructuredProtocol {
       "onseB\034\n\027com.cloudata.structured\210\001\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_StructuredResponseEntry_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_StructuredResponseEntry_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_StructuredResponseEntry_descriptor,
+              new java.lang.String[] { "Key", "Value", "Code", });
+          internal_static_StructuredAction_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_StructuredAction_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_StructuredAction_descriptor,
+              new java.lang.String[] { "StoreId", "KeyspaceId", "Action", "Key", "Value", "Version", "Children", "IfNotExists", "IfVersion", "SuppressFields", });
+          internal_static_StructuredRequest_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_StructuredRequest_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_StructuredRequest_descriptor,
+              new java.lang.String[] { "Action", });
+          internal_static_StructuredActionResponse_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_StructuredActionResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_StructuredActionResponse_descriptor,
+              new java.lang.String[] { "Entry", "Children", });
+          internal_static_StructuredResponse_descriptor =
+            getDescriptor().getMessageTypes().get(4);
+          internal_static_StructuredResponse_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_StructuredResponse_descriptor,
+              new java.lang.String[] { "ActionResponse", });
+          internal_static_KeyspaceName_descriptor =
+            getDescriptor().getMessageTypes().get(5);
+          internal_static_KeyspaceName_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_KeyspaceName_descriptor,
+              new java.lang.String[] { "Type", "Name", });
+          internal_static_KeyspaceData_descriptor =
+            getDescriptor().getMessageTypes().get(6);
+          internal_static_KeyspaceData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_KeyspaceData_descriptor,
+              new java.lang.String[] { "Id", "Name", "ProtobufSchema", "PrimaryKeyFields", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_StructuredResponseEntry_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_StructuredResponseEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_StructuredResponseEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", "Code", });
-    internal_static_StructuredAction_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_StructuredAction_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_StructuredAction_descriptor,
-        new java.lang.String[] { "StoreId", "KeyspaceId", "Action", "Key", "Value", "Version", "Children", "IfNotExists", "IfVersion", "SuppressFields", });
-    internal_static_StructuredRequest_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_StructuredRequest_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_StructuredRequest_descriptor,
-        new java.lang.String[] { "Action", });
-    internal_static_StructuredActionResponse_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_StructuredActionResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_StructuredActionResponse_descriptor,
-        new java.lang.String[] { "Entry", "Children", });
-    internal_static_StructuredResponse_descriptor =
-      getDescriptor().getMessageTypes().get(4);
-    internal_static_StructuredResponse_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_StructuredResponse_descriptor,
-        new java.lang.String[] { "ActionResponse", });
-    internal_static_KeyspaceName_descriptor =
-      getDescriptor().getMessageTypes().get(5);
-    internal_static_KeyspaceName_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_KeyspaceName_descriptor,
-        new java.lang.String[] { "Type", "Name", });
-    internal_static_KeyspaceData_descriptor =
-      getDescriptor().getMessageTypes().get(6);
-    internal_static_KeyspaceData_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_KeyspaceData_descriptor,
-        new java.lang.String[] { "Id", "Name", "ProtobufSchema", "PrimaryKeyFields", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

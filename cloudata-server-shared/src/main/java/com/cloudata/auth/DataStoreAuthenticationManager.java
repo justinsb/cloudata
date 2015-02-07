@@ -84,4 +84,7 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
     };
   }
 
+  public static void addMappings(DataStore dataStore) throws DataStoreException {
+    dataStore.addMap(DataStore.Mapping.create(AuthUser.getDefaultInstance()).hashKey("name"));
+  }
 }

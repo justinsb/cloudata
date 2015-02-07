@@ -8,10 +8,10 @@ public final class AppendLogProto {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface LogEntryOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:LogEntry)
-      com.google.protobuf.MessageOrBuilder {
+  public interface LogEntryOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // required uint64 log_id = 1;
     /**
      * <code>required uint64 log_id = 1;</code>
      */
@@ -21,6 +21,7 @@ public final class AppendLogProto {
      */
     long getLogId();
 
+    // required bytes value = 3;
     /**
      * <code>required bytes value = 3;</code>
      *
@@ -42,9 +43,8 @@ public final class AppendLogProto {
    * Protobuf type {@code LogEntry}
    */
   public static final class LogEntry extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:LogEntry)
-      LogEntryOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements LogEntryOrBuilder {
     // Use LogEntry.newBuilder() to construct.
     private LogEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -140,6 +140,7 @@ public final class AppendLogProto {
     }
 
     private int bitField0_;
+    // required uint64 log_id = 1;
     public static final int LOG_ID_FIELD_NUMBER = 1;
     private long logId_;
     /**
@@ -155,6 +156,7 @@ public final class AppendLogProto {
       return logId_;
     }
 
+    // required bytes value = 3;
     public static final int VALUE_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString value_;
     /**
@@ -185,8 +187,7 @@ public final class AppendLogProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       if (!hasLogId()) {
         memoizedIsInitialized = 0;
@@ -308,9 +309,8 @@ public final class AppendLogProto {
      * Protobuf type {@code LogEntry}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:LogEntry)
-        com.cloudata.appendlog.data.AppendLogProto.LogEntryOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.appendlog.data.AppendLogProto.LogEntryOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.appendlog.data.AppendLogProto.internal_static_LogEntry_descriptor;
@@ -440,6 +440,7 @@ public final class AppendLogProto {
       }
       private int bitField0_;
 
+      // required uint64 log_id = 1;
       private long logId_ ;
       /**
        * <code>required uint64 log_id = 1;</code>
@@ -472,6 +473,7 @@ public final class AppendLogProto {
         return this;
       }
 
+      // required bytes value = 3;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>required bytes value = 3;</code>
@@ -534,7 +536,7 @@ public final class AppendLogProto {
     // @@protoc_insertion_point(class_scope:LogEntry)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_LogEntry_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -553,23 +555,23 @@ public final class AppendLogProto {
       "B\035\n\033com.cloudata.appendlog.data"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_LogEntry_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_LogEntry_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_LogEntry_descriptor,
+              new java.lang.String[] { "LogId", "Value", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_LogEntry_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_LogEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_LogEntry_descriptor,
-        new java.lang.String[] { "LogId", "Value", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

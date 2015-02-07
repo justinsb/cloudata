@@ -11,8 +11,11 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Ref.Storage;
 import org.eclipse.jgit.lib.SymbolicRef;
 import org.eclipse.jgit.util.RefList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudata.datastore.DataStore;
+import com.cloudata.datastore.DataStoreException;
 import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.UniqueIndexViolation;
 import com.cloudata.datastore.WhereModifier;
@@ -21,6 +24,8 @@ import com.cloudata.git.GitModel.RepositoryData;
 import com.google.protobuf.ByteString;
 
 public class CloudRefDatabase extends DfsRefDatabase {
+  static final Logger log = LoggerFactory.getLogger(CloudRefDatabase.class);
+
   private final DataStore dataStore;
 
   // private final ByteString prefix;
@@ -88,6 +93,10 @@ public class CloudRefDatabase extends DfsRefDatabase {
       Modifier whereUnchanged = WhereModifier.create(cur.data);
       return dataStore.update(newModel, whereUnchanged);
     } catch (IOException e) {
+      log.warn("Error during ref update", e);
+      throw new IOException("Error creating reference", e);
+    } catch (Exception e) {
+      log.error("Unexpected error during ref update", e);
       throw new IOException("Error creating reference", e);
     }
 

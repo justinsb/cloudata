@@ -10,8 +10,7 @@ public class SendMessageAction extends SqsAction {
   public void run() throws Exception {
     String messageBody = getRequiredParameter("MessageBody");
 
-    QueueUser user = getQueueUser();
-    Queue queue = getQueue(user);
+    Queue queue = getQueue();
 
     Message.Builder message = Message.newBuilder();
 

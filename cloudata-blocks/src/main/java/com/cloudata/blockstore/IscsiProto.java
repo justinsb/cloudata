@@ -108,10 +108,10 @@ public final class IscsiProto {
     // @@protoc_insertion_point(enum_scope:LogAction)
   }
 
-  public interface LogEntryOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:LogEntry)
-      com.google.protobuf.MessageOrBuilder {
+  public interface LogEntryOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // required uint64 store_id = 1;
     /**
      * <code>required uint64 store_id = 1;</code>
      */
@@ -121,6 +121,7 @@ public final class IscsiProto {
      */
     long getStoreId();
 
+    // required .LogAction action = 2;
     /**
      * <code>required .LogAction action = 2;</code>
      */
@@ -130,6 +131,7 @@ public final class IscsiProto {
      */
     com.cloudata.blockstore.IscsiProto.LogAction getAction();
 
+    // optional bytes key = 3;
     /**
      * <code>optional bytes key = 3;</code>
      */
@@ -139,6 +141,7 @@ public final class IscsiProto {
      */
     com.google.protobuf.ByteString getKey();
 
+    // optional bytes value = 4;
     /**
      * <code>optional bytes value = 4;</code>
      */
@@ -148,6 +151,7 @@ public final class IscsiProto {
      */
     com.google.protobuf.ByteString getValue();
 
+    // optional int64 increment_by = 5;
     /**
      * <code>optional int64 increment_by = 5;</code>
      */
@@ -161,9 +165,8 @@ public final class IscsiProto {
    * Protobuf type {@code LogEntry}
    */
   public static final class LogEntry extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:LogEntry)
-      LogEntryOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements LogEntryOrBuilder {
     // Use LogEntry.newBuilder() to construct.
     private LogEntry(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -280,6 +283,7 @@ public final class IscsiProto {
     }
 
     private int bitField0_;
+    // required uint64 store_id = 1;
     public static final int STORE_ID_FIELD_NUMBER = 1;
     private long storeId_;
     /**
@@ -295,6 +299,7 @@ public final class IscsiProto {
       return storeId_;
     }
 
+    // required .LogAction action = 2;
     public static final int ACTION_FIELD_NUMBER = 2;
     private com.cloudata.blockstore.IscsiProto.LogAction action_;
     /**
@@ -310,6 +315,7 @@ public final class IscsiProto {
       return action_;
     }
 
+    // optional bytes key = 3;
     public static final int KEY_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString key_;
     /**
@@ -325,6 +331,7 @@ public final class IscsiProto {
       return key_;
     }
 
+    // optional bytes value = 4;
     public static final int VALUE_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString value_;
     /**
@@ -340,6 +347,7 @@ public final class IscsiProto {
       return value_;
     }
 
+    // optional int64 increment_by = 5;
     public static final int INCREMENT_BY_FIELD_NUMBER = 5;
     private long incrementBy_;
     /**
@@ -365,8 +373,7 @@ public final class IscsiProto {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       if (!hasStoreId()) {
         memoizedIsInitialized = 0;
@@ -509,9 +516,8 @@ public final class IscsiProto {
      * Protobuf type {@code LogEntry}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:LogEntry)
-        com.cloudata.blockstore.IscsiProto.LogEntryOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.blockstore.IscsiProto.LogEntryOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.blockstore.IscsiProto.internal_static_LogEntry_descriptor;
@@ -668,6 +674,7 @@ public final class IscsiProto {
       }
       private int bitField0_;
 
+      // required uint64 store_id = 1;
       private long storeId_ ;
       /**
        * <code>required uint64 store_id = 1;</code>
@@ -700,6 +707,7 @@ public final class IscsiProto {
         return this;
       }
 
+      // required .LogAction action = 2;
       private com.cloudata.blockstore.IscsiProto.LogAction action_ = com.cloudata.blockstore.IscsiProto.LogAction.SET;
       /**
        * <code>required .LogAction action = 2;</code>
@@ -735,6 +743,7 @@ public final class IscsiProto {
         return this;
       }
 
+      // optional bytes key = 3;
       private com.google.protobuf.ByteString key_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes key = 3;</code>
@@ -770,6 +779,7 @@ public final class IscsiProto {
         return this;
       }
 
+      // optional bytes value = 4;
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes value = 4;</code>
@@ -805,6 +815,7 @@ public final class IscsiProto {
         return this;
       }
 
+      // optional int64 increment_by = 5;
       private long incrementBy_ ;
       /**
        * <code>optional int64 increment_by = 5;</code>
@@ -848,7 +859,7 @@ public final class IscsiProto {
     // @@protoc_insertion_point(class_scope:LogEntry)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_LogEntry_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -870,23 +881,23 @@ public final class IscsiProto {
       "\020\004B\031\n\027com.cloudata.blockstore"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_LogEntry_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_LogEntry_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_LogEntry_descriptor,
+              new java.lang.String[] { "StoreId", "Action", "Key", "Value", "IncrementBy", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_LogEntry_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_LogEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_LogEntry_descriptor,
-        new java.lang.String[] { "StoreId", "Action", "Key", "Value", "IncrementBy", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

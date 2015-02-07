@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.eclipse.jgit.lib.Repository;
 
+import com.cloudata.datastore.DataStore;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 

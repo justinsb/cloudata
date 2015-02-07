@@ -1,13 +1,17 @@
 package com.cloudata.mq.web;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.cloudata.Randoms;
+import com.cloudata.auth.Project;
 import com.cloudata.datastore.ComparatorModifier;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
+import com.cloudata.datastore.LimitModifier;
 import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.WhereModifier;
 import com.cloudata.mq.MqModel.Message;
@@ -20,7 +24,6 @@ import com.google.protobuf.ByteString;
 
 @Singleton
 public class QueueService {
-
   @Inject
   DataStore dataStore;
 
@@ -30,15 +33,16 @@ public class QueueService {
     this.baseUrl = baseUrl;
   }
 
-  public List<Queue> listQueues(QueueUser user, String queueNamePrefix) throws DataStoreException {
+  public List<Queue> listQueues(Project project, Optional<String> queueNamePrefix) throws DataStoreException {
     Queue.Builder matcher = Queue.newBuilder();
-    matcher.setScope(user.getScope());
+    matcher.setProjectId(project.getId());
 
+    List<Modifier> modifiers = Lists.newArrayList();
+    if (queueNamePrefix.isPresent()) {
+      modifiers.add(ComparatorModifier.startsWith(Queue.newBuilder().setName(queueNamePrefix.get()).build()));
+    }
     List<Queue> ret = Lists.newArrayList();
-    for (Queue queue : dataStore.find(matcher.build())) {
-      if (queueNamePrefix != null && !queue.getName().startsWith(queueNamePrefix)) {
-        continue;
-      }
+    for (Queue queue : dataStore.find(matcher.build(), modifiers)) {
       ret.add(queue);
     }
 
@@ -46,14 +50,14 @@ public class QueueService {
   }
 
   public String buildQueueUrl(Queue queue) {
-    return "http://" + baseUrl + "/" + queue.getScope() + "/" + queue.getName();
+    return "http://" + baseUrl + "/" + queue.getProjectId().toStringUtf8() + "/" + queue.getName();
   }
 
-  public Queue createQueue(QueueUser user, Queue.Builder queue) throws DataStoreException {
+  public Queue createQueue(Project project, Queue.Builder queue) throws DataStoreException {
     if (!queue.hasName()) {
       throw new IllegalArgumentException();
     }
-    queue.setScope(user.getScope());
+    queue.setProjectId(project.getId());
     queue.setQueueId(Randoms.buildId());
 
     Queue inserted = queue.build();
@@ -62,12 +66,9 @@ public class QueueService {
     return inserted;
   }
 
-  public Queue findQueue(QueueUser user, String scope, String queueName) throws DataStoreException {
-    if (!user.getScope().equals(scope)) {
-      return null;
-    }
+  public Queue findQueue(Project project, String queueName) throws DataStoreException {
     Queue.Builder matcher = Queue.newBuilder();
-    matcher.setScope(user.getScope());
+    matcher.setProjectId(project.getId());
     matcher.setName(queueName);
 
     return dataStore.findOne(matcher.build());
@@ -101,14 +102,20 @@ public class QueueService {
     Message.Builder matcher = Message.newBuilder();
     matcher.setQueueId(queue.getQueueId());
 
+    List<Modifier> modifiers = Lists.newArrayList();
+
+    // Query for a few more than our limit, in case of simultaneous queries
+    int queryLimit = Math.max(maxNumberOfMessages + (maxNumberOfMessages / 2), 4);
+    modifiers.add(new LimitModifier(queryLimit));
+
     long now = now();
-    Modifier invisibleUntilFilter = new ComparatorModifier(Message.INVISIBLE_UNTIL_FIELD_NUMBER,
-        ComparatorModifier.Operator.LESS_THAN, Message.newBuilder().setInvisibleUntil(now).build());
+    Modifier invisibleUntilFilter = ComparatorModifier.lessThan(Message.newBuilder().setInvisibleUntil(now).build());
+    modifiers.add(invisibleUntilFilter);
 
     List<Message> received = Lists.newArrayList();
 
     // TODO: Limit or iterable
-    for (Message message : dataStore.find(matcher.build(), invisibleUntilFilter)) {
+    for (Message message : dataStore.find(matcher.build(), modifiers)) {
       Message.Builder update = Message.newBuilder(message);
       update.setReceiptHandleNonce(Randoms.buildId());
       update.setVersion(message.getVersion() + 1);

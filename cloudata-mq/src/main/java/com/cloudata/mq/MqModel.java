@@ -8,54 +8,50 @@ public final class MqModel {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface QueueOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Queue)
-      com.google.protobuf.MessageOrBuilder {
+  public interface QueueOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes project_id = 1;
     /**
-     * <code>optional bytes queue_id = 1;</code>
+     * <code>optional bytes project_id = 1;</code>
      */
-    boolean hasQueueId();
+    boolean hasProjectId();
     /**
-     * <code>optional bytes queue_id = 1;</code>
+     * <code>optional bytes project_id = 1;</code>
      */
-    com.google.protobuf.ByteString getQueueId();
+    com.google.protobuf.ByteString getProjectId();
 
+    // optional string name = 2;
     /**
-     * <code>optional string scope = 2;</code>
-     */
-    boolean hasScope();
-    /**
-     * <code>optional string scope = 2;</code>
-     */
-    java.lang.String getScope();
-    /**
-     * <code>optional string scope = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getScopeBytes();
-
-    /**
-     * <code>optional string name = 3;</code>
+     * <code>optional string name = 2;</code>
      */
     boolean hasName();
     /**
-     * <code>optional string name = 3;</code>
+     * <code>optional string name = 2;</code>
      */
     java.lang.String getName();
     /**
-     * <code>optional string name = 3;</code>
+     * <code>optional string name = 2;</code>
      */
     com.google.protobuf.ByteString
         getNameBytes();
+
+    // optional bytes queue_id = 3;
+    /**
+     * <code>optional bytes queue_id = 3;</code>
+     */
+    boolean hasQueueId();
+    /**
+     * <code>optional bytes queue_id = 3;</code>
+     */
+    com.google.protobuf.ByteString getQueueId();
   }
   /**
    * Protobuf type {@code Queue}
    */
   public static final class Queue extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:Queue)
-      QueueOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements QueueOrBuilder {
     // Use Queue.newBuilder() to construct.
     private Queue(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -103,19 +99,17 @@ public final class MqModel {
             }
             case 10: {
               bitField0_ |= 0x00000001;
-              queueId_ = input.readBytes();
+              projectId_ = input.readBytes();
               break;
             }
             case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              scope_ = bs;
+              name_ = input.readBytes();
               break;
             }
             case 26: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
-              name_ = bs;
+              queueId_ = input.readBytes();
               break;
             }
           }
@@ -158,73 +152,33 @@ public final class MqModel {
     }
 
     private int bitField0_;
-    public static final int QUEUE_ID_FIELD_NUMBER = 1;
-    private com.google.protobuf.ByteString queueId_;
+    // optional bytes project_id = 1;
+    public static final int PROJECT_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString projectId_;
     /**
-     * <code>optional bytes queue_id = 1;</code>
+     * <code>optional bytes project_id = 1;</code>
      */
-    public boolean hasQueueId() {
+    public boolean hasProjectId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional bytes queue_id = 1;</code>
+     * <code>optional bytes project_id = 1;</code>
      */
-    public com.google.protobuf.ByteString getQueueId() {
-      return queueId_;
+    public com.google.protobuf.ByteString getProjectId() {
+      return projectId_;
     }
 
-    public static final int SCOPE_FIELD_NUMBER = 2;
-    private java.lang.Object scope_;
+    // optional string name = 2;
+    public static final int NAME_FIELD_NUMBER = 2;
+    private java.lang.Object name_;
     /**
-     * <code>optional string scope = 2;</code>
+     * <code>optional string name = 2;</code>
      */
-    public boolean hasScope() {
+    public boolean hasName() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional string scope = 2;</code>
-     */
-    public java.lang.String getScope() {
-      java.lang.Object ref = scope_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          scope_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string scope = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getScopeBytes() {
-      java.lang.Object ref = scope_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        scope_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int NAME_FIELD_NUMBER = 3;
-    private java.lang.Object name_;
-    /**
-     * <code>optional string name = 3;</code>
-     */
-    public boolean hasName() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
-    }
-    /**
-     * <code>optional string name = 3;</code>
+     * <code>optional string name = 2;</code>
      */
     public java.lang.String getName() {
       java.lang.Object ref = name_;
@@ -241,7 +195,7 @@ public final class MqModel {
       }
     }
     /**
-     * <code>optional string name = 3;</code>
+     * <code>optional string name = 2;</code>
      */
     public com.google.protobuf.ByteString
         getNameBytes() {
@@ -257,16 +211,31 @@ public final class MqModel {
       }
     }
 
+    // optional bytes queue_id = 3;
+    public static final int QUEUE_ID_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString queueId_;
+    /**
+     * <code>optional bytes queue_id = 3;</code>
+     */
+    public boolean hasQueueId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes queue_id = 3;</code>
+     */
+    public com.google.protobuf.ByteString getQueueId() {
+      return queueId_;
+    }
+
     private void initFields() {
-      queueId_ = com.google.protobuf.ByteString.EMPTY;
-      scope_ = "";
+      projectId_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
+      queueId_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -276,13 +245,13 @@ public final class MqModel {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, queueId_);
+        output.writeBytes(1, projectId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getScopeBytes());
+        output.writeBytes(2, getNameBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(3, getNameBytes());
+        output.writeBytes(3, queueId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -295,15 +264,15 @@ public final class MqModel {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, queueId_);
+          .computeBytesSize(1, projectId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getScopeBytes());
+          .computeBytesSize(2, getNameBytes());
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(3, getNameBytes());
+          .computeBytesSize(3, queueId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -387,9 +356,8 @@ public final class MqModel {
      * Protobuf type {@code Queue}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Queue)
-        com.cloudata.mq.MqModel.QueueOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.mq.MqModel.QueueOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.mq.MqModel.internal_static_Queue_descriptor;
@@ -422,11 +390,11 @@ public final class MqModel {
 
       public Builder clear() {
         super.clear();
-        queueId_ = com.google.protobuf.ByteString.EMPTY;
+        projectId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        scope_ = "";
-        bitField0_ = (bitField0_ & ~0x00000002);
         name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        queueId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
@@ -459,15 +427,15 @@ public final class MqModel {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.queueId_ = queueId_;
+        result.projectId_ = projectId_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.scope_ = scope_;
+        result.name_ = name_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.name_ = name_;
+        result.queueId_ = queueId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -484,18 +452,16 @@ public final class MqModel {
 
       public Builder mergeFrom(com.cloudata.mq.MqModel.Queue other) {
         if (other == com.cloudata.mq.MqModel.Queue.getDefaultInstance()) return this;
-        if (other.hasQueueId()) {
-          setQueueId(other.getQueueId());
-        }
-        if (other.hasScope()) {
-          bitField0_ |= 0x00000002;
-          scope_ = other.scope_;
-          onChanged();
+        if (other.hasProjectId()) {
+          setProjectId(other.getProjectId());
         }
         if (other.hasName()) {
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000002;
           name_ = other.name_;
           onChanged();
+        }
+        if (other.hasQueueId()) {
+          setQueueId(other.getQueueId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -524,143 +490,66 @@ public final class MqModel {
       }
       private int bitField0_;
 
-      private com.google.protobuf.ByteString queueId_ = com.google.protobuf.ByteString.EMPTY;
+      // optional bytes project_id = 1;
+      private com.google.protobuf.ByteString projectId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional bytes queue_id = 1;</code>
+       * <code>optional bytes project_id = 1;</code>
        */
-      public boolean hasQueueId() {
+      public boolean hasProjectId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional bytes queue_id = 1;</code>
+       * <code>optional bytes project_id = 1;</code>
        */
-      public com.google.protobuf.ByteString getQueueId() {
-        return queueId_;
+      public com.google.protobuf.ByteString getProjectId() {
+        return projectId_;
       }
       /**
-       * <code>optional bytes queue_id = 1;</code>
+       * <code>optional bytes project_id = 1;</code>
        */
-      public Builder setQueueId(com.google.protobuf.ByteString value) {
+      public Builder setProjectId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000001;
-        queueId_ = value;
+        projectId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes queue_id = 1;</code>
+       * <code>optional bytes project_id = 1;</code>
        */
-      public Builder clearQueueId() {
+      public Builder clearProjectId() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        queueId_ = getDefaultInstance().getQueueId();
+        projectId_ = getDefaultInstance().getProjectId();
         onChanged();
         return this;
       }
 
-      private java.lang.Object scope_ = "";
+      // optional string name = 2;
+      private java.lang.Object name_ = "";
       /**
-       * <code>optional string scope = 2;</code>
+       * <code>optional string name = 2;</code>
        */
-      public boolean hasScope() {
+      public boolean hasName() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional string scope = 2;</code>
-       */
-      public java.lang.String getScope() {
-        java.lang.Object ref = scope_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            scope_ = s;
-          }
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>optional string scope = 2;</code>
-       */
-      public com.google.protobuf.ByteString
-          getScopeBytes() {
-        java.lang.Object ref = scope_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          scope_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string scope = 2;</code>
-       */
-      public Builder setScope(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        scope_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string scope = 2;</code>
-       */
-      public Builder clearScope() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        scope_ = getDefaultInstance().getScope();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string scope = 2;</code>
-       */
-      public Builder setScopeBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        scope_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object name_ = "";
-      /**
-       * <code>optional string name = 3;</code>
-       */
-      public boolean hasName() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
-      }
-      /**
-       * <code>optional string name = 3;</code>
+       * <code>optional string name = 2;</code>
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            name_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
         }
       }
       /**
-       * <code>optional string name = 3;</code>
+       * <code>optional string name = 2;</code>
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -676,37 +565,73 @@ public final class MqModel {
         }
       }
       /**
-       * <code>optional string name = 3;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder setName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string name = 3;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder clearName() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000002);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string name = 3;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000002;
         name_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes queue_id = 3;
+      private com.google.protobuf.ByteString queueId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes queue_id = 3;</code>
+       */
+      public boolean hasQueueId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes queue_id = 3;</code>
+       */
+      public com.google.protobuf.ByteString getQueueId() {
+        return queueId_;
+      }
+      /**
+       * <code>optional bytes queue_id = 3;</code>
+       */
+      public Builder setQueueId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        queueId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes queue_id = 3;</code>
+       */
+      public Builder clearQueueId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        queueId_ = getDefaultInstance().getQueueId();
         onChanged();
         return this;
       }
@@ -722,10 +647,10 @@ public final class MqModel {
     // @@protoc_insertion_point(class_scope:Queue)
   }
 
-  public interface MessageAttributeOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:MessageAttribute)
-      com.google.protobuf.MessageOrBuilder {
+  public interface MessageAttributeOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional string name = 1;
     /**
      * <code>optional string name = 1;</code>
      */
@@ -740,6 +665,7 @@ public final class MqModel {
     com.google.protobuf.ByteString
         getNameBytes();
 
+    // optional string value = 2;
     /**
      * <code>optional string value = 2;</code>
      */
@@ -758,9 +684,8 @@ public final class MqModel {
    * Protobuf type {@code MessageAttribute}
    */
   public static final class MessageAttribute extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:MessageAttribute)
-      MessageAttributeOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements MessageAttributeOrBuilder {
     // Use MessageAttribute.newBuilder() to construct.
     private MessageAttribute(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -807,15 +732,13 @@ public final class MqModel {
               break;
             }
             case 10: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000001;
-              name_ = bs;
+              name_ = input.readBytes();
               break;
             }
             case 18: {
-              com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000002;
-              value_ = bs;
+              value_ = input.readBytes();
               break;
             }
           }
@@ -858,6 +781,7 @@ public final class MqModel {
     }
 
     private int bitField0_;
+    // optional string name = 1;
     public static final int NAME_FIELD_NUMBER = 1;
     private java.lang.Object name_;
     /**
@@ -900,6 +824,7 @@ public final class MqModel {
       }
     }
 
+    // optional string value = 2;
     public static final int VALUE_FIELD_NUMBER = 2;
     private java.lang.Object value_;
     /**
@@ -949,8 +874,7 @@ public final class MqModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1064,9 +988,8 @@ public final class MqModel {
      * Protobuf type {@code MessageAttribute}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:MessageAttribute)
-        com.cloudata.mq.MqModel.MessageAttributeOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.mq.MqModel.MessageAttributeOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.mq.MqModel.internal_static_MessageAttribute_descriptor;
@@ -1192,6 +1115,7 @@ public final class MqModel {
       }
       private int bitField0_;
 
+      // optional string name = 1;
       private java.lang.Object name_ = "";
       /**
        * <code>optional string name = 1;</code>
@@ -1205,12 +1129,9 @@ public final class MqModel {
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            name_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          name_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1268,6 +1189,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional string value = 2;
       private java.lang.Object value_ = "";
       /**
        * <code>optional string value = 2;</code>
@@ -1281,12 +1203,9 @@ public final class MqModel {
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
         if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          if (bs.isValidUtf8()) {
-            value_ = s;
-          }
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          value_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -1355,10 +1274,10 @@ public final class MqModel {
     // @@protoc_insertion_point(class_scope:MessageAttribute)
   }
 
-  public interface MessageOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Message)
-      com.google.protobuf.MessageOrBuilder {
+  public interface MessageOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes queue_id = 1;
     /**
      * <code>optional bytes queue_id = 1;</code>
      */
@@ -1368,6 +1287,7 @@ public final class MqModel {
      */
     com.google.protobuf.ByteString getQueueId();
 
+    // optional bytes message_id = 2;
     /**
      * <code>optional bytes message_id = 2;</code>
      */
@@ -1377,6 +1297,7 @@ public final class MqModel {
      */
     com.google.protobuf.ByteString getMessageId();
 
+    // optional bytes body = 3;
     /**
      * <code>optional bytes body = 3;</code>
      */
@@ -1386,6 +1307,7 @@ public final class MqModel {
      */
     com.google.protobuf.ByteString getBody();
 
+    // optional bytes message_body_md5 = 4;
     /**
      * <code>optional bytes message_body_md5 = 4;</code>
      */
@@ -1395,6 +1317,7 @@ public final class MqModel {
      */
     com.google.protobuf.ByteString getMessageBodyMd5();
 
+    // repeated .MessageAttribute attribute = 5;
     /**
      * <code>repeated .MessageAttribute attribute = 5;</code>
      */
@@ -1419,6 +1342,7 @@ public final class MqModel {
     com.cloudata.mq.MqModel.MessageAttributeOrBuilder getAttributeOrBuilder(
         int index);
 
+    // optional bytes receipt_handle_nonce = 6;
     /**
      * <code>optional bytes receipt_handle_nonce = 6;</code>
      */
@@ -1428,6 +1352,7 @@ public final class MqModel {
      */
     com.google.protobuf.ByteString getReceiptHandleNonce();
 
+    // optional int64 invisible_until = 7;
     /**
      * <code>optional int64 invisible_until = 7;</code>
      */
@@ -1437,6 +1362,7 @@ public final class MqModel {
      */
     long getInvisibleUntil();
 
+    // optional int32 version = 8;
     /**
      * <code>optional int32 version = 8;</code>
      */
@@ -1450,9 +1376,8 @@ public final class MqModel {
    * Protobuf type {@code Message}
    */
   public static final class Message extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:Message)
-      MessageOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements MessageOrBuilder {
     // Use Message.newBuilder() to construct.
     private Message(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -1584,6 +1509,7 @@ public final class MqModel {
     }
 
     private int bitField0_;
+    // optional bytes queue_id = 1;
     public static final int QUEUE_ID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString queueId_;
     /**
@@ -1599,6 +1525,7 @@ public final class MqModel {
       return queueId_;
     }
 
+    // optional bytes message_id = 2;
     public static final int MESSAGE_ID_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString messageId_;
     /**
@@ -1614,6 +1541,7 @@ public final class MqModel {
       return messageId_;
     }
 
+    // optional bytes body = 3;
     public static final int BODY_FIELD_NUMBER = 3;
     private com.google.protobuf.ByteString body_;
     /**
@@ -1629,6 +1557,7 @@ public final class MqModel {
       return body_;
     }
 
+    // optional bytes message_body_md5 = 4;
     public static final int MESSAGE_BODY_MD5_FIELD_NUMBER = 4;
     private com.google.protobuf.ByteString messageBodyMd5_;
     /**
@@ -1644,6 +1573,7 @@ public final class MqModel {
       return messageBodyMd5_;
     }
 
+    // repeated .MessageAttribute attribute = 5;
     public static final int ATTRIBUTE_FIELD_NUMBER = 5;
     private java.util.List<com.cloudata.mq.MqModel.MessageAttribute> attribute_;
     /**
@@ -1679,6 +1609,7 @@ public final class MqModel {
       return attribute_.get(index);
     }
 
+    // optional bytes receipt_handle_nonce = 6;
     public static final int RECEIPT_HANDLE_NONCE_FIELD_NUMBER = 6;
     private com.google.protobuf.ByteString receiptHandleNonce_;
     /**
@@ -1694,6 +1625,7 @@ public final class MqModel {
       return receiptHandleNonce_;
     }
 
+    // optional int64 invisible_until = 7;
     public static final int INVISIBLE_UNTIL_FIELD_NUMBER = 7;
     private long invisibleUntil_;
     /**
@@ -1709,6 +1641,7 @@ public final class MqModel {
       return invisibleUntil_;
     }
 
+    // optional int32 version = 8;
     public static final int VERSION_FIELD_NUMBER = 8;
     private int version_;
     /**
@@ -1737,8 +1670,7 @@ public final class MqModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -1894,9 +1826,8 @@ public final class MqModel {
      * Protobuf type {@code Message}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Message)
-        com.cloudata.mq.MqModel.MessageOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.mq.MqModel.MessageOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.mq.MqModel.internal_static_Message_descriptor;
@@ -2105,6 +2036,7 @@ public final class MqModel {
       }
       private int bitField0_;
 
+      // optional bytes queue_id = 1;
       private com.google.protobuf.ByteString queueId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes queue_id = 1;</code>
@@ -2140,6 +2072,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional bytes message_id = 2;
       private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes message_id = 2;</code>
@@ -2175,6 +2108,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional bytes body = 3;
       private com.google.protobuf.ByteString body_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes body = 3;</code>
@@ -2210,6 +2144,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional bytes message_body_md5 = 4;
       private com.google.protobuf.ByteString messageBodyMd5_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes message_body_md5 = 4;</code>
@@ -2245,6 +2180,7 @@ public final class MqModel {
         return this;
       }
 
+      // repeated .MessageAttribute attribute = 5;
       private java.util.List<com.cloudata.mq.MqModel.MessageAttribute> attribute_ =
         java.util.Collections.emptyList();
       private void ensureAttributeIsMutable() {
@@ -2386,8 +2322,7 @@ public final class MqModel {
           java.lang.Iterable<? extends com.cloudata.mq.MqModel.MessageAttribute> values) {
         if (attributeBuilder_ == null) {
           ensureAttributeIsMutable();
-          com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, attribute_);
+          super.addAll(values, attribute_);
           onChanged();
         } else {
           attributeBuilder_.addAllMessages(values);
@@ -2485,6 +2420,7 @@ public final class MqModel {
         return attributeBuilder_;
       }
 
+      // optional bytes receipt_handle_nonce = 6;
       private com.google.protobuf.ByteString receiptHandleNonce_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes receipt_handle_nonce = 6;</code>
@@ -2520,6 +2456,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional int64 invisible_until = 7;
       private long invisibleUntil_ ;
       /**
        * <code>optional int64 invisible_until = 7;</code>
@@ -2552,6 +2489,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional int32 version = 8;
       private int version_ ;
       /**
        * <code>optional int32 version = 8;</code>
@@ -2595,10 +2533,10 @@ public final class MqModel {
     // @@protoc_insertion_point(class_scope:Message)
   }
 
-  public interface ReceiptHandleOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:ReceiptHandle)
-      com.google.protobuf.MessageOrBuilder {
+  public interface ReceiptHandleOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
 
+    // optional bytes message_id = 1;
     /**
      * <code>optional bytes message_id = 1;</code>
      */
@@ -2608,6 +2546,7 @@ public final class MqModel {
      */
     com.google.protobuf.ByteString getMessageId();
 
+    // optional bytes nonce = 2;
     /**
      * <code>optional bytes nonce = 2;</code>
      */
@@ -2621,9 +2560,8 @@ public final class MqModel {
    * Protobuf type {@code ReceiptHandle}
    */
   public static final class ReceiptHandle extends
-      com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:ReceiptHandle)
-      ReceiptHandleOrBuilder {
+      com.google.protobuf.GeneratedMessage
+      implements ReceiptHandleOrBuilder {
     // Use ReceiptHandle.newBuilder() to construct.
     private ReceiptHandle(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
@@ -2719,6 +2657,7 @@ public final class MqModel {
     }
 
     private int bitField0_;
+    // optional bytes message_id = 1;
     public static final int MESSAGE_ID_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString messageId_;
     /**
@@ -2734,6 +2673,7 @@ public final class MqModel {
       return messageId_;
     }
 
+    // optional bytes nonce = 2;
     public static final int NONCE_FIELD_NUMBER = 2;
     private com.google.protobuf.ByteString nonce_;
     /**
@@ -2756,8 +2696,7 @@ public final class MqModel {
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
-      if (isInitialized == 1) return true;
-      if (isInitialized == 0) return false;
+      if (isInitialized != -1) return isInitialized == 1;
 
       memoizedIsInitialized = 1;
       return true;
@@ -2871,9 +2810,8 @@ public final class MqModel {
      * Protobuf type {@code ReceiptHandle}
      */
     public static final class Builder extends
-        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:ReceiptHandle)
-        com.cloudata.mq.MqModel.ReceiptHandleOrBuilder {
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.mq.MqModel.ReceiptHandleOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
         return com.cloudata.mq.MqModel.internal_static_ReceiptHandle_descriptor;
@@ -2995,6 +2933,7 @@ public final class MqModel {
       }
       private int bitField0_;
 
+      // optional bytes message_id = 1;
       private com.google.protobuf.ByteString messageId_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes message_id = 1;</code>
@@ -3030,6 +2969,7 @@ public final class MqModel {
         return this;
       }
 
+      // optional bytes nonce = 2;
       private com.google.protobuf.ByteString nonce_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes nonce = 2;</code>
@@ -3076,22 +3016,22 @@ public final class MqModel {
     // @@protoc_insertion_point(class_scope:ReceiptHandle)
   }
 
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_Queue_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_Queue_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_MessageAttribute_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_MessageAttribute_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_Message_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_Message_fieldAccessorTable;
-  private static final com.google.protobuf.Descriptors.Descriptor
+  private static com.google.protobuf.Descriptors.Descriptor
     internal_static_ReceiptHandle_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
@@ -3105,54 +3045,54 @@ public final class MqModel {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\034src/main/proto/MqModel.proto\"6\n\005Queue\022" +
-      "\020\n\010queue_id\030\001 \001(\014\022\r\n\005scope\030\002 \001(\t\022\014\n\004name" +
-      "\030\003 \001(\t\"/\n\020MessageAttribute\022\014\n\004name\030\001 \001(\t" +
-      "\022\r\n\005value\030\002 \001(\t\"\305\001\n\007Message\022\020\n\010queue_id\030" +
-      "\001 \001(\014\022\022\n\nmessage_id\030\002 \001(\014\022\014\n\004body\030\003 \001(\014\022" +
-      "\030\n\020message_body_md5\030\004 \001(\014\022$\n\tattribute\030\005" +
-      " \003(\0132\021.MessageAttribute\022\034\n\024receipt_handl" +
-      "e_nonce\030\006 \001(\014\022\027\n\017invisible_until\030\007 \001(\003\022\017" +
-      "\n\007version\030\010 \001(\005\"2\n\rReceiptHandle\022\022\n\nmess" +
-      "age_id\030\001 \001(\014\022\r\n\005nonce\030\002 \001(\014B\021\n\017com.cloud",
-      "ata.mq"
+      "\n\034src/main/proto/MqModel.proto\";\n\005Queue\022" +
+      "\022\n\nproject_id\030\001 \001(\014\022\014\n\004name\030\002 \001(\t\022\020\n\010que" +
+      "ue_id\030\003 \001(\014\"/\n\020MessageAttribute\022\014\n\004name\030" +
+      "\001 \001(\t\022\r\n\005value\030\002 \001(\t\"\305\001\n\007Message\022\020\n\010queu" +
+      "e_id\030\001 \001(\014\022\022\n\nmessage_id\030\002 \001(\014\022\014\n\004body\030\003" +
+      " \001(\014\022\030\n\020message_body_md5\030\004 \001(\014\022$\n\tattrib" +
+      "ute\030\005 \003(\0132\021.MessageAttribute\022\034\n\024receipt_" +
+      "handle_nonce\030\006 \001(\014\022\027\n\017invisible_until\030\007 " +
+      "\001(\003\022\017\n\007version\030\010 \001(\005\"2\n\rReceiptHandle\022\022\n" +
+      "\nmessage_id\030\001 \001(\014\022\r\n\005nonce\030\002 \001(\014B\021\n\017com.",
+      "cloudata.mq"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
+      new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        public com.google.protobuf.ExtensionRegistry assignDescriptors(
+            com.google.protobuf.Descriptors.FileDescriptor root) {
+          descriptor = root;
+          internal_static_Queue_descriptor =
+            getDescriptor().getMessageTypes().get(0);
+          internal_static_Queue_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_Queue_descriptor,
+              new java.lang.String[] { "ProjectId", "Name", "QueueId", });
+          internal_static_MessageAttribute_descriptor =
+            getDescriptor().getMessageTypes().get(1);
+          internal_static_MessageAttribute_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_MessageAttribute_descriptor,
+              new java.lang.String[] { "Name", "Value", });
+          internal_static_Message_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_Message_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_Message_descriptor,
+              new java.lang.String[] { "QueueId", "MessageId", "Body", "MessageBodyMd5", "Attribute", "ReceiptHandleNonce", "InvisibleUntil", "Version", });
+          internal_static_ReceiptHandle_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_ReceiptHandle_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_ReceiptHandle_descriptor,
+              new java.lang.String[] { "MessageId", "Nonce", });
+          return null;
+        }
+      };
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_Queue_descriptor =
-      getDescriptor().getMessageTypes().get(0);
-    internal_static_Queue_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_Queue_descriptor,
-        new java.lang.String[] { "QueueId", "Scope", "Name", });
-    internal_static_MessageAttribute_descriptor =
-      getDescriptor().getMessageTypes().get(1);
-    internal_static_MessageAttribute_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_MessageAttribute_descriptor,
-        new java.lang.String[] { "Name", "Value", });
-    internal_static_Message_descriptor =
-      getDescriptor().getMessageTypes().get(2);
-    internal_static_Message_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_Message_descriptor,
-        new java.lang.String[] { "QueueId", "MessageId", "Body", "MessageBodyMd5", "Attribute", "ReceiptHandleNonce", "InvisibleUntil", "Version", });
-    internal_static_ReceiptHandle_descriptor =
-      getDescriptor().getMessageTypes().get(3);
-    internal_static_ReceiptHandle_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_ReceiptHandle_descriptor,
-        new java.lang.String[] { "MessageId", "Nonce", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

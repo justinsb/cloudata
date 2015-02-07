@@ -17,4 +17,11 @@ public class WhereModifier<T extends Message> extends Modifier {
   public static <T extends Message> WhereModifier<T> create(T matcher) {
     return new WhereModifier<T>(matcher);
   }
+
+  @Override
+  public String toString() {
+    return "WhereModifier [" + matcher + "]";
+  }
+  
+  
 }

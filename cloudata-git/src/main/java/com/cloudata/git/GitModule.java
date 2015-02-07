@@ -13,11 +13,15 @@ import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.internal.StaticCredentialsProvider;
 import com.cloudata.auth.DataStoreAuthenticationManager;
 import com.cloudata.auth.ProjectBasicAuthFilter;
+import com.cloudata.config.Configuration;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
-import com.cloudata.datastore.sql.SqlDataStore;
+import com.cloudata.datastore.dynamodb.DynamodbDataStore;
 import com.cloudata.git.jgit.CloudGitRepositoryStore;
 import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.objectstore.ObjectStore;
@@ -27,13 +31,30 @@ import com.google.inject.AbstractModule;
 
 public class GitModule extends AbstractModule {
 
+  final Configuration configuration;
+  private StaticCredentialsProvider awsCredentials;
+
+  public GitModule(Configuration configuration) {
+    this.configuration = configuration;
+  }
+
   @Override
   protected void configure() {
     ObjectStore objectStore = createObjectStore();
 
-    DataSource poolingDataSource = createDataSource();
+    // DataSource poolingDataSource = createDataSource();
+    // DataStore dataStore = new SqlDataStore(poolingDataSource);
 
-    DataStore dataStore = new SqlDataStore(poolingDataSource);
+    AWSCredentialsProvider awsCredentials = configuration.getAwsCredentials();
+    DataStore dataStore = new DynamodbDataStore(awsCredentials);
+
+    try {
+      DataStoreAuthenticationManager.addMappings(dataStore);
+      CloudGitRepositoryStore.addMappings(dataStore);
+    } catch (DataStoreException e) {
+      throw new IllegalStateException("Error configuring data store", e);
+    }
+
     GitRepositoryStore repositoryStore = new CloudGitRepositoryStore(objectStore, dataStore);
     bind(GitRepositoryStore.class).toInstance(repositoryStore);
 
@@ -67,13 +88,17 @@ public class GitModule extends AbstractModule {
     }
     URI objectStoreUri = URI.create(objectStore);
 
-    String username = objectStoreUri.getUserInfo().split(":")[0];
-    String password = objectStoreUri.getUserInfo().split(":")[1];
-
     String scheme = objectStoreUri.getScheme();
     if (scheme.equals("s3")) {
-      String bucket = objectStoreUri.getPath();
-      return new S3ObjectStore(bucket, username, password);
+      String bucket = objectStoreUri.getHost();
+
+      // String userInfo = objectStoreUri.getUserInfo();
+      // if (userInfo == null) {
+      // }
+      // String username = userInfo.split(":")[0];
+      // String password = userInfo.split(":")[1];
+
+      return new S3ObjectStore(bucket, configuration.getAwsCredentials());
     } else {
       throw new IllegalStateException("Unknown scheme: " + scheme);
     }

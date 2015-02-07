@@ -1,7 +1,6 @@
 package com.cloudata.datastore;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class DataStoreException extends IOException {
   public DataStoreException(String message) {
