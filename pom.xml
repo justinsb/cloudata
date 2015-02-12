@@ -16,6 +16,7 @@
 	</properties>
 
 	<modules>
+<module>keyczar/java/code</module>
 		<!-- <module>barge</module> -->
 		<module>cloudata-shared</module>
 		<module>cloudata-server-shared</module>

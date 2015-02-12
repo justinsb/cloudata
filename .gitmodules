@@ -1,0 +1,3 @@
+[submodule "keyczar"]
+	path = keyczar
+	url = https://github.com/justinsb/keyczar.git
