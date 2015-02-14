@@ -14,7 +14,6 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.internal.StaticCredentialsProvider;
 import com.cloudata.auth.DataStoreAuthenticationManager;
 import com.cloudata.auth.ProjectBasicAuthFilter;
