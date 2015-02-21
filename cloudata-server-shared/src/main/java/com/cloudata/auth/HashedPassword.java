@@ -37,8 +37,9 @@ public class HashedPassword {
     }
   }
 
-  public static boolean matches(HashedPasswordData hashed, String password) {
-    byte[] hash = computeHashed(hashed, password);
+  public static boolean matches(HashedPasswordData hashed, PasswordCredential password) {
+    String passwordSha256 = password.getSha256();
+    byte[] hash = computeHashed(hashed, passwordSha256);
     return constantTimeIsEqual(hash, hashed.getHashed().toByteArray());
   }
 
@@ -56,7 +57,7 @@ public class HashedPassword {
 
   static SecureRandom secureRandom = new SecureRandom();
 
-  public static HashedPasswordData build(String password) {
+  public static HashedPasswordData build(PasswordCredential password) {
     HashedPasswordData.Builder b = HashedPasswordData.newBuilder();
     b.setIterations(DEFAULT_ITERATIONS);
     byte[] salt = new byte[SALT_BYTES];
@@ -64,7 +65,8 @@ public class HashedPassword {
       secureRandom.nextBytes(salt);
     }
     b.setSalt(ByteString.copyFrom(salt));
-    byte[] hash = computeHashed(b, password);
+    String passwordSha256 = password.getSha256();
+    byte[] hash = computeHashed(b, passwordSha256);
     b.setHashed(ByteString.copyFrom(hash));
     return b.build();
   }

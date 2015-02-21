@@ -17,3 +17,9 @@ message HashedPasswordData {
 	optional int32 iterations = 3;
 	optional bytes hashed = 4;
 }
+
+message AuthenticationTokenData {
+	optional bytes id = 1;
+	optional bytes user_id = 2;
+	optional int64 expiration = 3;
+}

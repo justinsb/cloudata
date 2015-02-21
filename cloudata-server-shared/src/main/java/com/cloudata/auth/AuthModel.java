@@ -1906,6 +1906,570 @@ public final class AuthModel {
     // @@protoc_insertion_point(class_scope:HashedPasswordData)
   }
 
+  public interface AuthenticationTokenDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes id = 1;
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    boolean hasId();
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    com.google.protobuf.ByteString getId();
+
+    // optional bytes user_id = 2;
+    /**
+     * <code>optional bytes user_id = 2;</code>
+     */
+    boolean hasUserId();
+    /**
+     * <code>optional bytes user_id = 2;</code>
+     */
+    com.google.protobuf.ByteString getUserId();
+
+    // optional int64 expiration = 3;
+    /**
+     * <code>optional int64 expiration = 3;</code>
+     */
+    boolean hasExpiration();
+    /**
+     * <code>optional int64 expiration = 3;</code>
+     */
+    long getExpiration();
+  }
+  /**
+   * Protobuf type {@code AuthenticationTokenData}
+   */
+  public static final class AuthenticationTokenData extends
+      com.google.protobuf.GeneratedMessage
+      implements AuthenticationTokenDataOrBuilder {
+    // Use AuthenticationTokenData.newBuilder() to construct.
+    private AuthenticationTokenData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private AuthenticationTokenData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final AuthenticationTokenData defaultInstance;
+    public static AuthenticationTokenData getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public AuthenticationTokenData getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AuthenticationTokenData(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              id_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              userId_ = input.readBytes();
+              break;
+            }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              expiration_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudata.auth.AuthModel.internal_static_AuthenticationTokenData_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudata.auth.AuthModel.internal_static_AuthenticationTokenData_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudata.auth.AuthModel.AuthenticationTokenData.class, com.cloudata.auth.AuthModel.AuthenticationTokenData.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<AuthenticationTokenData> PARSER =
+        new com.google.protobuf.AbstractParser<AuthenticationTokenData>() {
+      public AuthenticationTokenData parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AuthenticationTokenData(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AuthenticationTokenData> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes id = 1;
+    public static final int ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString id_;
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    public com.google.protobuf.ByteString getId() {
+      return id_;
+    }
+
+    // optional bytes user_id = 2;
+    public static final int USER_ID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <code>optional bytes user_id = 2;</code>
+     */
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional bytes user_id = 2;</code>
+     */
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    // optional int64 expiration = 3;
+    public static final int EXPIRATION_FIELD_NUMBER = 3;
+    private long expiration_;
+    /**
+     * <code>optional int64 expiration = 3;</code>
+     */
+    public boolean hasExpiration() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int64 expiration = 3;</code>
+     */
+    public long getExpiration() {
+      return expiration_;
+    }
+
+    private void initFields() {
+      id_ = com.google.protobuf.ByteString.EMPTY;
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+      expiration_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, userId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(3, expiration_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, userId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(3, expiration_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.auth.AuthModel.AuthenticationTokenData parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.cloudata.auth.AuthModel.AuthenticationTokenData prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code AuthenticationTokenData}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.auth.AuthModel.AuthenticationTokenDataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudata.auth.AuthModel.internal_static_AuthenticationTokenData_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudata.auth.AuthModel.internal_static_AuthenticationTokenData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudata.auth.AuthModel.AuthenticationTokenData.class, com.cloudata.auth.AuthModel.AuthenticationTokenData.Builder.class);
+      }
+
+      // Construct using com.cloudata.auth.AuthModel.AuthenticationTokenData.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        id_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        expiration_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudata.auth.AuthModel.internal_static_AuthenticationTokenData_descriptor;
+      }
+
+      public com.cloudata.auth.AuthModel.AuthenticationTokenData getDefaultInstanceForType() {
+        return com.cloudata.auth.AuthModel.AuthenticationTokenData.getDefaultInstance();
+      }
+
+      public com.cloudata.auth.AuthModel.AuthenticationTokenData build() {
+        com.cloudata.auth.AuthModel.AuthenticationTokenData result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.cloudata.auth.AuthModel.AuthenticationTokenData buildPartial() {
+        com.cloudata.auth.AuthModel.AuthenticationTokenData result = new com.cloudata.auth.AuthModel.AuthenticationTokenData(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.id_ = id_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.userId_ = userId_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.expiration_ = expiration_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudata.auth.AuthModel.AuthenticationTokenData) {
+          return mergeFrom((com.cloudata.auth.AuthModel.AuthenticationTokenData)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudata.auth.AuthModel.AuthenticationTokenData other) {
+        if (other == com.cloudata.auth.AuthModel.AuthenticationTokenData.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasUserId()) {
+          setUserId(other.getUserId());
+        }
+        if (other.hasExpiration()) {
+          setExpiration(other.getExpiration());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudata.auth.AuthModel.AuthenticationTokenData parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudata.auth.AuthModel.AuthenticationTokenData) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes id = 1;
+      private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public com.google.protobuf.ByteString getId() {
+        return id_;
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public Builder setId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+
+      // optional bytes user_id = 2;
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes user_id = 2;</code>
+       */
+      public boolean hasUserId() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional bytes user_id = 2;</code>
+       */
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>optional bytes user_id = 2;</code>
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000002;
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes user_id = 2;</code>
+       */
+      public Builder clearUserId() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      // optional int64 expiration = 3;
+      private long expiration_ ;
+      /**
+       * <code>optional int64 expiration = 3;</code>
+       */
+      public boolean hasExpiration() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int64 expiration = 3;</code>
+       */
+      public long getExpiration() {
+        return expiration_;
+      }
+      /**
+       * <code>optional int64 expiration = 3;</code>
+       */
+      public Builder setExpiration(long value) {
+        bitField0_ |= 0x00000004;
+        expiration_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 expiration = 3;</code>
+       */
+      public Builder clearExpiration() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        expiration_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:AuthenticationTokenData)
+    }
+
+    static {
+      defaultInstance = new AuthenticationTokenData(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:AuthenticationTokenData)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_UserCredentialData_descriptor;
   private static
@@ -1921,6 +2485,11 @@ public final class AuthModel {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_HashedPasswordData_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_AuthenticationTokenData_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_AuthenticationTokenData_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1936,7 +2505,9 @@ public final class AuthModel {
       "ser_id\030\003 \001(\014\"$\n\010UserData\022\n\n\002id\030\001 \001(\014\022\014\n\004" +
       "name\030\002 \001(\t\"F\n\022HashedPasswordData\022\014\n\004salt" +
       "\030\002 \001(\014\022\022\n\niterations\030\003 \001(\005\022\016\n\006hashed\030\004 \001" +
-      "(\014B\023\n\021com.cloudata.auth"
+      "(\014\"J\n\027AuthenticationTokenData\022\n\n\002id\030\001 \001(" +
+      "\014\022\017\n\007user_id\030\002 \001(\014\022\022\n\nexpiration\030\003 \001(\003B\023" +
+      "\n\021com.cloudata.auth"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1961,6 +2532,12 @@ public final class AuthModel {
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_HashedPasswordData_descriptor,
               new java.lang.String[] { "Salt", "Iterations", "Hashed", });
+          internal_static_AuthenticationTokenData_descriptor =
+            getDescriptor().getMessageTypes().get(3);
+          internal_static_AuthenticationTokenData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_AuthenticationTokenData_descriptor,
+              new java.lang.String[] { "Id", "UserId", "Expiration", });
           return null;
         }
       };

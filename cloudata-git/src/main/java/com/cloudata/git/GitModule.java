@@ -15,7 +15,9 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.internal.StaticCredentialsProvider;
+import com.cloudata.auth.AuthenticationManager;
 import com.cloudata.auth.DataStoreAuthenticationManager;
+import com.cloudata.auth.PasswordCredential;
 import com.cloudata.auth.ProjectBasicAuthFilter;
 import com.cloudata.config.Configuration;
 import com.cloudata.datastore.DataStore;
@@ -56,11 +58,11 @@ public class GitModule extends AbstractModule {
       throw new IllegalStateException("Error configuring data store", e);
     }
 
-//    try {
-//      dataStore.reindex(RepositoryData.getDefaultInstance());
-//    } catch (DataStoreException e) {
-//      throw new IllegalStateException("Error during reindex", e);
-//    }
+    // try {
+    // dataStore.reindex(RepositoryData.getDefaultInstance());
+    // } catch (DataStoreException e) {
+    // throw new IllegalStateException("Error during reindex", e);
+    // }
 
     GitRepositoryStore repositoryStore = new CloudGitRepositoryStore(objectStore, dataStore);
     bind(GitRepositoryStore.class).toInstance(repositoryStore);
@@ -70,6 +72,7 @@ public class GitModule extends AbstractModule {
     // bind(AuthenticationManager.class).toInstance(authenticationManager);
 
     DataStoreAuthenticationManager authenticationManager = new DataStoreAuthenticationManager(dataStore);
+    bind(AuthenticationManager.class).toInstance(authenticationManager);
 
     {
       String username = System.getenv("ENSURE_USERNAME");
@@ -77,7 +80,7 @@ public class GitModule extends AbstractModule {
       if (username != null) {
         try {
           if (authenticationManager.findUserByLogin(username) == null) {
-            authenticationManager.createUser(username, password);
+            authenticationManager.createUser(username, PasswordCredential.fromPlaintext(password));
           }
         } catch (DataStoreException e) {
           throw new IllegalStateException("Error creating user", e);

@@ -135,9 +135,11 @@ public class ProjectBasicAuthFilter implements Filter {
     // AuthRequest whoAuth = AuthRequest.forUser(username);
     // whoAuth.setPassword(password);
 
+    PasswordCredential passwordCredential = PasswordCredential.fromPlaintext(password);
+
     AuthenticatedUser user;
     try {
-      user = authenticationManager.authenticate(username, password);
+      user = authenticationManager.authenticate(username, passwordCredential);
     } catch (Exception e) {
       throw new IllegalStateException("Error retrieving user", e);
     }

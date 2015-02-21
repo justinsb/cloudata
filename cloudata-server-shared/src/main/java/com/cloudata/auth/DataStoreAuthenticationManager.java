@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.Randoms;
+import com.cloudata.auth.AuthModel.AuthenticationTokenData;
 import com.cloudata.auth.AuthModel.UserCredentialData;
 import com.cloudata.auth.AuthModel.UserData;
 import com.cloudata.datastore.DataStore;
@@ -17,6 +18,8 @@ import com.google.protobuf.ByteString;
 public class DataStoreAuthenticationManager implements AuthenticationManager {
   static final Logger log = LoggerFactory.getLogger(DataStoreAuthenticationManager.class);
 
+  private static final long TOKEN_EXPIRATION = 1000L * 60L * 60L * 24L * 365L;
+
   final DataStore dataStore;
 
   @Inject
@@ -25,7 +28,7 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
   }
 
   @Override
-  public AuthenticatedUser authenticate(final String login, String password) throws Exception {
+  public AuthenticatedUser authenticate(final String login, PasswordCredential password) throws Exception {
 
     // TODO: Scoping?
     // final String userId = username;
@@ -40,16 +43,22 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
       return null;
     }
 
-    UserData user = dataStore.findOne(UserData.newBuilder().setId(credential.getUserId()).build());
+    return authenticated(credential.getUserId());
+
+  }
+
+  private AuthenticatedUser authenticated(ByteString userId) throws DataStoreException {
+
+    UserData user = dataStore.findOne(UserData.newBuilder().setId(userId).build());
     if (user == null) {
-      log.error("Did not find user for credential {}", credential);
+      log.error("Did not find user {}", userId);
       return null;
     }
 
     return new AuthenticatedUser() {
       @Override
       public String getName() {
-        return login;
+        return user.getName();
       }
 
       @Override
@@ -57,35 +66,11 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
         return user.getId();
       }
 
-      // @Override
-      // public boolean canAccess(GitRepository repo) throws IOException {
-      // return CloudGitRepositoryStore.canAccess(this, repo);
-      // }
-      //
-      // @Override
-      // public String mapToAbsolutePath(String name) {
-      // log.warn("TODO: Escaping?");
-      //
-      // String path = name;
-      // // path = Escaping.escape(name);
-      //
-      // // ObjectStorePath base = user.getRepoBasePath();
-      // //
-      // // ObjectStorePath repoPath = base.child(Escaping.escape(name));
-      //
-      // return path;
-      // }
-      //
-      // @Override
-      // public ObjectStorePath buildObjectStorePath(String absolutePath) {
-      // return new ObjectStorePath(store, absolutePath);
-      // }
-
     };
 
   }
 
-  public void createUser(String username, String password) throws DataStoreException {
+  public void createUser(String username, PasswordCredential password) throws DataStoreException {
     UserData.Builder user = UserData.newBuilder();
     user.setId(Randoms.buildId());
     user.setName(username);
@@ -110,5 +95,49 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
   public static void addMappings(DataStore dataStore) throws DataStoreException {
     dataStore.addMap(DataStore.Mapping.create(UserCredentialData.getDefaultInstance()).hashKey("login"));
     dataStore.addMap(DataStore.Mapping.create(UserData.getDefaultInstance()).hashKey("id"));
+    dataStore.addMap(DataStore.Mapping.create(AuthenticationTokenData.getDefaultInstance()).hashKey("id"));
+  }
+
+  @Override
+  public AuthenticationToken createToken(AuthenticatedUser user) throws DataStoreException {
+    AuthenticationTokenData.Builder token = AuthenticationTokenData.newBuilder();
+    token.setId(Randoms.buildId());
+    token.setUserId(user.getUserId());
+
+    long expiration = System.currentTimeMillis() + TOKEN_EXPIRATION;
+    token.setExpiration(expiration);
+
+    AuthenticationTokenData data = token.build();
+    dataStore.insert(data);
+    return new AuthenticationToken(data);
+  }
+
+  @Override
+  public void revokeToken(AuthenticationToken authenticationToken) throws DataStoreException {
+    AuthenticationTokenData.Builder token = AuthenticationTokenData.newBuilder();
+    token.setId(authenticationToken.getId());
+
+    AuthenticationTokenData data = token.build();
+    dataStore.delete(data);
+  }
+
+  @Override
+  public AuthenticatedUser authenticate(AuthenticationToken token) throws DataStoreException {
+    if (token.hasExpired()) {
+      return null;
+    }
+    ByteString userId = token.data.getUserId();
+    return authenticated(userId);
+  }
+
+  @Override
+  public AuthenticationToken findToken(ByteString tokenId) throws DataStoreException {
+    AuthenticationTokenData.Builder matcher = AuthenticationTokenData.newBuilder();
+    matcher.setId(tokenId);
+    AuthenticationTokenData data = dataStore.findOne(matcher.build());
+    if (data == null) {
+      return null;
+    }
+    return new AuthenticationToken(data);
   }
 }

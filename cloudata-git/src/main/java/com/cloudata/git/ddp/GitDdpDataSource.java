@@ -18,13 +18,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
+import com.justinsb.ddpserver.DdpMethod;
+import com.justinsb.ddpserver.DdpMethodContext;
+import com.justinsb.ddpserver.DdpPublish;
+import com.justinsb.ddpserver.DdpPublishContext;
 import com.justinsb.ddpserver.DdpSession;
 import com.justinsb.ddpserver.DdpSubscription;
 import com.justinsb.ddpserver.Jsonable;
-import com.justinsb.ddpserver.triggeredpoll.DdpMethod;
-import com.justinsb.ddpserver.triggeredpoll.DdpMethodContext;
-import com.justinsb.ddpserver.triggeredpoll.DdpPublish;
-import com.justinsb.ddpserver.triggeredpoll.DdpPublishContext;
 import com.justinsb.ddpserver.triggeredpoll.SimpleDdpDataSource;
 import com.justinsb.ddpserver.triggeredpoll.SimpleDdpSubscription;
 import com.justinsb.ddpserver.triggeredpoll.TriggerDdpDataSource;
@@ -34,8 +34,18 @@ public class GitDdpDataSource extends SimpleDdpDataSource {
   @Inject
   GitRepositoryStore store;
 
-  public GitDdpDataSource() {
+  @Inject
+  DdpMethodLogin ddpMethodLogin;
+  @Inject
+  DdpMethodLogout ddpMethodLogout;
+
+  public void init() {
     addPublish("repos", new PublishRepos());
+    addPublish("meteor_autoupdate_clientVersions", new PublishClientVersions());
+    addPublish("meteor.loginServiceConfiguration", new MeteorLoginServiceConfiguration());
+
+    addMethod("login", ddpMethodLogin);
+    addMethod("logout", ddpMethodLogout);
   }
 
   public class PublishRepos implements DdpPublish {

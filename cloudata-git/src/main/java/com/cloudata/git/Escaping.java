@@ -23,4 +23,8 @@ public class Escaping {
     return BaseEncoding.base64Url().encode(bytes.toByteArray());
   }
 
+  public static ByteString fromBase64Url(String base64) {
+    return ByteString.copyFrom(BaseEncoding.base64Url().decode(base64));
+  }
+
 }

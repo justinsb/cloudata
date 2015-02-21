@@ -70,7 +70,8 @@ public class GitServer {
     this.jetty = server;
 
     GitDdpDataSource ddpDataSource = injector.getInstance(GitDdpDataSource.class);
-
+    ddpDataSource.init();
+    
     DdpEndpoints.register(context, ddpDataSource);
 
     // FilterHolder filterHolder = new FilterHolder(injector.getInstance(GuiceFilter.class));
