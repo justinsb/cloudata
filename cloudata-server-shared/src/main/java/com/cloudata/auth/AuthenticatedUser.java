@@ -1,7 +1,11 @@
 package com.cloudata.auth;
 
+import com.google.protobuf.ByteString;
+
 public interface AuthenticatedUser {
 
-  String getId();
+  String getName();
+
+  ByteString getUserId();
 
 }

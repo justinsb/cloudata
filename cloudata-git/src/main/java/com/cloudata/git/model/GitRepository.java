@@ -34,7 +34,7 @@ public class GitRepository implements Jsonable {
     JsonObject json = new JsonObject();
     json.addProperty("_id", Escaping.asBase64Url(data.getRepositoryId()));
     json.addProperty("name", data.getName());
-    json.addProperty("owner", data.getOwner());
+//    json.addProperty("owner", data.getOwner());
     return json;
   }
 

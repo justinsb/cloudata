@@ -96,7 +96,7 @@ public class GitOverHttpServlet extends GitServlet {
 
     @Override
     public Repository open(HttpServletRequest req, String projectName) throws RepositoryNotFoundException,
-    ServiceNotAuthorizedException, ServiceNotEnabledException {
+        ServiceNotAuthorizedException, ServiceNotEnabledException {
       while (projectName.endsWith("/")) {
         projectName = projectName.substring(0, projectName.length() - 1);
       }
@@ -115,7 +115,7 @@ public class GitOverHttpServlet extends GitServlet {
       boolean mustExist = false;
 
       AuthenticatedUser authenticatedUser = (AuthenticatedUser) req.getAttribute(AuthenticatedUser.class.getName());
-      final GitUser user = GitUser.toGitUser(gitRepositoryStore, authenticatedUser);
+      final GitUser user = gitRepositoryStore.toGitUser(authenticatedUser);
 
       GitRepository repo;
       try {
@@ -139,19 +139,25 @@ public class GitOverHttpServlet extends GitServlet {
         }
       }
 
-      if (user == null && !repo.isPublicRead()) {
+      if (user == null && (repo == null || !repo.isPublicRead())) {
+        // We want it to prompt for a password
         throw new ServiceNotAuthorizedException();
       }
 
+      Repository opened;
       try {
-        if (!user.canAccess(repo)) {
-          throw new RepositoryNotFoundException(projectName);
-        }
-
-        return gitRepositoryStore.openRepository(repo, mustExist);
+        opened = gitRepositoryStore.openRepository(user, repo, mustExist);
       } catch (IOException e) {
-        throw new RepositoryNotFoundException(projectName, e);
+        RepositoryNotFoundException e2 = new RepositoryNotFoundException("Cannot open repository "
+            + projectName);
+        e2.initCause(e);
+        throw e2;
       }
+      
+      if (opened == null) {
+        throw new RepositoryNotFoundException(projectName);
+      }
+      return opened;
     }
   }
 

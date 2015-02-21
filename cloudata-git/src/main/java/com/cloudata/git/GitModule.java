@@ -21,7 +21,9 @@ import com.cloudata.config.Configuration;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
 import com.cloudata.datastore.dynamodb.DynamodbDataStore;
+import com.cloudata.git.GitModel.RepositoryData;
 import com.cloudata.git.jgit.CloudGitRepositoryStore;
+import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.objectstore.ObjectStore;
 import com.cloudata.objectstore.s3.S3ObjectStore;
@@ -45,7 +47,7 @@ public class GitModule extends AbstractModule {
     // DataStore dataStore = new SqlDataStore(poolingDataSource);
 
     AWSCredentialsProvider awsCredentials = configuration.getAwsCredentials();
-    DataStore dataStore = new DynamodbDataStore(awsCredentials);
+    DynamodbDataStore dataStore = new DynamodbDataStore(awsCredentials);
 
     try {
       DataStoreAuthenticationManager.addMappings(dataStore);
@@ -53,6 +55,12 @@ public class GitModule extends AbstractModule {
     } catch (DataStoreException e) {
       throw new IllegalStateException("Error configuring data store", e);
     }
+
+//    try {
+//      dataStore.reindex(RepositoryData.getDefaultInstance());
+//    } catch (DataStoreException e) {
+//      throw new IllegalStateException("Error during reindex", e);
+//    }
 
     GitRepositoryStore repositoryStore = new CloudGitRepositoryStore(objectStore, dataStore);
     bind(GitRepositoryStore.class).toInstance(repositoryStore);
@@ -68,7 +76,7 @@ public class GitModule extends AbstractModule {
       String password = System.getenv("ENSURE_PASSWORD");
       if (username != null) {
         try {
-          if (authenticationManager.findUser(username) == null) {
+          if (authenticationManager.findUserByLogin(username) == null) {
             authenticationManager.createUser(username, password);
           }
         } catch (DataStoreException e) {

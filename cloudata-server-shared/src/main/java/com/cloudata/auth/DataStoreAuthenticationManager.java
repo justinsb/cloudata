@@ -3,12 +3,19 @@ package com.cloudata.auth;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import com.cloudata.auth.AuthModel.AuthUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cloudata.Randoms;
+import com.cloudata.auth.AuthModel.UserCredentialData;
+import com.cloudata.auth.AuthModel.UserData;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
+import com.google.protobuf.ByteString;
 
 @Singleton
 public class DataStoreAuthenticationManager implements AuthenticationManager {
+  static final Logger log = LoggerFactory.getLogger(DataStoreAuthenticationManager.class);
 
   final DataStore dataStore;
 
@@ -18,25 +25,36 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
   }
 
   @Override
-  public AuthenticatedUser authenticate(String username, String password) throws Exception {
+  public AuthenticatedUser authenticate(final String login, String password) throws Exception {
 
     // TODO: Scoping?
-    final String userId = username;
+    // final String userId = username;
     // final ObjectStore store = new JCloudsObjectStore(blobStore);
 
-    AuthUser user = dataStore.findOne(AuthUser.newBuilder().setName(username).build());
-    if (user == null) {
+    UserCredentialData credential = dataStore.findOne(UserCredentialData.newBuilder().setLogin(login).build());
+    if (credential == null) {
       return null;
     }
 
-    if (!PasswordHashing.matches(user.getPasswordHashed(), password)) {
+    if (!HashedPassword.matches(credential.getPasswordHashed(), password)) {
+      return null;
+    }
+
+    UserData user = dataStore.findOne(UserData.newBuilder().setId(credential.getUserId()).build());
+    if (user == null) {
+      log.error("Did not find user for credential {}", credential);
       return null;
     }
 
     return new AuthenticatedUser() {
       @Override
-      public String getId() {
-        return userId;
+      public String getName() {
+        return login;
+      }
+
+      @Override
+      public ByteString getUserId() {
+        return user.getId();
       }
 
       // @Override
@@ -68,23 +86,29 @@ public class DataStoreAuthenticationManager implements AuthenticationManager {
   }
 
   public void createUser(String username, String password) throws DataStoreException {
-    AuthUser.Builder b = AuthUser.newBuilder();
-    b.setName(username);
-    b.setPasswordHashed(PasswordHashing.create(password));
-    dataStore.insert(b.build());
+    UserData.Builder user = UserData.newBuilder();
+    user.setId(Randoms.buildId());
+    user.setName(username);
+
+    UserCredentialData.Builder credential = UserCredentialData.newBuilder();
+    credential.setLogin(username);
+    credential.setPasswordHashed(HashedPassword.build(password));
+    credential.setUserId(user.getId());
+
+    dataStore.insert(user.build());
+    dataStore.insert(credential.build());
   }
 
-  public UserInfo findUser(String username) throws DataStoreException {
-    AuthUser user = dataStore.findOne(AuthUser.newBuilder().setName(username).build());
-    if (user == null) {
+  public UserCredential findUserByLogin(String login) throws DataStoreException {
+    UserCredentialData data = dataStore.findOne(UserCredentialData.newBuilder().setLogin(login).build());
+    if (data == null) {
       return null;
     }
-    return new UserInfo() {
-
-    };
+    return new UserCredential(data);
   }
 
   public static void addMappings(DataStore dataStore) throws DataStoreException {
-    dataStore.addMap(DataStore.Mapping.create(AuthUser.getDefaultInstance()).hashKey("name"));
+    dataStore.addMap(DataStore.Mapping.create(UserCredentialData.getDefaultInstance()).hashKey("login"));
+    dataStore.addMap(DataStore.Mapping.create(UserData.getDefaultInstance()).hashKey("id"));
   }
 }

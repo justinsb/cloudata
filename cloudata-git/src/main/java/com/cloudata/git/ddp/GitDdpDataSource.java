@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.protobuf.ByteString;
 import com.justinsb.ddpserver.DdpSession;
 import com.justinsb.ddpserver.DdpSubscription;
 import com.justinsb.ddpserver.Jsonable;
@@ -70,10 +71,15 @@ public class GitDdpDataSource extends SimpleDdpDataSource {
     AuthenticatedUser authenticatedUser = new AuthenticatedUser() {
 
       @Override
-      public String getId() {
+      public String getName() {
         return "justinsb";
       }
+
+      @Override
+      public ByteString getUserId() {
+        return ByteString.copyFromUtf8("justinsb");
+      }
     };
-    return GitUser.toGitUser(store, authenticatedUser);
+    return store.toGitUser(authenticatedUser);
   }
 }

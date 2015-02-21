@@ -24,14 +24,19 @@ import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
+import org.eclipse.jgit.transport.resolver.ServiceNotAuthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudata.auth.AuthenticatedUser;
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
 import com.cloudata.git.Escaping;
 import com.cloudata.git.GitModel.RefData;
 import com.cloudata.git.GitModel.RepositoryData;
+import com.cloudata.git.GitModel.RepositoryData.Builder;
+import com.cloudata.git.GitModel.TargetType;
+import com.cloudata.git.GitModel.UserAcl;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 import com.cloudata.git.services.GitRepositoryStore;
@@ -46,7 +51,7 @@ import com.google.protobuf.ByteString;
 /** Manages Git repositories stored in the cloud */
 @Singleton
 public class CloudGitRepositoryStore implements GitRepositoryStore {
-  private static final String METADATA_KEY = "metadata";
+  // private static final String METADATA_KEY = "metadata";
 
   static final ByteString ZERO = ByteString.copyFrom(new byte[] { 0 });
 
@@ -124,15 +129,19 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
   }
 
   @Override
-  public Repository openRepository(GitRepository repo, boolean mustExist) throws IOException {
-    final CloudKey loc = new CloudKey(repo, this);
-    try {
-      return RepositoryCache.open(loc, mustExist);
-    } catch (IOException e1) {
-      RepositoryNotFoundException e2 = new RepositoryNotFoundException("Cannot open repository " + repo.getObjectPath());
-      e2.initCause(e1);
-      throw e2;
+  public Repository openRepository(GitUser user, GitRepository repo, boolean mustExist) throws IOException {
+    if (user == null) {
+      if (!repo.isPublicRead()) {
+        return null;
+      }
+    } else {
+      if (!user.canAccess(repo)) {
+        return null;
+      }
     }
+
+    final CloudKey loc = new CloudKey(repo, this);
+    return RepositoryCache.open(loc, mustExist);
   }
 
   @Override
@@ -148,15 +157,23 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
     }
     repositoryDataBuilder.setRepositoryId(ByteString.copyFrom(uniqueId));
     repositoryDataBuilder.setName(name);
-    repositoryDataBuilder.setOwner(user.getId());
-
+    repositoryDataBuilder.setOwnerId(user.getId());
     RepositoryData repositoryData = repositoryDataBuilder.build();
+    
+    // We must insert the ACL, because we user the ACL to list repos
     dataStore.insert(repositoryData);
+    
+    UserAcl.Builder acl = UserAcl.newBuilder();
+    acl.setTargetId(repositoryData.getRepositoryId());
+    acl.setTargetType(TargetType.TARGET_TYPE_REPO);
+    acl.setUserId(user.getId());
+    acl.setOwner(true);
+    dataStore.insert(acl.build());
 
     GitRepository gitRepository = buildGitRepository(repositoryData);
 
     // Create the repo
-    openRepository(gitRepository, false);
+    openRepository(user, gitRepository, false);
 
     return gitRepository;
   }
@@ -168,22 +185,95 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
     return gitRepository;
   }
 
-  
   public static void addMappings(DataStore dataStore) throws DataStoreException {
     dataStore.addMap(DataStore.Mapping.create(RepositoryData.getDefaultInstance()).hashKey("name"));
     dataStore.addMap(DataStore.Mapping.create(RefData.getDefaultInstance()).hashKey("repository_id").rangeKey("name")
         .filterable("object_id"));
+    dataStore.addMap(DataStore.Mapping.create(UserAcl.getDefaultInstance()).hashKey("user_id")
+        .rangeKey("target_type", "target_id"));
   }
 
   @Override
-  public List<GitRepository> listRepos(GitUser user) throws IOException {
-    // XXX: This is not efficient with our current indexes
-    RepositoryData.Builder matcher = RepositoryData.newBuilder();
-    matcher.setOwner(user.getId());
+  public List<GitRepository> listRepos(GitUser gitUser) throws IOException {
+    // XXX: Joins - yuk
+    List<ByteString> repoIds = Lists.newArrayList();
+
+    CloudGitUser user = (CloudGitUser) gitUser;
+    for (UserAcl acl : user.getRepoAcls()) {
+      repoIds.add(acl.getTargetId());
+    }
+
     List<GitRepository> repos = Lists.newArrayList();
-    for (RepositoryData repositoryData : dataStore.find(matcher.build())) {
+    // XXX: Implement multi-get
+    for (ByteString repoId : repoIds) {
+      RepositoryData.Builder matcher = RepositoryData.newBuilder();
+      matcher.setRepositoryId(repoId);
+      RepositoryData repositoryData = dataStore.findOne(matcher.build());
+      if (repositoryData == null) {
+        throw new IllegalStateException();
+      }
       repos.add(buildGitRepository(repositoryData));
     }
     return repos;
+  }
+
+  @Override
+  public GitUser toGitUser(AuthenticatedUser authenticatedUser) {
+    if (authenticatedUser == null) {
+      return null;
+    }
+
+    return new CloudGitUser(authenticatedUser);
+  }
+
+  class CloudGitUser extends GitUser {
+
+    final AuthenticatedUser authenticatedUser;
+    final ByteString userId;
+
+    List<UserAcl> userAcls;
+
+    public CloudGitUser(AuthenticatedUser authenticatedUser) {
+      this.authenticatedUser = authenticatedUser;
+      this.userId = authenticatedUser.getUserId();
+    }
+
+    public synchronized List<UserAcl> getRepoAcls() {
+      if (userAcls == null) {
+        List<UserAcl> userAcls = Lists.newArrayList();
+        UserAcl.Builder matcher = UserAcl.newBuilder();
+        matcher.setUserId(userId);
+        matcher.setTargetType(TargetType.TARGET_TYPE_REPO);
+        try {
+          for (UserAcl acl : dataStore.find(matcher.build())) {
+            userAcls.add(acl);
+          }
+        } catch (DataStoreException e) {
+          throw new IllegalStateException("Error reading from datastore", e);
+        }
+        this.userAcls = userAcls;
+      }
+      return this.userAcls;
+    }
+
+    @Override
+    public ByteString getId() {
+      return authenticatedUser.getUserId();
+    }
+
+    @Override
+    public boolean canAccess(GitRepository repo) {
+      if (repo.getData().getOwnerId().equals(this.userId)) {
+        return true;
+      }
+
+      for (UserAcl acl : getRepoAcls()) {
+        if (acl.getTargetId().equals(repo.getData().getRepositoryId())) {
+          return true;
+        }
+      }
+
+      return false;
+    }
   }
 }

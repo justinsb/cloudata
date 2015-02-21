@@ -7,16 +7,16 @@ import java.security.spec.InvalidKeySpecException;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
-import com.cloudata.auth.AuthModel.HashedPassword;
-import com.cloudata.auth.AuthModel.HashedPasswordOrBuilder;
+import com.cloudata.auth.AuthModel.HashedPasswordData;
+import com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder;
 import com.google.protobuf.ByteString;
 
-public class PasswordHashing {
+public class HashedPassword {
   private static final int DEFAULT_ITERATIONS = 1000;
   private static final int HASH_BYTE_SIZE = 256;
   private static final int SALT_BYTES = 16;
 
-  private static byte[] computeHashed(HashedPasswordOrBuilder hashed, String password) {
+  private static byte[] computeHashed(HashedPasswordDataOrBuilder hashed, String password) {
     int length = HASH_BYTE_SIZE;
     if (hashed.hasHashed()) {
       length = hashed.getHashed().size() * 8;
@@ -37,7 +37,7 @@ public class PasswordHashing {
     }
   }
 
-  public static boolean matches(HashedPassword hashed, String password) {
+  public static boolean matches(HashedPasswordData hashed, String password) {
     byte[] hash = computeHashed(hashed, password);
     return constantTimeIsEqual(hash, hashed.getHashed().toByteArray());
   }
@@ -56,8 +56,8 @@ public class PasswordHashing {
 
   static SecureRandom secureRandom = new SecureRandom();
 
-  public static HashedPassword create(String password) {
-    HashedPassword.Builder b = HashedPassword.newBuilder();
+  public static HashedPasswordData build(String password) {
+    HashedPasswordData.Builder b = HashedPasswordData.newBuilder();
     b.setIterations(DEFAULT_ITERATIONS);
     byte[] salt = new byte[SALT_BYTES];
     synchronized (secureRandom) {

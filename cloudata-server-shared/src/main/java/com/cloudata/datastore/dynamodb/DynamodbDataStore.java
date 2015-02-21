@@ -246,6 +246,70 @@ public class DynamodbDataStore implements DataStore {
     return items;
   }
 
+  public <T extends Message> List<T> reindex(T instance) throws DataStoreException {
+    DynamoClassMapping<T> tableInfo = getClassMapping(instance);
+
+    log.debug("reindex {}", instance.getClass().getSimpleName());
+
+    ScanRequest scanRequest = new ScanRequest();
+    scanRequest.setTableName(tableInfo.getDynamoTableName());
+
+    // TODO: Filter expressions on prefix?
+
+    ScanResult scanResponse = dynamoDB.scan(scanRequest);
+
+    Map<String, AttributeValue> lastEvaluatedKey = scanResponse.getLastEvaluatedKey();
+    if (lastEvaluatedKey != null) {
+      throw new UnsupportedOperationException("Multiple page results not implemented");
+    }
+
+    List<T> items = Lists.newArrayList();
+    List<Map<String, AttributeValue>> responseItems = scanResponse.getItems();
+    for (Map<String, AttributeValue> itemData : responseItems) {
+      if (!tableInfo.matchesType(itemData)) {
+        continue;
+      }
+
+      T item = tableInfo.mapFromDb(itemData);
+
+      Map<String, AttributeValue> newItemData = tableInfo.mapToDb(item);
+
+      if (DynamoDbHelpers.areEqual(itemData, newItemData)) {
+        log.debug("No change for item: {}", itemData);
+        continue;
+      }
+
+      PutItemRequest putRequest = new PutItemRequest();
+      putRequest.setTableName(tableInfo.getDynamoTableName());
+      putRequest.setItem(itemData);
+      dynamoDB.putItem(putRequest);
+
+      Map<String, AttributeValue> oldKey = extractKey(itemData);
+      Map<String, AttributeValue> newKey = extractKey(newItemData);
+
+      if (!DynamoDbHelpers.areEqual(oldKey, newKey)) {
+        DeleteItemRequest deleteItemRequest = new DeleteItemRequest();
+        deleteItemRequest.setTableName(tableInfo.getDynamoTableName());
+        deleteItemRequest.setKey(oldKey);
+        dynamoDB.deleteItem(deleteItemRequest);
+      }
+
+    }
+
+    return items;
+  }
+
+  private static Map<String, AttributeValue> extractKey(Map<String, AttributeValue> itemData) {
+    Map<String, AttributeValue> key = Maps.newHashMap();
+    if (itemData.containsKey(FIELD_HASH_KEY)) {
+      key.put(FIELD_HASH_KEY, itemData.get(FIELD_HASH_KEY));
+    }
+    if (itemData.containsKey(FIELD_RANGE_KEY)) {
+      key.put(FIELD_RANGE_KEY, itemData.get(FIELD_RANGE_KEY));
+    }
+    return key;
+  }
+
   private <T extends Message> List<T> findMatching(T matcher, List<Modifier> modifiers) throws DataStoreException {
     DynamoClassMapping<T> tableInfo = getClassMapping(matcher);
 
@@ -536,7 +600,7 @@ public class DynamodbDataStore implements DataStore {
         throw new IllegalArgumentException();
       }
 
-      ByteString bytes = ByteString.copyFrom(b);
+      ByteString bytes = ByteString.copyFrom(b.asReadOnlyBuffer());
       ByteString prefix = ByteString.copyFrom(Ints.toByteArray(typeMetadata.getId()));
 
       return bytes.startsWith(prefix);
@@ -579,7 +643,7 @@ public class DynamodbDataStore implements DataStore {
         throw new IllegalArgumentException("Expected blob column");
       }
       try {
-        dest.mergeFrom(new ByteBufferInputStream(blob.getB()));
+        dest.mergeFrom(new ByteBufferInputStream(blob.getB().asReadOnlyBuffer()));
       } catch (IOException e) {
         throw new IllegalArgumentException("Error reading blob", e);
       }

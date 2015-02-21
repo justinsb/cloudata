@@ -8,6 +8,79 @@ public final class GitModel {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
+  /**
+   * Protobuf enum {@code TargetType}
+   */
+  public enum TargetType
+      implements com.google.protobuf.ProtocolMessageEnum {
+    /**
+     * <code>TARGET_TYPE_REPO = 1;</code>
+     */
+    TARGET_TYPE_REPO(0, 1),
+    ;
+
+    /**
+     * <code>TARGET_TYPE_REPO = 1;</code>
+     */
+    public static final int TARGET_TYPE_REPO_VALUE = 1;
+
+
+    public final int getNumber() { return value; }
+
+    public static TargetType valueOf(int value) {
+      switch (value) {
+        case 1: return TARGET_TYPE_REPO;
+        default: return null;
+      }
+    }
+
+    public static com.google.protobuf.Internal.EnumLiteMap<TargetType>
+        internalGetValueMap() {
+      return internalValueMap;
+    }
+    private static com.google.protobuf.Internal.EnumLiteMap<TargetType>
+        internalValueMap =
+          new com.google.protobuf.Internal.EnumLiteMap<TargetType>() {
+            public TargetType findValueByNumber(int number) {
+              return TargetType.valueOf(number);
+            }
+          };
+
+    public final com.google.protobuf.Descriptors.EnumValueDescriptor
+        getValueDescriptor() {
+      return getDescriptor().getValues().get(index);
+    }
+    public final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptorForType() {
+      return getDescriptor();
+    }
+    public static final com.google.protobuf.Descriptors.EnumDescriptor
+        getDescriptor() {
+      return com.cloudata.git.GitModel.getDescriptor().getEnumTypes().get(0);
+    }
+
+    private static final TargetType[] VALUES = values();
+
+    public static TargetType valueOf(
+        com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+      if (desc.getType() != getDescriptor()) {
+        throw new java.lang.IllegalArgumentException(
+          "EnumValueDescriptor is not for this type.");
+      }
+      return VALUES[desc.getIndex()];
+    }
+
+    private final int index;
+    private final int value;
+
+    private TargetType(int index, int value) {
+      this.index = index;
+      this.value = value;
+    }
+
+    // @@protoc_insertion_point(enum_scope:TargetType)
+  }
+
   public interface RefDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
@@ -816,20 +889,15 @@ public final class GitModel {
      */
     com.google.protobuf.ByteString getRepositoryId();
 
-    // optional string owner = 2;
+    // optional bytes owner_id = 2;
     /**
-     * <code>optional string owner = 2;</code>
+     * <code>optional bytes owner_id = 2;</code>
      */
-    boolean hasOwner();
+    boolean hasOwnerId();
     /**
-     * <code>optional string owner = 2;</code>
+     * <code>optional bytes owner_id = 2;</code>
      */
-    java.lang.String getOwner();
-    /**
-     * <code>optional string owner = 2;</code>
-     */
-    com.google.protobuf.ByteString
-        getOwnerBytes();
+    com.google.protobuf.ByteString getOwnerId();
 
     // optional string name = 3;
     /**
@@ -904,7 +972,7 @@ public final class GitModel {
             }
             case 18: {
               bitField0_ |= 0x00000002;
-              owner_ = input.readBytes();
+              ownerId_ = input.readBytes();
               break;
             }
             case 26: {
@@ -968,47 +1036,20 @@ public final class GitModel {
       return repositoryId_;
     }
 
-    // optional string owner = 2;
-    public static final int OWNER_FIELD_NUMBER = 2;
-    private java.lang.Object owner_;
+    // optional bytes owner_id = 2;
+    public static final int OWNER_ID_FIELD_NUMBER = 2;
+    private com.google.protobuf.ByteString ownerId_;
     /**
-     * <code>optional string owner = 2;</code>
+     * <code>optional bytes owner_id = 2;</code>
      */
-    public boolean hasOwner() {
+    public boolean hasOwnerId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional string owner = 2;</code>
+     * <code>optional bytes owner_id = 2;</code>
      */
-    public java.lang.String getOwner() {
-      java.lang.Object ref = owner_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8()) {
-          owner_ = s;
-        }
-        return s;
-      }
-    }
-    /**
-     * <code>optional string owner = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getOwnerBytes() {
-      java.lang.Object ref = owner_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        owner_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.google.protobuf.ByteString getOwnerId() {
+      return ownerId_;
     }
 
     // optional string name = 3;
@@ -1056,7 +1097,7 @@ public final class GitModel {
 
     private void initFields() {
       repositoryId_ = com.google.protobuf.ByteString.EMPTY;
-      owner_ = "";
+      ownerId_ = com.google.protobuf.ByteString.EMPTY;
       name_ = "";
     }
     private byte memoizedIsInitialized = -1;
@@ -1075,7 +1116,7 @@ public final class GitModel {
         output.writeBytes(1, repositoryId_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBytes(2, getOwnerBytes());
+        output.writeBytes(2, ownerId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(3, getNameBytes());
@@ -1095,7 +1136,7 @@ public final class GitModel {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(2, getOwnerBytes());
+          .computeBytesSize(2, ownerId_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -1219,7 +1260,7 @@ public final class GitModel {
         super.clear();
         repositoryId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
-        owner_ = "";
+        ownerId_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000002);
         name_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -1258,7 +1299,7 @@ public final class GitModel {
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
-        result.owner_ = owner_;
+        result.ownerId_ = ownerId_;
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
@@ -1282,10 +1323,8 @@ public final class GitModel {
         if (other.hasRepositoryId()) {
           setRepositoryId(other.getRepositoryId());
         }
-        if (other.hasOwner()) {
-          bitField0_ |= 0x00000002;
-          owner_ = other.owner_;
-          onChanged();
+        if (other.hasOwnerId()) {
+          setOwnerId(other.getOwnerId());
         }
         if (other.hasName()) {
           bitField0_ |= 0x00000004;
@@ -1355,76 +1394,38 @@ public final class GitModel {
         return this;
       }
 
-      // optional string owner = 2;
-      private java.lang.Object owner_ = "";
+      // optional bytes owner_id = 2;
+      private com.google.protobuf.ByteString ownerId_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>optional string owner = 2;</code>
+       * <code>optional bytes owner_id = 2;</code>
        */
-      public boolean hasOwner() {
+      public boolean hasOwnerId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional string owner = 2;</code>
+       * <code>optional bytes owner_id = 2;</code>
        */
-      public java.lang.String getOwner() {
-        java.lang.Object ref = owner_;
-        if (!(ref instanceof java.lang.String)) {
-          java.lang.String s = ((com.google.protobuf.ByteString) ref)
-              .toStringUtf8();
-          owner_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
+      public com.google.protobuf.ByteString getOwnerId() {
+        return ownerId_;
       }
       /**
-       * <code>optional string owner = 2;</code>
+       * <code>optional bytes owner_id = 2;</code>
        */
-      public com.google.protobuf.ByteString
-          getOwnerBytes() {
-        java.lang.Object ref = owner_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          owner_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>optional string owner = 2;</code>
-       */
-      public Builder setOwner(
-          java.lang.String value) {
+      public Builder setOwnerId(com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   bitField0_ |= 0x00000002;
-        owner_ = value;
+        ownerId_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string owner = 2;</code>
+       * <code>optional bytes owner_id = 2;</code>
        */
-      public Builder clearOwner() {
+      public Builder clearOwnerId() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        owner_ = getDefaultInstance().getOwner();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional string owner = 2;</code>
-       */
-      public Builder setOwnerBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  bitField0_ |= 0x00000002;
-        owner_ = value;
+        ownerId_ = getDefaultInstance().getOwnerId();
         onChanged();
         return this;
       }
@@ -1514,6 +1515,660 @@ public final class GitModel {
     // @@protoc_insertion_point(class_scope:RepositoryData)
   }
 
+  public interface UserAclOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes user_id = 1;
+    /**
+     * <code>optional bytes user_id = 1;</code>
+     */
+    boolean hasUserId();
+    /**
+     * <code>optional bytes user_id = 1;</code>
+     */
+    com.google.protobuf.ByteString getUserId();
+
+    // optional .TargetType target_type = 2;
+    /**
+     * <code>optional .TargetType target_type = 2;</code>
+     */
+    boolean hasTargetType();
+    /**
+     * <code>optional .TargetType target_type = 2;</code>
+     */
+    com.cloudata.git.GitModel.TargetType getTargetType();
+
+    // optional bytes target_id = 3;
+    /**
+     * <code>optional bytes target_id = 3;</code>
+     */
+    boolean hasTargetId();
+    /**
+     * <code>optional bytes target_id = 3;</code>
+     */
+    com.google.protobuf.ByteString getTargetId();
+
+    // optional bool owner = 4;
+    /**
+     * <code>optional bool owner = 4;</code>
+     */
+    boolean hasOwner();
+    /**
+     * <code>optional bool owner = 4;</code>
+     */
+    boolean getOwner();
+  }
+  /**
+   * Protobuf type {@code UserAcl}
+   */
+  public static final class UserAcl extends
+      com.google.protobuf.GeneratedMessage
+      implements UserAclOrBuilder {
+    // Use UserAcl.newBuilder() to construct.
+    private UserAcl(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private UserAcl(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final UserAcl defaultInstance;
+    public static UserAcl getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public UserAcl getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserAcl(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              userId_ = input.readBytes();
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+              com.cloudata.git.GitModel.TargetType value = com.cloudata.git.GitModel.TargetType.valueOf(rawValue);
+              if (value == null) {
+                unknownFields.mergeVarintField(2, rawValue);
+              } else {
+                bitField0_ |= 0x00000002;
+                targetType_ = value;
+              }
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              targetId_ = input.readBytes();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              owner_ = input.readBool();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudata.git.GitModel.internal_static_UserAcl_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudata.git.GitModel.internal_static_UserAcl_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudata.git.GitModel.UserAcl.class, com.cloudata.git.GitModel.UserAcl.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<UserAcl> PARSER =
+        new com.google.protobuf.AbstractParser<UserAcl>() {
+      public UserAcl parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserAcl(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserAcl> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes user_id = 1;
+    public static final int USER_ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <code>optional bytes user_id = 1;</code>
+     */
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes user_id = 1;</code>
+     */
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
+    // optional .TargetType target_type = 2;
+    public static final int TARGET_TYPE_FIELD_NUMBER = 2;
+    private com.cloudata.git.GitModel.TargetType targetType_;
+    /**
+     * <code>optional .TargetType target_type = 2;</code>
+     */
+    public boolean hasTargetType() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional .TargetType target_type = 2;</code>
+     */
+    public com.cloudata.git.GitModel.TargetType getTargetType() {
+      return targetType_;
+    }
+
+    // optional bytes target_id = 3;
+    public static final int TARGET_ID_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString targetId_;
+    /**
+     * <code>optional bytes target_id = 3;</code>
+     */
+    public boolean hasTargetId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes target_id = 3;</code>
+     */
+    public com.google.protobuf.ByteString getTargetId() {
+      return targetId_;
+    }
+
+    // optional bool owner = 4;
+    public static final int OWNER_FIELD_NUMBER = 4;
+    private boolean owner_;
+    /**
+     * <code>optional bool owner = 4;</code>
+     */
+    public boolean hasOwner() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional bool owner = 4;</code>
+     */
+    public boolean getOwner() {
+      return owner_;
+    }
+
+    private void initFields() {
+      userId_ = com.google.protobuf.ByteString.EMPTY;
+      targetType_ = com.cloudata.git.GitModel.TargetType.TARGET_TYPE_REPO;
+      targetId_ = com.google.protobuf.ByteString.EMPTY;
+      owner_ = false;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, userId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeEnum(2, targetType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, targetId_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBool(4, owner_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, userId_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, targetType_.getNumber());
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, targetId_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, owner_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.git.GitModel.UserAcl parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.cloudata.git.GitModel.UserAcl prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code UserAcl}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.git.GitModel.UserAclOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudata.git.GitModel.internal_static_UserAcl_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudata.git.GitModel.internal_static_UserAcl_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudata.git.GitModel.UserAcl.class, com.cloudata.git.GitModel.UserAcl.Builder.class);
+      }
+
+      // Construct using com.cloudata.git.GitModel.UserAcl.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        targetType_ = com.cloudata.git.GitModel.TargetType.TARGET_TYPE_REPO;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        targetId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        owner_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudata.git.GitModel.internal_static_UserAcl_descriptor;
+      }
+
+      public com.cloudata.git.GitModel.UserAcl getDefaultInstanceForType() {
+        return com.cloudata.git.GitModel.UserAcl.getDefaultInstance();
+      }
+
+      public com.cloudata.git.GitModel.UserAcl build() {
+        com.cloudata.git.GitModel.UserAcl result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.cloudata.git.GitModel.UserAcl buildPartial() {
+        com.cloudata.git.GitModel.UserAcl result = new com.cloudata.git.GitModel.UserAcl(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.userId_ = userId_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.targetType_ = targetType_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.targetId_ = targetId_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.owner_ = owner_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudata.git.GitModel.UserAcl) {
+          return mergeFrom((com.cloudata.git.GitModel.UserAcl)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudata.git.GitModel.UserAcl other) {
+        if (other == com.cloudata.git.GitModel.UserAcl.getDefaultInstance()) return this;
+        if (other.hasUserId()) {
+          setUserId(other.getUserId());
+        }
+        if (other.hasTargetType()) {
+          setTargetType(other.getTargetType());
+        }
+        if (other.hasTargetId()) {
+          setTargetId(other.getTargetId());
+        }
+        if (other.hasOwner()) {
+          setOwner(other.getOwner());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudata.git.GitModel.UserAcl parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudata.git.GitModel.UserAcl) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes user_id = 1;
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes user_id = 1;</code>
+       */
+      public boolean hasUserId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes user_id = 1;</code>
+       */
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>optional bytes user_id = 1;</code>
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes user_id = 1;</code>
+       */
+      public Builder clearUserId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      // optional .TargetType target_type = 2;
+      private com.cloudata.git.GitModel.TargetType targetType_ = com.cloudata.git.GitModel.TargetType.TARGET_TYPE_REPO;
+      /**
+       * <code>optional .TargetType target_type = 2;</code>
+       */
+      public boolean hasTargetType() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional .TargetType target_type = 2;</code>
+       */
+      public com.cloudata.git.GitModel.TargetType getTargetType() {
+        return targetType_;
+      }
+      /**
+       * <code>optional .TargetType target_type = 2;</code>
+       */
+      public Builder setTargetType(com.cloudata.git.GitModel.TargetType value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000002;
+        targetType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional .TargetType target_type = 2;</code>
+       */
+      public Builder clearTargetType() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        targetType_ = com.cloudata.git.GitModel.TargetType.TARGET_TYPE_REPO;
+        onChanged();
+        return this;
+      }
+
+      // optional bytes target_id = 3;
+      private com.google.protobuf.ByteString targetId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes target_id = 3;</code>
+       */
+      public boolean hasTargetId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes target_id = 3;</code>
+       */
+      public com.google.protobuf.ByteString getTargetId() {
+        return targetId_;
+      }
+      /**
+       * <code>optional bytes target_id = 3;</code>
+       */
+      public Builder setTargetId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        targetId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes target_id = 3;</code>
+       */
+      public Builder clearTargetId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        targetId_ = getDefaultInstance().getTargetId();
+        onChanged();
+        return this;
+      }
+
+      // optional bool owner = 4;
+      private boolean owner_ ;
+      /**
+       * <code>optional bool owner = 4;</code>
+       */
+      public boolean hasOwner() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional bool owner = 4;</code>
+       */
+      public boolean getOwner() {
+        return owner_;
+      }
+      /**
+       * <code>optional bool owner = 4;</code>
+       */
+      public Builder setOwner(boolean value) {
+        bitField0_ |= 0x00000008;
+        owner_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool owner = 4;</code>
+       */
+      public Builder clearOwner() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        owner_ = false;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:UserAcl)
+    }
+
+    static {
+      defaultInstance = new UserAcl(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:UserAcl)
+  }
+
   private static com.google.protobuf.Descriptors.Descriptor
     internal_static_RefData_descriptor;
   private static
@@ -1524,6 +2179,11 @@ public final class GitModel {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_RepositoryData_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_UserAcl_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_UserAcl_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1536,9 +2196,12 @@ public final class GitModel {
       "\n\035src/main/proto/GitModel.proto\"V\n\007RefDa" +
       "ta\022\025\n\rrepository_id\030\001 \001(\014\022\014\n\004name\030\002 \001(\t\022" +
       "\023\n\013target_name\030\003 \001(\t\022\021\n\tobject_id\030\004 \001(\014\"" +
-      "D\n\016RepositoryData\022\025\n\rrepository_id\030\001 \001(\014" +
-      "\022\r\n\005owner\030\002 \001(\t\022\014\n\004name\030\003 \001(\tB\022\n\020com.clo" +
-      "udata.git"
+      "G\n\016RepositoryData\022\025\n\rrepository_id\030\001 \001(\014" +
+      "\022\020\n\010owner_id\030\002 \001(\014\022\014\n\004name\030\003 \001(\t\"^\n\007User" +
+      "Acl\022\017\n\007user_id\030\001 \001(\014\022 \n\013target_type\030\002 \001(" +
+      "\0162\013.TargetType\022\021\n\ttarget_id\030\003 \001(\014\022\r\n\005own" +
+      "er\030\004 \001(\010*\"\n\nTargetType\022\024\n\020TARGET_TYPE_RE" +
+      "PO\020\001B\022\n\020com.cloudata.git"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -1556,7 +2219,13 @@ public final class GitModel {
           internal_static_RepositoryData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_RepositoryData_descriptor,
-              new java.lang.String[] { "RepositoryId", "Owner", "Name", });
+              new java.lang.String[] { "RepositoryId", "OwnerId", "Name", });
+          internal_static_UserAcl_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_UserAcl_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_UserAcl_descriptor,
+              new java.lang.String[] { "UserId", "TargetType", "TargetId", "Owner", });
           return null;
         }
       };

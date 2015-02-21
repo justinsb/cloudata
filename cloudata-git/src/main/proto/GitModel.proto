@@ -9,6 +9,17 @@ message RefData {
 
 message RepositoryData {
 	optional bytes repository_id = 1;
-	optional string owner = 2;
+	optional bytes owner_id = 2;
 	optional string name = 3;
+}
+
+enum TargetType {
+	TARGET_TYPE_REPO = 1;
+}
+
+message UserAcl {
+	optional bytes user_id = 1;
+	optional TargetType target_type = 2;
+	optional bytes target_id = 3;
+	optional bool owner = 4;
 }

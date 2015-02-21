@@ -8,57 +8,67 @@ public final class AuthModel {
   public static void registerAllExtensions(
       com.google.protobuf.ExtensionRegistry registry) {
   }
-  public interface AuthUserOrBuilder
+  public interface UserCredentialDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
-    // optional string name = 1;
+    // optional string login = 1;
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string login = 1;</code>
      */
-    boolean hasName();
+    boolean hasLogin();
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string login = 1;</code>
      */
-    java.lang.String getName();
+    java.lang.String getLogin();
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string login = 1;</code>
      */
     com.google.protobuf.ByteString
-        getNameBytes();
+        getLoginBytes();
 
-    // optional .HashedPassword password_hashed = 2;
+    // optional .HashedPasswordData password_hashed = 2;
     /**
-     * <code>optional .HashedPassword password_hashed = 2;</code>
+     * <code>optional .HashedPasswordData password_hashed = 2;</code>
      */
     boolean hasPasswordHashed();
     /**
-     * <code>optional .HashedPassword password_hashed = 2;</code>
+     * <code>optional .HashedPasswordData password_hashed = 2;</code>
      */
-    com.cloudata.auth.AuthModel.HashedPassword getPasswordHashed();
+    com.cloudata.auth.AuthModel.HashedPasswordData getPasswordHashed();
     /**
-     * <code>optional .HashedPassword password_hashed = 2;</code>
+     * <code>optional .HashedPasswordData password_hashed = 2;</code>
      */
-    com.cloudata.auth.AuthModel.HashedPasswordOrBuilder getPasswordHashedOrBuilder();
+    com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder getPasswordHashedOrBuilder();
+
+    // optional bytes user_id = 3;
+    /**
+     * <code>optional bytes user_id = 3;</code>
+     */
+    boolean hasUserId();
+    /**
+     * <code>optional bytes user_id = 3;</code>
+     */
+    com.google.protobuf.ByteString getUserId();
   }
   /**
-   * Protobuf type {@code AuthUser}
+   * Protobuf type {@code UserCredentialData}
    */
-  public static final class AuthUser extends
+  public static final class UserCredentialData extends
       com.google.protobuf.GeneratedMessage
-      implements AuthUserOrBuilder {
-    // Use AuthUser.newBuilder() to construct.
-    private AuthUser(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements UserCredentialDataOrBuilder {
+    // Use UserCredentialData.newBuilder() to construct.
+    private UserCredentialData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private AuthUser(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private UserCredentialData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final AuthUser defaultInstance;
-    public static AuthUser getDefaultInstance() {
+    private static final UserCredentialData defaultInstance;
+    public static UserCredentialData getDefaultInstance() {
       return defaultInstance;
     }
 
-    public AuthUser getDefaultInstanceForType() {
+    public UserCredentialData getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -68,7 +78,7 @@ public final class AuthModel {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private AuthUser(
+    private UserCredentialData(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -93,20 +103,25 @@ public final class AuthModel {
             }
             case 10: {
               bitField0_ |= 0x00000001;
-              name_ = input.readBytes();
+              login_ = input.readBytes();
               break;
             }
             case 18: {
-              com.cloudata.auth.AuthModel.HashedPassword.Builder subBuilder = null;
+              com.cloudata.auth.AuthModel.HashedPasswordData.Builder subBuilder = null;
               if (((bitField0_ & 0x00000002) == 0x00000002)) {
                 subBuilder = passwordHashed_.toBuilder();
               }
-              passwordHashed_ = input.readMessage(com.cloudata.auth.AuthModel.HashedPassword.PARSER, extensionRegistry);
+              passwordHashed_ = input.readMessage(com.cloudata.auth.AuthModel.HashedPasswordData.PARSER, extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom(passwordHashed_);
                 passwordHashed_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000002;
+              break;
+            }
+            case 26: {
+              bitField0_ |= 0x00000004;
+              userId_ = input.readBytes();
               break;
             }
           }
@@ -123,46 +138,46 @@ public final class AuthModel {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudata.auth.AuthModel.internal_static_AuthUser_descriptor;
+      return com.cloudata.auth.AuthModel.internal_static_UserCredentialData_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudata.auth.AuthModel.internal_static_AuthUser_fieldAccessorTable
+      return com.cloudata.auth.AuthModel.internal_static_UserCredentialData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudata.auth.AuthModel.AuthUser.class, com.cloudata.auth.AuthModel.AuthUser.Builder.class);
+              com.cloudata.auth.AuthModel.UserCredentialData.class, com.cloudata.auth.AuthModel.UserCredentialData.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<AuthUser> PARSER =
-        new com.google.protobuf.AbstractParser<AuthUser>() {
-      public AuthUser parsePartialFrom(
+    public static com.google.protobuf.Parser<UserCredentialData> PARSER =
+        new com.google.protobuf.AbstractParser<UserCredentialData>() {
+      public UserCredentialData parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new AuthUser(input, extensionRegistry);
+        return new UserCredentialData(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<AuthUser> getParserForType() {
+    public com.google.protobuf.Parser<UserCredentialData> getParserForType() {
       return PARSER;
     }
 
     private int bitField0_;
-    // optional string name = 1;
-    public static final int NAME_FIELD_NUMBER = 1;
-    private java.lang.Object name_;
+    // optional string login = 1;
+    public static final int LOGIN_FIELD_NUMBER = 1;
+    private java.lang.Object login_;
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string login = 1;</code>
      */
-    public boolean hasName() {
+    public boolean hasLogin() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string login = 1;</code>
      */
-    public java.lang.String getName() {
-      java.lang.Object ref = name_;
+    public java.lang.String getLogin() {
+      java.lang.Object ref = login_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
@@ -170,53 +185,70 @@ public final class AuthModel {
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
-          name_ = s;
+          login_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>optional string name = 1;</code>
+     * <code>optional string login = 1;</code>
      */
     public com.google.protobuf.ByteString
-        getNameBytes() {
-      java.lang.Object ref = name_;
+        getLoginBytes() {
+      java.lang.Object ref = login_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        name_ = b;
+        login_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
 
-    // optional .HashedPassword password_hashed = 2;
+    // optional .HashedPasswordData password_hashed = 2;
     public static final int PASSWORD_HASHED_FIELD_NUMBER = 2;
-    private com.cloudata.auth.AuthModel.HashedPassword passwordHashed_;
+    private com.cloudata.auth.AuthModel.HashedPasswordData passwordHashed_;
     /**
-     * <code>optional .HashedPassword password_hashed = 2;</code>
+     * <code>optional .HashedPasswordData password_hashed = 2;</code>
      */
     public boolean hasPasswordHashed() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional .HashedPassword password_hashed = 2;</code>
+     * <code>optional .HashedPasswordData password_hashed = 2;</code>
      */
-    public com.cloudata.auth.AuthModel.HashedPassword getPasswordHashed() {
+    public com.cloudata.auth.AuthModel.HashedPasswordData getPasswordHashed() {
       return passwordHashed_;
     }
     /**
-     * <code>optional .HashedPassword password_hashed = 2;</code>
+     * <code>optional .HashedPasswordData password_hashed = 2;</code>
      */
-    public com.cloudata.auth.AuthModel.HashedPasswordOrBuilder getPasswordHashedOrBuilder() {
+    public com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder getPasswordHashedOrBuilder() {
       return passwordHashed_;
     }
 
+    // optional bytes user_id = 3;
+    public static final int USER_ID_FIELD_NUMBER = 3;
+    private com.google.protobuf.ByteString userId_;
+    /**
+     * <code>optional bytes user_id = 3;</code>
+     */
+    public boolean hasUserId() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional bytes user_id = 3;</code>
+     */
+    public com.google.protobuf.ByteString getUserId() {
+      return userId_;
+    }
+
     private void initFields() {
-      name_ = "";
-      passwordHashed_ = com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance();
+      login_ = "";
+      passwordHashed_ = com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance();
+      userId_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -231,10 +263,13 @@ public final class AuthModel {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeBytes(1, getNameBytes());
+        output.writeBytes(1, getLoginBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeMessage(2, passwordHashed_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeBytes(3, userId_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -247,11 +282,15 @@ public final class AuthModel {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(1, getNameBytes());
+          .computeBytesSize(1, getLoginBytes());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, passwordHashed_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(3, userId_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -265,53 +304,53 @@ public final class AuthModel {
       return super.writeReplace();
     }
 
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(byte[] data)
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(java.io.InputStream input)
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseDelimitedFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.cloudata.auth.AuthModel.AuthUser parseFrom(
+    public static com.cloudata.auth.AuthModel.UserCredentialData parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -320,7 +359,7 @@ public final class AuthModel {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.cloudata.auth.AuthModel.AuthUser prototype) {
+    public static Builder newBuilder(com.cloudata.auth.AuthModel.UserCredentialData prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -332,24 +371,24 @@ public final class AuthModel {
       return builder;
     }
     /**
-     * Protobuf type {@code AuthUser}
+     * Protobuf type {@code UserCredentialData}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.auth.AuthModel.AuthUserOrBuilder {
+       implements com.cloudata.auth.AuthModel.UserCredentialDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudata.auth.AuthModel.internal_static_AuthUser_descriptor;
+        return com.cloudata.auth.AuthModel.internal_static_UserCredentialData_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudata.auth.AuthModel.internal_static_AuthUser_fieldAccessorTable
+        return com.cloudata.auth.AuthModel.internal_static_UserCredentialData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudata.auth.AuthModel.AuthUser.class, com.cloudata.auth.AuthModel.AuthUser.Builder.class);
+                com.cloudata.auth.AuthModel.UserCredentialData.class, com.cloudata.auth.AuthModel.UserCredentialData.Builder.class);
       }
 
-      // Construct using com.cloudata.auth.AuthModel.AuthUser.newBuilder()
+      // Construct using com.cloudata.auth.AuthModel.UserCredentialData.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -370,14 +409,16 @@ public final class AuthModel {
 
       public Builder clear() {
         super.clear();
-        name_ = "";
+        login_ = "";
         bitField0_ = (bitField0_ & ~0x00000001);
         if (passwordHashedBuilder_ == null) {
-          passwordHashed_ = com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance();
+          passwordHashed_ = com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance();
         } else {
           passwordHashedBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000002);
+        userId_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -387,29 +428,29 @@ public final class AuthModel {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudata.auth.AuthModel.internal_static_AuthUser_descriptor;
+        return com.cloudata.auth.AuthModel.internal_static_UserCredentialData_descriptor;
       }
 
-      public com.cloudata.auth.AuthModel.AuthUser getDefaultInstanceForType() {
-        return com.cloudata.auth.AuthModel.AuthUser.getDefaultInstance();
+      public com.cloudata.auth.AuthModel.UserCredentialData getDefaultInstanceForType() {
+        return com.cloudata.auth.AuthModel.UserCredentialData.getDefaultInstance();
       }
 
-      public com.cloudata.auth.AuthModel.AuthUser build() {
-        com.cloudata.auth.AuthModel.AuthUser result = buildPartial();
+      public com.cloudata.auth.AuthModel.UserCredentialData build() {
+        com.cloudata.auth.AuthModel.UserCredentialData result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.cloudata.auth.AuthModel.AuthUser buildPartial() {
-        com.cloudata.auth.AuthModel.AuthUser result = new com.cloudata.auth.AuthModel.AuthUser(this);
+      public com.cloudata.auth.AuthModel.UserCredentialData buildPartial() {
+        com.cloudata.auth.AuthModel.UserCredentialData result = new com.cloudata.auth.AuthModel.UserCredentialData(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.name_ = name_;
+        result.login_ = login_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
@@ -418,29 +459,36 @@ public final class AuthModel {
         } else {
           result.passwordHashed_ = passwordHashedBuilder_.build();
         }
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.userId_ = userId_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudata.auth.AuthModel.AuthUser) {
-          return mergeFrom((com.cloudata.auth.AuthModel.AuthUser)other);
+        if (other instanceof com.cloudata.auth.AuthModel.UserCredentialData) {
+          return mergeFrom((com.cloudata.auth.AuthModel.UserCredentialData)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudata.auth.AuthModel.AuthUser other) {
-        if (other == com.cloudata.auth.AuthModel.AuthUser.getDefaultInstance()) return this;
-        if (other.hasName()) {
+      public Builder mergeFrom(com.cloudata.auth.AuthModel.UserCredentialData other) {
+        if (other == com.cloudata.auth.AuthModel.UserCredentialData.getDefaultInstance()) return this;
+        if (other.hasLogin()) {
           bitField0_ |= 0x00000001;
-          name_ = other.name_;
+          login_ = other.login_;
           onChanged();
         }
         if (other.hasPasswordHashed()) {
           mergePasswordHashed(other.getPasswordHashed());
+        }
+        if (other.hasUserId()) {
+          setUserId(other.getUserId());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -454,11 +502,11 @@ public final class AuthModel {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudata.auth.AuthModel.AuthUser parsedMessage = null;
+        com.cloudata.auth.AuthModel.UserCredentialData parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudata.auth.AuthModel.AuthUser) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudata.auth.AuthModel.UserCredentialData) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -469,16 +517,724 @@ public final class AuthModel {
       }
       private int bitField0_;
 
-      // optional string name = 1;
-      private java.lang.Object name_ = "";
+      // optional string login = 1;
+      private java.lang.Object login_ = "";
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string login = 1;</code>
        */
-      public boolean hasName() {
+      public boolean hasLogin() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string login = 1;</code>
+       */
+      public java.lang.String getLogin() {
+        java.lang.Object ref = login_;
+        if (!(ref instanceof java.lang.String)) {
+          java.lang.String s = ((com.google.protobuf.ByteString) ref)
+              .toStringUtf8();
+          login_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>optional string login = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLoginBytes() {
+        java.lang.Object ref = login_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          login_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>optional string login = 1;</code>
+       */
+      public Builder setLogin(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        login_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string login = 1;</code>
+       */
+      public Builder clearLogin() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        login_ = getDefaultInstance().getLogin();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional string login = 1;</code>
+       */
+      public Builder setLoginBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        login_ = value;
+        onChanged();
+        return this;
+      }
+
+      // optional .HashedPasswordData password_hashed = 2;
+      private com.cloudata.auth.AuthModel.HashedPasswordData passwordHashed_ = com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          com.cloudata.auth.AuthModel.HashedPasswordData, com.cloudata.auth.AuthModel.HashedPasswordData.Builder, com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder> passwordHashedBuilder_;
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public boolean hasPasswordHashed() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public com.cloudata.auth.AuthModel.HashedPasswordData getPasswordHashed() {
+        if (passwordHashedBuilder_ == null) {
+          return passwordHashed_;
+        } else {
+          return passwordHashedBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public Builder setPasswordHashed(com.cloudata.auth.AuthModel.HashedPasswordData value) {
+        if (passwordHashedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          passwordHashed_ = value;
+          onChanged();
+        } else {
+          passwordHashedBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public Builder setPasswordHashed(
+          com.cloudata.auth.AuthModel.HashedPasswordData.Builder builderForValue) {
+        if (passwordHashedBuilder_ == null) {
+          passwordHashed_ = builderForValue.build();
+          onChanged();
+        } else {
+          passwordHashedBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public Builder mergePasswordHashed(com.cloudata.auth.AuthModel.HashedPasswordData value) {
+        if (passwordHashedBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              passwordHashed_ != com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance()) {
+            passwordHashed_ =
+              com.cloudata.auth.AuthModel.HashedPasswordData.newBuilder(passwordHashed_).mergeFrom(value).buildPartial();
+          } else {
+            passwordHashed_ = value;
+          }
+          onChanged();
+        } else {
+          passwordHashedBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000002;
+        return this;
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public Builder clearPasswordHashed() {
+        if (passwordHashedBuilder_ == null) {
+          passwordHashed_ = com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance();
+          onChanged();
+        } else {
+          passwordHashedBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public com.cloudata.auth.AuthModel.HashedPasswordData.Builder getPasswordHashedBuilder() {
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return getPasswordHashedFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      public com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder getPasswordHashedOrBuilder() {
+        if (passwordHashedBuilder_ != null) {
+          return passwordHashedBuilder_.getMessageOrBuilder();
+        } else {
+          return passwordHashed_;
+        }
+      }
+      /**
+       * <code>optional .HashedPasswordData password_hashed = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          com.cloudata.auth.AuthModel.HashedPasswordData, com.cloudata.auth.AuthModel.HashedPasswordData.Builder, com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder> 
+          getPasswordHashedFieldBuilder() {
+        if (passwordHashedBuilder_ == null) {
+          passwordHashedBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              com.cloudata.auth.AuthModel.HashedPasswordData, com.cloudata.auth.AuthModel.HashedPasswordData.Builder, com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder>(
+                  passwordHashed_,
+                  getParentForChildren(),
+                  isClean());
+          passwordHashed_ = null;
+        }
+        return passwordHashedBuilder_;
+      }
+
+      // optional bytes user_id = 3;
+      private com.google.protobuf.ByteString userId_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes user_id = 3;</code>
+       */
+      public boolean hasUserId() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional bytes user_id = 3;</code>
+       */
+      public com.google.protobuf.ByteString getUserId() {
+        return userId_;
+      }
+      /**
+       * <code>optional bytes user_id = 3;</code>
+       */
+      public Builder setUserId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000004;
+        userId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes user_id = 3;</code>
+       */
+      public Builder clearUserId() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        userId_ = getDefaultInstance().getUserId();
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:UserCredentialData)
+    }
+
+    static {
+      defaultInstance = new UserCredentialData(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:UserCredentialData)
+  }
+
+  public interface UserDataOrBuilder
+      extends com.google.protobuf.MessageOrBuilder {
+
+    // optional bytes id = 1;
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    boolean hasId();
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    com.google.protobuf.ByteString getId();
+
+    // optional string name = 2;
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    boolean hasName();
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    java.lang.String getName();
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getNameBytes();
+  }
+  /**
+   * Protobuf type {@code UserData}
+   */
+  public static final class UserData extends
+      com.google.protobuf.GeneratedMessage
+      implements UserDataOrBuilder {
+    // Use UserData.newBuilder() to construct.
+    private UserData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private UserData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final UserData defaultInstance;
+    public static UserData getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public UserData getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private UserData(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 10: {
+              bitField0_ |= 0x00000001;
+              id_ = input.readBytes();
+              break;
+            }
+            case 18: {
+              bitField0_ |= 0x00000002;
+              name_ = input.readBytes();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudata.auth.AuthModel.internal_static_UserData_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudata.auth.AuthModel.internal_static_UserData_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudata.auth.AuthModel.UserData.class, com.cloudata.auth.AuthModel.UserData.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<UserData> PARSER =
+        new com.google.protobuf.AbstractParser<UserData>() {
+      public UserData parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new UserData(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<UserData> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    // optional bytes id = 1;
+    public static final int ID_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString id_;
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional bytes id = 1;</code>
+     */
+    public com.google.protobuf.ByteString getId() {
+      return id_;
+    }
+
+    // optional string name = 2;
+    public static final int NAME_FIELD_NUMBER = 2;
+    private java.lang.Object name_;
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public boolean hasName() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public java.lang.String getName() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        if (bs.isValidUtf8()) {
+          name_ = s;
+        }
+        return s;
+      }
+    }
+    /**
+     * <code>optional string name = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getNameBytes() {
+      java.lang.Object ref = name_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        name_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private void initFields() {
+      id_ = com.google.protobuf.ByteString.EMPTY;
+      name_ = "";
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized != -1) return isInitialized == 1;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeBytes(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeBytes(2, getNameBytes());
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, id_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(2, getNameBytes());
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.cloudata.auth.AuthModel.UserData parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.cloudata.auth.AuthModel.UserData prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code UserData}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder>
+       implements com.cloudata.auth.AuthModel.UserDataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudata.auth.AuthModel.internal_static_UserData_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudata.auth.AuthModel.internal_static_UserData_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudata.auth.AuthModel.UserData.class, com.cloudata.auth.AuthModel.UserData.Builder.class);
+      }
+
+      // Construct using com.cloudata.auth.AuthModel.UserData.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        id_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        name_ = "";
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudata.auth.AuthModel.internal_static_UserData_descriptor;
+      }
+
+      public com.cloudata.auth.AuthModel.UserData getDefaultInstanceForType() {
+        return com.cloudata.auth.AuthModel.UserData.getDefaultInstance();
+      }
+
+      public com.cloudata.auth.AuthModel.UserData build() {
+        com.cloudata.auth.AuthModel.UserData result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.cloudata.auth.AuthModel.UserData buildPartial() {
+        com.cloudata.auth.AuthModel.UserData result = new com.cloudata.auth.AuthModel.UserData(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.id_ = id_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.name_ = name_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudata.auth.AuthModel.UserData) {
+          return mergeFrom((com.cloudata.auth.AuthModel.UserData)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudata.auth.AuthModel.UserData other) {
+        if (other == com.cloudata.auth.AuthModel.UserData.getDefaultInstance()) return this;
+        if (other.hasId()) {
+          setId(other.getId());
+        }
+        if (other.hasName()) {
+          bitField0_ |= 0x00000002;
+          name_ = other.name_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudata.auth.AuthModel.UserData parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudata.auth.AuthModel.UserData) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      // optional bytes id = 1;
+      private com.google.protobuf.ByteString id_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public com.google.protobuf.ByteString getId() {
+        return id_;
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public Builder setId(com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  bitField0_ |= 0x00000001;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bytes id = 1;</code>
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+
+      // optional string name = 2;
+      private java.lang.Object name_ = "";
+      /**
+       * <code>optional string name = 2;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional string name = 2;</code>
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -492,7 +1248,7 @@ public final class AuthModel {
         }
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -508,170 +1264,53 @@ public final class AuthModel {
         }
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder setName(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder clearName() {
-        bitField0_ = (bitField0_ & ~0x00000001);
+        bitField0_ = (bitField0_ & ~0x00000002);
         name_ = getDefaultInstance().getName();
         onChanged();
         return this;
       }
       /**
-       * <code>optional string name = 1;</code>
+       * <code>optional string name = 2;</code>
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000001;
+  bitField0_ |= 0x00000002;
         name_ = value;
         onChanged();
         return this;
       }
 
-      // optional .HashedPassword password_hashed = 2;
-      private com.cloudata.auth.AuthModel.HashedPassword passwordHashed_ = com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance();
-      private com.google.protobuf.SingleFieldBuilder<
-          com.cloudata.auth.AuthModel.HashedPassword, com.cloudata.auth.AuthModel.HashedPassword.Builder, com.cloudata.auth.AuthModel.HashedPasswordOrBuilder> passwordHashedBuilder_;
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public boolean hasPasswordHashed() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public com.cloudata.auth.AuthModel.HashedPassword getPasswordHashed() {
-        if (passwordHashedBuilder_ == null) {
-          return passwordHashed_;
-        } else {
-          return passwordHashedBuilder_.getMessage();
-        }
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public Builder setPasswordHashed(com.cloudata.auth.AuthModel.HashedPassword value) {
-        if (passwordHashedBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          passwordHashed_ = value;
-          onChanged();
-        } else {
-          passwordHashedBuilder_.setMessage(value);
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public Builder setPasswordHashed(
-          com.cloudata.auth.AuthModel.HashedPassword.Builder builderForValue) {
-        if (passwordHashedBuilder_ == null) {
-          passwordHashed_ = builderForValue.build();
-          onChanged();
-        } else {
-          passwordHashedBuilder_.setMessage(builderForValue.build());
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public Builder mergePasswordHashed(com.cloudata.auth.AuthModel.HashedPassword value) {
-        if (passwordHashedBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002) &&
-              passwordHashed_ != com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance()) {
-            passwordHashed_ =
-              com.cloudata.auth.AuthModel.HashedPassword.newBuilder(passwordHashed_).mergeFrom(value).buildPartial();
-          } else {
-            passwordHashed_ = value;
-          }
-          onChanged();
-        } else {
-          passwordHashedBuilder_.mergeFrom(value);
-        }
-        bitField0_ |= 0x00000002;
-        return this;
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public Builder clearPasswordHashed() {
-        if (passwordHashedBuilder_ == null) {
-          passwordHashed_ = com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance();
-          onChanged();
-        } else {
-          passwordHashedBuilder_.clear();
-        }
-        bitField0_ = (bitField0_ & ~0x00000002);
-        return this;
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public com.cloudata.auth.AuthModel.HashedPassword.Builder getPasswordHashedBuilder() {
-        bitField0_ |= 0x00000002;
-        onChanged();
-        return getPasswordHashedFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      public com.cloudata.auth.AuthModel.HashedPasswordOrBuilder getPasswordHashedOrBuilder() {
-        if (passwordHashedBuilder_ != null) {
-          return passwordHashedBuilder_.getMessageOrBuilder();
-        } else {
-          return passwordHashed_;
-        }
-      }
-      /**
-       * <code>optional .HashedPassword password_hashed = 2;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilder<
-          com.cloudata.auth.AuthModel.HashedPassword, com.cloudata.auth.AuthModel.HashedPassword.Builder, com.cloudata.auth.AuthModel.HashedPasswordOrBuilder> 
-          getPasswordHashedFieldBuilder() {
-        if (passwordHashedBuilder_ == null) {
-          passwordHashedBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-              com.cloudata.auth.AuthModel.HashedPassword, com.cloudata.auth.AuthModel.HashedPassword.Builder, com.cloudata.auth.AuthModel.HashedPasswordOrBuilder>(
-                  passwordHashed_,
-                  getParentForChildren(),
-                  isClean());
-          passwordHashed_ = null;
-        }
-        return passwordHashedBuilder_;
-      }
-
-      // @@protoc_insertion_point(builder_scope:AuthUser)
+      // @@protoc_insertion_point(builder_scope:UserData)
     }
 
     static {
-      defaultInstance = new AuthUser(true);
+      defaultInstance = new UserData(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:AuthUser)
+    // @@protoc_insertion_point(class_scope:UserData)
   }
 
-  public interface HashedPasswordOrBuilder
+  public interface HashedPasswordDataOrBuilder
       extends com.google.protobuf.MessageOrBuilder {
 
     // optional bytes salt = 2;
@@ -713,24 +1352,24 @@ public final class AuthModel {
     com.google.protobuf.ByteString getHashed();
   }
   /**
-   * Protobuf type {@code HashedPassword}
+   * Protobuf type {@code HashedPasswordData}
    */
-  public static final class HashedPassword extends
+  public static final class HashedPasswordData extends
       com.google.protobuf.GeneratedMessage
-      implements HashedPasswordOrBuilder {
-    // Use HashedPassword.newBuilder() to construct.
-    private HashedPassword(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      implements HashedPasswordDataOrBuilder {
+    // Use HashedPasswordData.newBuilder() to construct.
+    private HashedPasswordData(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
       super(builder);
       this.unknownFields = builder.getUnknownFields();
     }
-    private HashedPassword(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+    private HashedPasswordData(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
 
-    private static final HashedPassword defaultInstance;
-    public static HashedPassword getDefaultInstance() {
+    private static final HashedPasswordData defaultInstance;
+    public static HashedPasswordData getDefaultInstance() {
       return defaultInstance;
     }
 
-    public HashedPassword getDefaultInstanceForType() {
+    public HashedPasswordData getDefaultInstanceForType() {
       return defaultInstance;
     }
 
@@ -740,7 +1379,7 @@ public final class AuthModel {
         getUnknownFields() {
       return this.unknownFields;
     }
-    private HashedPassword(
+    private HashedPasswordData(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
@@ -792,28 +1431,28 @@ public final class AuthModel {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.cloudata.auth.AuthModel.internal_static_HashedPassword_descriptor;
+      return com.cloudata.auth.AuthModel.internal_static_HashedPasswordData_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.cloudata.auth.AuthModel.internal_static_HashedPassword_fieldAccessorTable
+      return com.cloudata.auth.AuthModel.internal_static_HashedPasswordData_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
-              com.cloudata.auth.AuthModel.HashedPassword.class, com.cloudata.auth.AuthModel.HashedPassword.Builder.class);
+              com.cloudata.auth.AuthModel.HashedPasswordData.class, com.cloudata.auth.AuthModel.HashedPasswordData.Builder.class);
     }
 
-    public static com.google.protobuf.Parser<HashedPassword> PARSER =
-        new com.google.protobuf.AbstractParser<HashedPassword>() {
-      public HashedPassword parsePartialFrom(
+    public static com.google.protobuf.Parser<HashedPasswordData> PARSER =
+        new com.google.protobuf.AbstractParser<HashedPasswordData>() {
+      public HashedPasswordData parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws com.google.protobuf.InvalidProtocolBufferException {
-        return new HashedPassword(input, extensionRegistry);
+        return new HashedPasswordData(input, extensionRegistry);
       }
     };
 
     @java.lang.Override
-    public com.google.protobuf.Parser<HashedPassword> getParserForType() {
+    public com.google.protobuf.Parser<HashedPasswordData> getParserForType() {
       return PARSER;
     }
 
@@ -933,53 +1572,53 @@ public final class AuthModel {
       return super.writeReplace();
     }
 
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(
         com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(
         com.google.protobuf.ByteString data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(byte[] data)
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(
         byte[] data,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
       return PARSER.parseFrom(data, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(java.io.InputStream input)
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseFrom(input, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseDelimitedFrom(java.io.InputStream input)
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseDelimitedFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseDelimitedFrom(
         java.io.InputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
       return PARSER.parseDelimitedFrom(input, extensionRegistry);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(
         com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
       return PARSER.parseFrom(input);
     }
-    public static com.cloudata.auth.AuthModel.HashedPassword parseFrom(
+    public static com.cloudata.auth.AuthModel.HashedPasswordData parseFrom(
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
@@ -988,7 +1627,7 @@ public final class AuthModel {
 
     public static Builder newBuilder() { return Builder.create(); }
     public Builder newBuilderForType() { return newBuilder(); }
-    public static Builder newBuilder(com.cloudata.auth.AuthModel.HashedPassword prototype) {
+    public static Builder newBuilder(com.cloudata.auth.AuthModel.HashedPasswordData prototype) {
       return newBuilder().mergeFrom(prototype);
     }
     public Builder toBuilder() { return newBuilder(this); }
@@ -1000,24 +1639,24 @@ public final class AuthModel {
       return builder;
     }
     /**
-     * Protobuf type {@code HashedPassword}
+     * Protobuf type {@code HashedPasswordData}
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder>
-       implements com.cloudata.auth.AuthModel.HashedPasswordOrBuilder {
+       implements com.cloudata.auth.AuthModel.HashedPasswordDataOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.cloudata.auth.AuthModel.internal_static_HashedPassword_descriptor;
+        return com.cloudata.auth.AuthModel.internal_static_HashedPasswordData_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.cloudata.auth.AuthModel.internal_static_HashedPassword_fieldAccessorTable
+        return com.cloudata.auth.AuthModel.internal_static_HashedPasswordData_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.cloudata.auth.AuthModel.HashedPassword.class, com.cloudata.auth.AuthModel.HashedPassword.Builder.class);
+                com.cloudata.auth.AuthModel.HashedPasswordData.class, com.cloudata.auth.AuthModel.HashedPasswordData.Builder.class);
       }
 
-      // Construct using com.cloudata.auth.AuthModel.HashedPassword.newBuilder()
+      // Construct using com.cloudata.auth.AuthModel.HashedPasswordData.newBuilder()
       private Builder() {
         maybeForceBuilderInitialization();
       }
@@ -1052,23 +1691,23 @@ public final class AuthModel {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.cloudata.auth.AuthModel.internal_static_HashedPassword_descriptor;
+        return com.cloudata.auth.AuthModel.internal_static_HashedPasswordData_descriptor;
       }
 
-      public com.cloudata.auth.AuthModel.HashedPassword getDefaultInstanceForType() {
-        return com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance();
+      public com.cloudata.auth.AuthModel.HashedPasswordData getDefaultInstanceForType() {
+        return com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance();
       }
 
-      public com.cloudata.auth.AuthModel.HashedPassword build() {
-        com.cloudata.auth.AuthModel.HashedPassword result = buildPartial();
+      public com.cloudata.auth.AuthModel.HashedPasswordData build() {
+        com.cloudata.auth.AuthModel.HashedPasswordData result = buildPartial();
         if (!result.isInitialized()) {
           throw newUninitializedMessageException(result);
         }
         return result;
       }
 
-      public com.cloudata.auth.AuthModel.HashedPassword buildPartial() {
-        com.cloudata.auth.AuthModel.HashedPassword result = new com.cloudata.auth.AuthModel.HashedPassword(this);
+      public com.cloudata.auth.AuthModel.HashedPasswordData buildPartial() {
+        com.cloudata.auth.AuthModel.HashedPasswordData result = new com.cloudata.auth.AuthModel.HashedPasswordData(this);
         int from_bitField0_ = bitField0_;
         int to_bitField0_ = 0;
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
@@ -1089,16 +1728,16 @@ public final class AuthModel {
       }
 
       public Builder mergeFrom(com.google.protobuf.Message other) {
-        if (other instanceof com.cloudata.auth.AuthModel.HashedPassword) {
-          return mergeFrom((com.cloudata.auth.AuthModel.HashedPassword)other);
+        if (other instanceof com.cloudata.auth.AuthModel.HashedPasswordData) {
+          return mergeFrom((com.cloudata.auth.AuthModel.HashedPasswordData)other);
         } else {
           super.mergeFrom(other);
           return this;
         }
       }
 
-      public Builder mergeFrom(com.cloudata.auth.AuthModel.HashedPassword other) {
-        if (other == com.cloudata.auth.AuthModel.HashedPassword.getDefaultInstance()) return this;
+      public Builder mergeFrom(com.cloudata.auth.AuthModel.HashedPasswordData other) {
+        if (other == com.cloudata.auth.AuthModel.HashedPasswordData.getDefaultInstance()) return this;
         if (other.hasSalt()) {
           setSalt(other.getSalt());
         }
@@ -1120,11 +1759,11 @@ public final class AuthModel {
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
           throws java.io.IOException {
-        com.cloudata.auth.AuthModel.HashedPassword parsedMessage = null;
+        com.cloudata.auth.AuthModel.HashedPasswordData parsedMessage = null;
         try {
           parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
         } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-          parsedMessage = (com.cloudata.auth.AuthModel.HashedPassword) e.getUnfinishedMessage();
+          parsedMessage = (com.cloudata.auth.AuthModel.HashedPasswordData) e.getUnfinishedMessage();
           throw e;
         } finally {
           if (parsedMessage != null) {
@@ -1256,27 +1895,32 @@ public final class AuthModel {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:HashedPassword)
+      // @@protoc_insertion_point(builder_scope:HashedPasswordData)
     }
 
     static {
-      defaultInstance = new HashedPassword(true);
+      defaultInstance = new HashedPasswordData(true);
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:HashedPassword)
+    // @@protoc_insertion_point(class_scope:HashedPasswordData)
   }
 
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_AuthUser_descriptor;
+    internal_static_UserCredentialData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_AuthUser_fieldAccessorTable;
+      internal_static_UserCredentialData_fieldAccessorTable;
   private static com.google.protobuf.Descriptors.Descriptor
-    internal_static_HashedPassword_descriptor;
+    internal_static_UserData_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_HashedPassword_fieldAccessorTable;
+      internal_static_UserData_fieldAccessorTable;
+  private static com.google.protobuf.Descriptors.Descriptor
+    internal_static_HashedPasswordData_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_HashedPasswordData_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -1286,28 +1930,36 @@ public final class AuthModel {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\036src/main/proto/AuthModel.proto\"B\n\010Auth" +
-      "User\022\014\n\004name\030\001 \001(\t\022(\n\017password_hashed\030\002 " +
-      "\001(\0132\017.HashedPassword\"B\n\016HashedPassword\022\014" +
-      "\n\004salt\030\002 \001(\014\022\022\n\niterations\030\003 \001(\005\022\016\n\006hash" +
-      "ed\030\004 \001(\014B\023\n\021com.cloudata.auth"
+      "\n\036src/main/proto/AuthModel.proto\"b\n\022User" +
+      "CredentialData\022\r\n\005login\030\001 \001(\t\022,\n\017passwor" +
+      "d_hashed\030\002 \001(\0132\023.HashedPasswordData\022\017\n\007u" +
+      "ser_id\030\003 \001(\014\"$\n\010UserData\022\n\n\002id\030\001 \001(\014\022\014\n\004" +
+      "name\030\002 \001(\t\"F\n\022HashedPasswordData\022\014\n\004salt" +
+      "\030\002 \001(\014\022\022\n\niterations\030\003 \001(\005\022\016\n\006hashed\030\004 \001" +
+      "(\014B\023\n\021com.cloudata.auth"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;
-          internal_static_AuthUser_descriptor =
+          internal_static_UserCredentialData_descriptor =
             getDescriptor().getMessageTypes().get(0);
-          internal_static_AuthUser_fieldAccessorTable = new
+          internal_static_UserCredentialData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_AuthUser_descriptor,
-              new java.lang.String[] { "Name", "PasswordHashed", });
-          internal_static_HashedPassword_descriptor =
+              internal_static_UserCredentialData_descriptor,
+              new java.lang.String[] { "Login", "PasswordHashed", "UserId", });
+          internal_static_UserData_descriptor =
             getDescriptor().getMessageTypes().get(1);
-          internal_static_HashedPassword_fieldAccessorTable = new
+          internal_static_UserData_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-              internal_static_HashedPassword_descriptor,
+              internal_static_UserData_descriptor,
+              new java.lang.String[] { "Id", "Name", });
+          internal_static_HashedPasswordData_descriptor =
+            getDescriptor().getMessageTypes().get(2);
+          internal_static_HashedPasswordData_fieldAccessorTable = new
+            com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+              internal_static_HashedPasswordData_descriptor,
               new java.lang.String[] { "Salt", "Iterations", "Hashed", });
           return null;
         }
