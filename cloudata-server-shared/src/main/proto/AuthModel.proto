@@ -11,6 +11,3 @@ message HashedPassword {
 	optional int32 iterations = 3;
 	optional bytes hashed = 4;
 }
-
-
-

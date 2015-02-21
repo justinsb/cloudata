@@ -81,7 +81,7 @@ public class DynamodbDataStore implements DataStore {
 
   private DynamoClassMapping<TypeMetadata> buildMetadataMapping() {
     Mapping<TypeMetadata> builder = DataStore.Mapping.create(TypeMetadata.getDefaultInstance());
-    builder.hashKey = new String[] { "id" };
+    builder.hashKey = Arrays.asList("id");
     TypeMetadata typeMetadata = TypeMetadata.newBuilder().setId(SYSTEM_ID_TYPE_METADATA)
         .setTypeDescriptor(TypeMetadata.getDescriptor().toProto()).build();
     return new DynamoClassMapping<TypeMetadata>(DEFAULT_DYNAMO_TABLENAME, builder, typeMetadata);

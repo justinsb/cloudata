@@ -1,11 +1,13 @@
 package com.cloudata.datastore;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.cloudata.datastore.DataStore.Mapping;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 
@@ -46,15 +48,15 @@ public interface DataStore {
 
   static class Mapping<T extends Message> {
     public final T defaultInstance;
-    public String[] hashKey;
-    public String[] rangeKey;
-    public String[] filterable;
+    public List<String> hashKey;
+    public List<String> rangeKey;
+    public List<String> filterable;
 
     private Mapping(T defaultInstance) {
       this.defaultInstance = defaultInstance;
-      this.hashKey = new String[0];
-      this.rangeKey = new String[0];
-      this.filterable = new String[0];
+      this.hashKey = Lists.newArrayList();
+      this.rangeKey = Lists.newArrayList();
+      this.filterable = Lists.newArrayList();
     }
 
     public static <T extends Message> Mapping<T> create(T defaultInstance) {
@@ -62,20 +64,19 @@ public interface DataStore {
     }
 
     public Mapping<T> rangeKey(String... rangeKey) {
-      this.rangeKey = rangeKey;
+      this.rangeKey = Arrays.asList(rangeKey);
       return this;
     }
 
     public Mapping<T> filterable(String... filterable) {
-      this.filterable = filterable;
+      this.filterable = Arrays.asList(filterable);
       return this;
     }
 
     public Mapping<T> hashKey(String... hashKey) {
-      this.hashKey = hashKey;
+      this.hashKey = Arrays.asList(hashKey);
       return this;
     }
-
   }
 
 }

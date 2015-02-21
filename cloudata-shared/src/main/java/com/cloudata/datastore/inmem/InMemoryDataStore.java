@@ -34,13 +34,13 @@ public class InMemoryDataStore implements DataStore {
       final Map<ByteString, T> items = Maps.newHashMap();
       final boolean requireFields;
 
-      public Index(Descriptor descriptorForType, String[] columns, boolean requireFields) {
+      public Index(Descriptor descriptorForType, List<String> columns, boolean requireFields) {
         this.requireFields = requireFields;
-        FieldDescriptor[] fields = new FieldDescriptor[columns.length];
-        for (int i = 0; i < columns.length; i++) {
-          fields[i] = descriptorForType.findFieldByName(columns[i]);
+        FieldDescriptor[] fields = new FieldDescriptor[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
+          fields[i] = descriptorForType.findFieldByName(columns.get(i));
           if (fields[i] == null) {
-            throw new IllegalArgumentException("Unknown field: " + columns[i]);
+            throw new IllegalArgumentException("Unknown field: " + columns.get(i));
           }
         }
         this.fields = fields;
@@ -64,11 +64,15 @@ public class InMemoryDataStore implements DataStore {
     }
 
     public Space(DataStore.Mapping<T> builder) {
-      throw new UnsupportedOperationException();
-      // this.instance = instance;
-      // this.descriptorForType = instance.getDescriptorForType();
-      //
-      // this.primaryKey = new Index(descriptorForType, primaryKey, true);
+       this.instance = builder.defaultInstance;
+       this.descriptorForType = instance.getDescriptorForType();
+      
+       List<String> primaryKeyFields = Lists.newArrayList();
+       primaryKeyFields.addAll(builder.hashKey);
+       primaryKeyFields.addAll(builder.rangeKey);
+       
+       
+       this.primaryKey = new Index(descriptorForType, primaryKeyFields, true);
     }
 
     public synchronized List<T> findAll(T matcher, List<Modifier> modifiers) {
@@ -223,14 +227,15 @@ public class InMemoryDataStore implements DataStore {
     }
 
     public void withIndex(String... columns) {
-      secondaryIndexes.add(new Index(descriptorForType, columns, false));
+      secondaryIndexes.add(new Index(descriptorForType, Arrays.asList(columns), false));
     }
 
   }
 
   final Map<Class<?>, Space<?>> spaces = Maps.newHashMap();
 
-  public <T extends Message> void addMapping(DataStore.Mapping<T> builder) {
+  @Override
+  public <T extends Message> void addMap(DataStore.Mapping<T> builder) {
     Space<T> space = new Space<T>(builder);
     spaces.put(space.instance.getClass(), space);
   }
@@ -298,10 +303,5 @@ public class InMemoryDataStore implements DataStore {
     space.upsert(data);
   }
 
-  @Override
-  public <T extends Message> void addMap(DataStore.Mapping<T> builder) {
-    throw new UnsupportedOperationException();
-
-  }
-
+ 
 }
