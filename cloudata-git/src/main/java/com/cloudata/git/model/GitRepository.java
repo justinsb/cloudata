@@ -1,8 +1,12 @@
 package com.cloudata.git.model;
 
+import com.cloudata.git.Escaping;
 import com.cloudata.git.GitModel.RepositoryData;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.justinsb.ddpserver.Jsonable;
 
-public class GitRepository {
+public class GitRepository implements Jsonable {
 
   final String objectPath;
   final RepositoryData data;
@@ -22,6 +26,16 @@ public class GitRepository {
 
   public RepositoryData getData() {
     return data;
+  }
+
+  @Override
+  public JsonElement toJsonElement() {
+    // XXX: Use protobuf -> JSON encoder
+    JsonObject json = new JsonObject();
+    json.addProperty("_id", Escaping.asBase64Url(data.getRepositoryId()));
+    json.addProperty("name", data.getName());
+    json.addProperty("owner", data.getOwner());
+    return json;
   }
 
 }

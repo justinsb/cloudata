@@ -1,6 +1,7 @@
 package com.cloudata.datastore.dynamodb;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,8 @@ import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryRequest;
 import com.amazonaws.services.dynamodbv2.model.QueryResult;
+import com.amazonaws.services.dynamodbv2.model.ScanRequest;
+import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemRequest;
 import com.amazonaws.services.dynamodbv2.model.UpdateItemResult;
 import com.cloudata.MetadataModel.TypeMetadata;
@@ -186,10 +189,74 @@ public class DynamodbDataStore implements DataStore {
     return null;
   }
 
+  private <T extends Message> List<T> scan(T matcher, List<Modifier> modifiers) throws DataStoreException {
+    DynamoClassMapping<T> tableInfo = getClassMapping(matcher);
+
+    log.debug("scan {} {}", matcher.getClass().getSimpleName(), matcher);
+
+    AttributeValue hashKey = tableInfo.buildHashKey(matcher);
+    if (hashKey != null) {
+      // We don't need to do a scan here!
+      throw new IllegalStateException();
+    }
+
+    Map<FieldDescriptor, Object> matcherFields = matcher.getAllFields();
+    // TODO: Remove PK fields
+
+    ScanRequest request = new ScanRequest();
+    request.setTableName(tableInfo.getDynamoTableName());
+
+    // TODO: Filter expressions!
+
+    // int limit = Integer.MAX_VALUE;
+
+    for (Modifier modifier : modifiers) {
+      if (modifier instanceof ComparatorModifier) {
+        throw new UnsupportedOperationException();
+      } else if (modifier instanceof LimitModifier) {
+        throw new UnsupportedOperationException();
+        // limitModifier = (LimitModifier) modifier;
+        // limit = limitModifier.getLimit();
+      } else {
+        throw new UnsupportedOperationException();
+      }
+    }
+
+    ScanResult response = dynamoDB.scan(request);
+
+    Map<String, AttributeValue> lastEvaluatedKey = response.getLastEvaluatedKey();
+    if (lastEvaluatedKey != null) {
+      throw new UnsupportedOperationException("Multiple page results not implemented");
+    }
+
+    List<T> items = Lists.newArrayList();
+    List<Map<String, AttributeValue>> responseItems = response.getItems();
+    for (Map<String, AttributeValue> itemData : responseItems) {
+      if (!tableInfo.matchesType(itemData)) {
+        continue;
+      }
+
+      T item = tableInfo.mapFromDb(itemData);
+      if (!DataStore.matches(matcherFields, matcher)) {
+        continue;
+      }
+      items.add(item);
+    }
+
+    return items;
+  }
+
   private <T extends Message> List<T> findMatching(T matcher, List<Modifier> modifiers) throws DataStoreException {
     DynamoClassMapping<T> tableInfo = getClassMapping(matcher);
 
     log.debug("findAll {} {}", matcher.getClass().getSimpleName(), matcher);
+
+    AttributeValue hashKey = tableInfo.buildHashKey(matcher);
+    if (hashKey == null) {
+      log.warn("No hash-query provided for query, full table scan required: {}", matcher);
+      // XXX: throw?
+      return scan(matcher, modifiers);
+    }
 
     Map<FieldDescriptor, Object> matcherFields = matcher.getAllFields();
     // TODO: Remove PK fields
@@ -200,7 +267,6 @@ public class DynamodbDataStore implements DataStore {
     request.setTableName(tableInfo.getDynamoTableName());
 
     Map<String, Condition> keyConditions = Maps.newHashMap();
-    AttributeValue hashKey = tableInfo.buildHashKey(matcher);
     keyConditions.put(FIELD_HASH_KEY, new Condition().withComparisonOperator(ComparisonOperator.EQ)
         .withAttributeValueList(hashKey));
 
@@ -458,6 +524,22 @@ public class DynamodbDataStore implements DataStore {
       this.hashKeyFields = ImmutableList.copyOf(hashKeyFields);
       this.rangeKeyFields = ImmutableList.copyOf(rangeKeyFields);
       this.filterable = ImmutableList.copyOf(filterable);
+    }
+
+    public boolean matchesType(Map<String, AttributeValue> fields) {
+      AttributeValue hashKey = fields.get(FIELD_HASH_KEY);
+      if (hashKey == null) {
+        throw new IllegalArgumentException();
+      }
+      ByteBuffer b = hashKey.getB();
+      if (b == null) {
+        throw new IllegalArgumentException();
+      }
+
+      ByteString bytes = ByteString.copyFrom(b);
+      ByteString prefix = ByteString.copyFrom(Ints.toByteArray(typeMetadata.getId()));
+
+      return bytes.startsWith(prefix);
     }
 
     public void addFilter(Map<String, ExpectedAttributeValue> expected, FieldDescriptor fieldDescriptor,

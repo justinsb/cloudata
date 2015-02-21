@@ -7,6 +7,7 @@ import org.eclipse.jgit.lib.Repository;
 import com.cloudata.auth.AuthenticatedUser;
 import com.cloudata.git.config.RepoConfig;
 import com.cloudata.git.services.GitRepositoryStore;
+import com.google.common.base.Strings;
 
 public abstract class GitUser implements AuthenticatedUser {
 
@@ -44,4 +45,5 @@ public abstract class GitUser implements AuthenticatedUser {
 
     };
   }
+  
 }

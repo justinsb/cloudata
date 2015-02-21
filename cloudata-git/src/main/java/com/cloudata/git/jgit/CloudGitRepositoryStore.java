@@ -17,6 +17,7 @@ package com.cloudata.git.jgit;
 import java.io.File;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.List;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudata.datastore.DataStore;
 import com.cloudata.datastore.DataStoreException;
+import com.cloudata.git.Escaping;
 import com.cloudata.git.GitModel.RefData;
 import com.cloudata.git.GitModel.RepositoryData;
 import com.cloudata.git.model.GitRepository;
@@ -35,6 +37,7 @@ import com.cloudata.git.model.GitUser;
 import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.objectstore.ObjectStore;
 import com.cloudata.objectstore.ObjectStorePath;
+import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
 import com.google.inject.Singleton;
@@ -107,9 +110,7 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
       return null;
     }
 
-    String objectPath = toObjectPath(repositoryData);
-
-    return new GitRepository(objectPath, repositoryData);
+    return buildGitRepository(repositoryData);
   }
 
   @Override
@@ -152,9 +153,7 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
     RepositoryData repositoryData = repositoryDataBuilder.build();
     dataStore.insert(repositoryData);
 
-    String objectPath = toObjectPath(repositoryData);
-
-    GitRepository gitRepository = new GitRepository(objectPath, repositoryData);
+    GitRepository gitRepository = buildGitRepository(repositoryData);
 
     // Create the repo
     openRepository(gitRepository, false);
@@ -162,13 +161,29 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
     return gitRepository;
   }
 
-  private String toObjectPath(RepositoryData repositoryData) {
-    return BaseEncoding.base64Url().encode(repositoryData.getRepositoryId().toByteArray());
+  private GitRepository buildGitRepository(RepositoryData repositoryData) {
+    String objectPath = Escaping.asBase64Url(repositoryData.getRepositoryId());
+
+    GitRepository gitRepository = new GitRepository(objectPath, repositoryData);
+    return gitRepository;
   }
 
+  
   public static void addMappings(DataStore dataStore) throws DataStoreException {
     dataStore.addMap(DataStore.Mapping.create(RepositoryData.getDefaultInstance()).hashKey("name"));
     dataStore.addMap(DataStore.Mapping.create(RefData.getDefaultInstance()).hashKey("repository_id").rangeKey("name")
         .filterable("object_id"));
+  }
+
+  @Override
+  public List<GitRepository> listRepos(GitUser user) throws IOException {
+    // XXX: This is not efficient with our current indexes
+    RepositoryData.Builder matcher = RepositoryData.newBuilder();
+    matcher.setOwner(user.getId());
+    List<GitRepository> repos = Lists.newArrayList();
+    for (RepositoryData repositoryData : dataStore.find(matcher.build())) {
+      repos.add(buildGitRepository(repositoryData));
+    }
+    return repos;
   }
 }
