@@ -42,6 +42,7 @@ import com.cloudata.git.model.GitUser;
 import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.objectstore.ObjectStore;
 import com.cloudata.objectstore.ObjectStorePath;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
@@ -159,13 +160,13 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
     repositoryDataBuilder.setName(name);
     repositoryDataBuilder.setOwnerId(user.getId());
     RepositoryData repositoryData = repositoryDataBuilder.build();
-    
-    // We must insert the ACL, because we user the ACL to list repos
+
     dataStore.insert(repositoryData);
-    
+
+    // We must insert the ACL, because we user the ACL to list repos
     UserAcl.Builder acl = UserAcl.newBuilder();
-    acl.setTargetId(repositoryData.getRepositoryId());
-    acl.setTargetType(TargetType.TARGET_TYPE_REPO);
+    acl.setTargetId(ByteString.copyFromUtf8(repositoryData.getName()));
+    acl.setTargetType(TargetType.TARGET_TYPE_REPO_NAME);
     acl.setUserId(user.getId());
     acl.setOwner(true);
     dataStore.insert(acl.build());
@@ -195,19 +196,19 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
 
   @Override
   public List<GitRepository> listRepos(GitUser gitUser) throws IOException {
-    // XXX: Joins - yuk
-    List<ByteString> repoIds = Lists.newArrayList();
+    // XXX: Manual joins - yuk
+    List<String> repoNames = Lists.newArrayList();
 
     CloudGitUser user = (CloudGitUser) gitUser;
     for (UserAcl acl : user.getRepoAcls()) {
-      repoIds.add(acl.getTargetId());
+      repoNames.add(acl.getTargetId().toStringUtf8());
     }
 
     List<GitRepository> repos = Lists.newArrayList();
     // XXX: Implement multi-get
-    for (ByteString repoId : repoIds) {
+    for (String repoName : repoNames) {
       RepositoryData.Builder matcher = RepositoryData.newBuilder();
-      matcher.setRepositoryId(repoId);
+      matcher.setName(repoName);
       RepositoryData repositoryData = dataStore.findOne(matcher.build());
       if (repositoryData == null) {
         throw new IllegalStateException();
@@ -243,7 +244,7 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
         List<UserAcl> userAcls = Lists.newArrayList();
         UserAcl.Builder matcher = UserAcl.newBuilder();
         matcher.setUserId(userId);
-        matcher.setTargetType(TargetType.TARGET_TYPE_REPO);
+        matcher.setTargetType(TargetType.TARGET_TYPE_REPO_NAME);
         try {
           for (UserAcl acl : dataStore.find(matcher.build())) {
             userAcls.add(acl);

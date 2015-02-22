@@ -168,7 +168,7 @@ public class DynamodbDataStore implements DataStore {
     // TODO: Modifier for eventually consistent read?
     request.setConsistentRead(true);
     request.setTableName(tableInfo.getDynamoTableName());
-    request.setKey(tableInfo.buildKey(matcher));
+    request.setKey(tableInfo.buildCompleteKey(matcher));
 
     for (Modifier modifier : modifiers) {
       throw new UnsupportedOperationException();
@@ -334,18 +334,7 @@ public class DynamodbDataStore implements DataStore {
     keyConditions.put(FIELD_HASH_KEY, new Condition().withComparisonOperator(ComparisonOperator.EQ)
         .withAttributeValueList(hashKey));
 
-    AttributeValue rangeKey = tableInfo.buildRangeKey(matcher);
-    if (rangeKey == null) {
-      if (!tableInfo.hasRangeKey()) {
-        // We supply the dummy range-key, just for potential speed
-        rangeKey = toAttributeValue(EMPTY_RANGE_KEY);
-      }
-    }
-
-    if (rangeKey != null) {
-      keyConditions.put(FIELD_RANGE_KEY, new Condition().withComparisonOperator(ComparisonOperator.EQ)
-          .withAttributeValueList(rangeKey));
-    }
+    tableInfo.addRangeKeyCondition(matcher, keyConditions);
 
     request.setKeyConditions(keyConditions);
 
@@ -422,7 +411,7 @@ public class DynamodbDataStore implements DataStore {
 
     UpdateItemRequest request = new UpdateItemRequest();
     request.setTableName(tableInfo.getDynamoTableName());
-    request.setKey(tableInfo.buildKey(item));
+    request.setKey(tableInfo.buildCompleteKey(item));
 
     Map<String, ExpectedAttributeValue> expected = Maps.newHashMap();
     expected.put(FIELD_HASH_KEY, new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.NOT_NULL));
@@ -470,7 +459,7 @@ public class DynamodbDataStore implements DataStore {
 
     DeleteItemRequest request = new DeleteItemRequest();
     request.setTableName(tableInfo.getDynamoTableName());
-    request.setKey(tableInfo.buildKey(item));
+    request.setKey(tableInfo.buildCompleteKey(item));
     request.setConditionExpression("attribute_exists(hash_key)");
     try {
       DeleteItemResult response = dynamoDB.deleteItem(request);
@@ -572,6 +561,14 @@ public class DynamodbDataStore implements DataStore {
         rangeKeyFields.add(attributeMapping);
       }
 
+      for (int i = 1; i < rangeKeyFields.size(); i++) {
+        AttributeMapping previous = rangeKeyFields.get(i - 1);
+        AttributeMapping current = rangeKeyFields.get(i);
+        if (previous.field.getIndex() >= current.field.getIndex()) {
+          // Currently we serialize in structure order (default protobuf), not field order
+          throw new UnsupportedOperationException();
+        }
+      }
       for (String fieldName : builder.filterable) {
         FieldDescriptor field = this.descriptor.findFieldByName(fieldName);
         if (field == null) {
@@ -655,12 +652,16 @@ public class DynamodbDataStore implements DataStore {
       AttributeValue hashKey = buildHashKey(item);
       data.put(FIELD_HASH_KEY, hashKey);
 
-      AttributeValue rangeKey = buildRangeKey(item);
-      if (rangeKey == null) {
-        // Range key is required; add dummy value
-        rangeKey = toAttributeValue(EMPTY_RANGE_KEY);
+      if (!hasRangeKey()) {
+        // Range key is required by dynamodb; add dummy value
+        data.put(FIELD_RANGE_KEY, toAttributeValue(EMPTY_RANGE_KEY));
+      } else {
+        RangeSpecifier rangeKey = buildRangeKey(item);
+        if (rangeKey == null || rangeKey.exact == null) {
+          throw new IllegalArgumentException();
+        }
+        data.put(FIELD_RANGE_KEY, rangeKey.exact);
       }
-      data.put(FIELD_RANGE_KEY, rangeKey);
 
       data.put(FIELD_BLOB, buildBlob(item));
 
@@ -724,9 +725,42 @@ public class DynamodbDataStore implements DataStore {
       }
     }
 
-    public AttributeValue buildRangeKey(T item) {
+    public static class RangeSpecifier {
+      AttributeValue exact;
+      AttributeValue prefix;
+    }
+
+    public void addRangeKeyCondition(T matcher, Map<String, Condition> keyConditions) {
+      AttributeValue rangeKey = null;
+      ComparisonOperator comparisonOperator = ComparisonOperator.EQ;
+
+      if (!hasRangeKey()) {
+        // We supply the dummy range-key, just for potential speed
+        rangeKey = toAttributeValue(EMPTY_RANGE_KEY);
+      } else {
+        RangeSpecifier spec = buildRangeKey(matcher);
+        if (spec != null) {
+          if (spec.exact != null) {
+            rangeKey = spec.exact;
+          } else if (spec.prefix != null) {
+            comparisonOperator = ComparisonOperator.BEGINS_WITH;
+            rangeKey = spec.prefix;
+          } else {
+            throw new IllegalStateException();
+          }
+        }
+      }
+
+      if (rangeKey != null) {
+        keyConditions.put(FIELD_RANGE_KEY, new Condition().withComparisonOperator(comparisonOperator)
+            .withAttributeValueList(rangeKey));
+      }
+    }
+
+    public RangeSpecifier buildRangeKey(T item) {
       try {
         boolean empty = true;
+        boolean complete = true;
 
         Output output = ByteString.newOutput();
 
@@ -736,6 +770,9 @@ public class DynamodbDataStore implements DataStore {
             Object value = item.getField(rangeKeyField.field);
             key.setField(rangeKeyField.field, value);
             empty = false;
+          } else {
+            complete = false;
+            break;
           }
         }
 
@@ -743,24 +780,32 @@ public class DynamodbDataStore implements DataStore {
           return null;
         } else {
           key.buildPartial().writeTo(output);
-
-          return toAttributeValue(output.toByteString());
+          RangeSpecifier specifier = new RangeSpecifier();
+          if (complete) {
+            specifier.exact = toAttributeValue(output.toByteString());
+          } else {
+            specifier.prefix = toAttributeValue(output.toByteString());
+          }
+          return specifier;
         }
       } catch (IOException e) {
         throw new IllegalArgumentException("Error building range key", e);
       }
     }
 
-    public Map<String, AttributeValue> buildKey(T item) {
+    public Map<String, AttributeValue> buildCompleteKey(T item) {
       Map<String, AttributeValue> key = Maps.newHashMap();
       key.put(FIELD_HASH_KEY, buildHashKey(item));
-      AttributeValue rangeKey = buildRangeKey(item);
-      if (rangeKey == null) {
-        if (hasRangeKey()) {
-          throw new IllegalStateException("Range key fields not specified");
-        }
+      AttributeValue rangeKey;
+      if (!hasRangeKey()) {
         // Range key is required; add dummy value
         rangeKey = toAttributeValue(EMPTY_RANGE_KEY);
+      } else {
+        RangeSpecifier rangeSpec = buildRangeKey(item);
+        if (rangeSpec == null || rangeSpec.exact == null) {
+          throw new IllegalStateException("Range key fields not specified");
+        }
+        rangeKey = rangeSpec.exact;
       }
       key.put(FIELD_RANGE_KEY, rangeKey);
       return key;

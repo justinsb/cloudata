@@ -8,13 +8,15 @@ message RefData {
 }
 
 message RepositoryData {
+	// pk
+	optional string name = 3;
+
 	optional bytes repository_id = 1;
 	optional bytes owner_id = 2;
-	optional string name = 3;
 }
 
 enum TargetType {
-	TARGET_TYPE_REPO = 1;
+	TARGET_TYPE_REPO_NAME = 1;
 }
 
 message UserAcl {

@@ -13,6 +13,7 @@ import com.cloudata.git.Escaping;
 import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 import com.cloudata.git.services.GitRepositoryStore;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -53,14 +54,15 @@ public class GitDdpDataSource extends SimpleDdpDataSource {
     @Override
     public DdpSubscription subscribe(DdpPublishContext context, JsonArray params) throws IOException {
       GitUser user = getGitUser(context);
-      if (user == null) {
+      List<GitRepository> repos;
+      if (user != null) {
+        repos = store.listRepos(user);
+      } else {
         // XXX: Public repos?
-        throw new SecurityException();
+        repos = Lists.newArrayList();
       }
-      List<GitRepository> repos = store.listRepos(user);
 
       SimpleDdpSubscription subscription = new SimpleDdpSubscription(context) {
-
         @Override
         protected Iterable<Entry<String, Jsonable>> getInitialItems() {
           Map<String, Jsonable> items = Maps.newHashMap();
@@ -78,18 +80,13 @@ public class GitDdpDataSource extends SimpleDdpDataSource {
   }
 
   public GitUser getGitUser(DdpPublishContext context) {
-    AuthenticatedUser authenticatedUser = new AuthenticatedUser() {
+    DdpSession session = context.getSession();
 
-      @Override
-      public String getName() {
-        return "justinsb";
-      }
+    AuthenticatedUser authenticatedUser = session.getState(AuthenticatedUser.class);
+    if (authenticatedUser == null) {
+      return null;
+    }
 
-      @Override
-      public ByteString getUserId() {
-        return ByteString.copyFromUtf8("justinsb");
-      }
-    };
     return store.toGitUser(authenticatedUser);
   }
 }

@@ -1,10 +1,8 @@
-DataConnection = DDP.connect('http://127.0.0.1:8888/');
-
-Repos = new Meteor.Collection("repos", DataConnection);
+Repos = new Meteor.Collection("repos");
 
 
 if (Meteor.isClient) {
-DataConnection.subscribe('repos', function() {
+Meteor.subscribe('repos', function() {
   console.log('Subscribed to repos');
 });
 
