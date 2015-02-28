@@ -9,3 +9,4 @@ autopublish
 insecure
 accounts-ui
 accounts-password
+iron:router

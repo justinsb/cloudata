@@ -2,13 +2,20 @@ Repos = new Meteor.Collection("repos");
 
 
 if (Meteor.isClient) {
-Meteor.subscribe('repos', function() {
-  console.log('Subscribed to repos');
-});
+	Meteor.subscribe('repos', function() {
+	  console.log('Subscribed to repos');
+	});
 
-	Template.body.helpers({
+	Template.HomePage.helpers({
 	  repos: function () {
-		  return Repos.find();
+		  return Repos.find({}, { sort: [ 'name' ] });
+	  },
+	});
+	
+	Template.repo.helpers({
+	  url: function () {
+	    var repo = this;
+	    return encodeURI(repo.name);
 	  }
 	});
 	

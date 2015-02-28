@@ -1,13 +1,22 @@
 <head>
-  <title>gitapp</title>
+  <title>GitHob</title>
 </head>
 
-<body>
-  <h1>Welcome to Meteor!</h1>
+<template name="HomePage">
+	{{> loginButtons}}
+	
+	{{#each repos}}
+	  {{> repo }}
+	{{/each}}
+</template>
 
-{{> loginButtons}}
 
-{{#each repos}}
-  <p>{{name}}</p>
-{{/each}}
-</body>
+<template name="repo">
+	<p><a href="/repo/{{url}}">{{name}}</a></p>
+</template>
+
+
+<template name="RepoPage">
+	<h1>{{name}}</h1>
+</template>
+
