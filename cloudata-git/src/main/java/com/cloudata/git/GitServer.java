@@ -2,6 +2,7 @@ package com.cloudata.git;
 
 import java.io.File;
 import java.util.EnumSet;
+
 import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Server;
@@ -23,14 +24,17 @@ import com.justinsb.ddpserver.DdpEndpoints;
 public class GitServer {
   private static final Logger log = LoggerFactory.getLogger(GitServer.class);
 
+  private static final int DEFAULT_PORT = 8080;
+
   final File baseDir;
-  final int httpPort;
 
   private Server jetty;
 
-  public GitServer(File baseDir, int httpPort) {
+  final Configuration configuration;
+
+  public GitServer(Configuration configuration, File baseDir) {
+    this.configuration = configuration;
     this.baseDir = baseDir;
-    this.httpPort = httpPort;
   }
 
   public synchronized void start() throws Exception {
@@ -38,14 +42,9 @@ public class GitServer {
       throw new IllegalStateException();
     }
 
-    Configuration configuration = Configuration.build();
+    Injector injector = Guice.createInjector(new GitModule(configuration)); // , new WebModule());
 
-    Injector injector = Guice.createInjector(new GitModule(configuration)); //, new WebModule());
-
-    // ResourceConfig rc = new PackagesResourceConfig(WebModule.class.getPackage().getName());
-    // IoCComponentProviderFactory ioc = new GuiceComponentProviderFactory(rc, injector);
-    //
-    // this.selector = GrizzlyServerFactory.create(baseUri, rc, ioc);
+    int httpPort = configuration.get("http.port", DEFAULT_PORT);
 
     Server server = new Server();
 
@@ -61,7 +60,7 @@ public class GitServer {
 
     GitDdpDataSource ddpDataSource = injector.getInstance(GitDdpDataSource.class);
     ddpDataSource.init();
-    
+
     DdpEndpoints.register(context, ddpDataSource);
 
     // FilterHolder filterHolder = new FilterHolder(injector.getInstance(GuiceFilter.class));
@@ -79,15 +78,15 @@ public class GitServer {
 
   }
 
-  public String getHttpUrl() {
-    return "http://localhost:" + httpPort + "/";
-  }
+  // public String getHttpUrl() {
+  // return "http://localhost:" + httpPort + "/";
+  // }
 
   public static void main(String... args) throws Exception {
+    Configuration configuration = Configuration.build();
     File baseDir = new File("gitdata");
-    int httpPort = 8888;
 
-    final GitServer server = new GitServer(baseDir, httpPort);
+    final GitServer server = new GitServer(configuration, baseDir);
     server.start();
 
     Runtime.getRuntime().addShutdownHook(new Thread() {

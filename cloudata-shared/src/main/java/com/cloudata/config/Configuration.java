@@ -26,6 +26,14 @@ public abstract class Configuration {
     return v;
   }
 
+  public int get(String key, int defaultValue) {
+    String v = get(key, "");
+    if (Strings.isNullOrEmpty(v)) {
+      return defaultValue;
+    }
+    return Integer.parseInt(v);
+  }
+
   protected abstract String find(String key);
 
   public static Configuration build() {
@@ -71,4 +79,5 @@ public abstract class Configuration {
     }
     return awsCredentials;
   }
+
 }
