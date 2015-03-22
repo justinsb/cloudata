@@ -17,6 +17,12 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.justinsb</groupId>
+			<artifactId>ddpserver</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 			<version>2.0.1</version>
