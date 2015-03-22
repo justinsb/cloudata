@@ -1,10 +1,20 @@
 Repos = new Meteor.Collection("repos");
+RevLogs = new Meteor.Collection("revlogs");
+Diffs = new Meteor.Collection("diffs");
+Files = new Meteor.Collection("files");
+FileContents = new Meteor.Collection("filecontents");
 
 
 if (Meteor.isClient) {
 	Meteor.subscribe('repos', function() {
 	  console.log('Subscribed to repos');
 	});
+	
+	Template.registerHelper("highlight", function (src) {
+		var result = hljs.highlightAuto(src, ['java']);
+		return result.value;	
+	});
+	
 
 	Template.HomePage.helpers({
 	  repos: function () {

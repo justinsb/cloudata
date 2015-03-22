@@ -83,11 +83,12 @@ public class DdpMethodLogin implements DdpMethod {
   }
 
   private DdpMethodResult authenticated(DdpSession session, AuthenticatedUser user, AuthenticationToken token)
-      throws IOException {
+      throws Exception {
 
     session.setState(AuthenticationToken.class, token);
     session.setState(AuthenticatedUser.class, user);
 
+    
     JsonObject result = new JsonObject();
     String userId = Escaping.asBase64Url(user.getUserId());
     result.addProperty("id", userId);
@@ -109,6 +110,8 @@ public class DdpMethodLogin implements DdpMethod {
         }
       }
     }
+
+    session.recalculateSubscriptions();
 
     return DdpMethodResult.complete(result);
 

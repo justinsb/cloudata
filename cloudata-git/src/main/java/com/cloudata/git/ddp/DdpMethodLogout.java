@@ -30,6 +30,8 @@ public class DdpMethodLogout implements DdpMethod {
     session.setState(AuthenticationToken.class, null);
     session.setState(AuthenticatedUser.class, null);
 
+    session.recalculateSubscriptions();
+
     return DdpMethodResult.complete(null);
   }
 }

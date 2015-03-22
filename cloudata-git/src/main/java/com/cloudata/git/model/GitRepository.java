@@ -32,10 +32,14 @@ public class GitRepository implements Jsonable {
   public JsonElement toJsonElement() {
     // XXX: Use protobuf -> JSON encoder
     JsonObject json = new JsonObject();
-    json.addProperty("_id", Escaping.asBase64Url(data.getRepositoryId()));
+    // json.addProperty("_id", Escaping.asBase64Url(data.getRepositoryId()));
     json.addProperty("name", data.getName());
-//    json.addProperty("owner", data.getOwner());
+    // json.addProperty("owner", data.getOwner());
     return json;
+  }
+
+  public String getName() {
+    return data.getName();
   }
 
 }

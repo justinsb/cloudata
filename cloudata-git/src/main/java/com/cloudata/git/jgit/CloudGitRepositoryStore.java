@@ -43,6 +43,8 @@ import com.cloudata.git.services.GitRepositoryStore;
 import com.cloudata.objectstore.ObjectStore;
 import com.cloudata.objectstore.ObjectStorePath;
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.Files;
@@ -108,6 +110,7 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
   }
 
   GitRepository loadRepository(String repoName) throws IOException {
+    Preconditions.checkArgument(!Strings.isNullOrEmpty(repoName));
     RepositoryData.Builder matcher = RepositoryData.newBuilder();
     matcher.setName(repoName);
 
@@ -126,7 +129,9 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
     // return null;
     // }
 
-    return loadRepository(repoName);
+    GitRepository repo = loadRepository(repoName);
+
+    return repo;
   }
 
   @Override
@@ -277,4 +282,5 @@ public class CloudGitRepositoryStore implements GitRepositoryStore {
       return false;
     }
   }
+
 }

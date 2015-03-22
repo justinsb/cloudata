@@ -1,5 +1,8 @@
 <head>
   <title>GitHob</title>
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/default.min.css">
+	<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
 </head>
 
 <template name="HomePage">
@@ -17,6 +20,61 @@
 
 
 <template name="RepoPage">
-	<h1>{{name}}</h1>
+	<h1>{{repo.name}}</h1>
+	
+	{{#each revlogs}}
+	  {{> revlog }}
+	{{/each}}
+	
+	{{#each files}}
+	  {{> repoFile }}
+	{{/each}}
 </template>
+
+
+<template name="revlog">
+	<p>{{shortMessage}}</p>
+	<i>{{fullMessage}}</i>
+	<a href="/repo/{{../name}}/commit/{{sha}}">{{sha}}</a>
+</template>
+
+
+<template name="repoFile">
+<div>
+	<a href="/repo/{{../repo.name}}/tree/master/{{path}}">{{path}}</a>
+	</div>
+</template>
+
+
+<template name="DiffPage">
+	<h1>{{repo.name}}</h1>
+	
+	{{#each diffs}}
+	<div>
+	  {{ oldPath }} => {{ newPath }}
+	  
+	  <div>
+	  <pre>
+	  <code>
+	  {{{ highlight diff }}}
+	  </code>
+	  </pre>
+	  </div>
+	</div>
+	{{/each}}
+</template>
+
+
+<template name="FileContentsPage">
+	<h1>{{repo.name}}</h1>
+	
+	  <div>
+	  <pre>
+	  <code>
+	  {{{ highlight filecontent.contents }}}
+	  </code>
+	  </pre>
+	  </div>
+</template>
+
 

@@ -10,7 +10,6 @@ import com.cloudata.git.model.GitRepository;
 import com.cloudata.git.model.GitUser;
 
 public interface GitRepositoryStore {
-  GitRepository findRepo(String repoName) throws IOException;
 
   List<GitRepository> listRepos(GitUser user) throws IOException;
 
@@ -19,5 +18,7 @@ public interface GitRepositoryStore {
   GitRepository createRepo(GitUser owner, String path) throws IOException;
 
   GitUser toGitUser(AuthenticatedUser authenticatedUser);
+
+  GitRepository findRepo(String repoName) throws IOException;
 
 }

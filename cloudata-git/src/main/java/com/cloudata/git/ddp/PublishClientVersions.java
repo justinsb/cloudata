@@ -14,7 +14,7 @@ import com.justinsb.ddpserver.triggeredpoll.SimpleDdpSubscription;
 public class PublishClientVersions implements DdpPublish {
 
   @Override
-  public DdpSubscription subscribe(DdpPublishContext context, JsonArray params) throws Exception {
+  public DdpSubscription subscribe(DdpPublishContext context, String name, JsonArray params) throws Exception {
     SimpleDdpSubscription subscription = new SimpleDdpSubscription(context) {
 
       @Override
