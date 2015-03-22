@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.justinsb.ddpserver.DdpSession;
 import com.justinsb.ddpserver.Jsonable;
 import com.justinsb.ddpserver.Storage;
@@ -32,11 +31,13 @@ public class DdpStorage implements Storage {
     }
   }
 
+  @Override
   public Set<Entry<String, Jsonable>> query(String collectionName) {
     DdpCollection collection = getCollection(collectionName);
     return collection.getItems();
   }
 
+  @Override
   public JsonElement executeCollectionMethod(DdpSession session, String methodId, String collectionName,
       String collectionMethod, JsonArray params) {
     JsonElement result;

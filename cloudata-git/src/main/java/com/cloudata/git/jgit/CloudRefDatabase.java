@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.datastore.DataStore;
-import com.cloudata.datastore.DataStoreException;
 import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.UniqueIndexViolation;
 import com.cloudata.datastore.WhereModifier;

@@ -1,6 +1,5 @@
 package com.cloudata.git.model;
 
-import com.cloudata.auth.AuthenticatedUser;
 import com.google.protobuf.ByteString;
 
 public abstract class GitUser {

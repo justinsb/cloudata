@@ -1,6 +1,5 @@
 package com.cloudata.git.model;
 
-import com.cloudata.git.Escaping;
 import com.cloudata.git.GitModel.RepositoryData;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

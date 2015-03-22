@@ -2,9 +2,6 @@ package com.cloudata.git;
 
 import java.io.File;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Server;
@@ -19,16 +16,9 @@ import com.cloudata.auth.ProjectBasicAuthFilter;
 import com.cloudata.config.Configuration;
 import com.cloudata.git.ddp.GitDdpDataSource;
 import com.google.gerrit.httpd.GitOverHttpServlet;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.servlet.GuiceFilter;
-import com.justinsb.ddpserver.DdpDataSource;
 import com.justinsb.ddpserver.DdpEndpoints;
-import com.justinsb.ddpserver.DdpMergeBox;
-import com.justinsb.ddpserver.DdpSession;
-import com.justinsb.ddpserver.DdpSubscription;
 
 public class GitServer {
   private static final Logger log = LoggerFactory.getLogger(GitServer.class);

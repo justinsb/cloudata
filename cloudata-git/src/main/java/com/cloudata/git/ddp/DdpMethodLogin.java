@@ -1,7 +1,5 @@
 package com.cloudata.git.ddp;
 
-import java.io.IOException;
-
 import javax.inject.Inject;
 
 import com.cloudata.Randoms;
@@ -20,7 +18,6 @@ import com.justinsb.ddpserver.DdpMethodContext;
 import com.justinsb.ddpserver.DdpMethodResult;
 import com.justinsb.ddpserver.DdpPublishContext;
 import com.justinsb.ddpserver.DdpSession;
-import com.justinsb.ddpserver.DdpSubscription;
 import com.justinsb.ddpserver.MeteorError;
 
 public class DdpMethodLogin implements DdpMethod {

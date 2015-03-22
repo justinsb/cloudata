@@ -3,7 +3,6 @@ package com.cloudata.git;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import com.cloudata.git.GitModel.RepositoryData;
 import com.google.common.io.BaseEncoding;
 import com.google.protobuf.ByteString;
 

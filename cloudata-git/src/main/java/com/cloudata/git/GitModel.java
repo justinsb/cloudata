@@ -25,6 +25,7 @@ public final class GitModel {
     public static final int TARGET_TYPE_REPO_NAME_VALUE = 1;
 
 
+    @Override
     public final int getNumber() { return value; }
 
     public static TargetType valueOf(int value) {
@@ -41,15 +42,18 @@ public final class GitModel {
     private static com.google.protobuf.Internal.EnumLiteMap<TargetType>
         internalValueMap =
           new com.google.protobuf.Internal.EnumLiteMap<TargetType>() {
+            @Override
             public TargetType findValueByNumber(int number) {
               return TargetType.valueOf(number);
             }
           };
 
+    @Override
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
       return getDescriptor().getValues().get(index);
     }
+    @Override
     public final com.google.protobuf.Descriptors.EnumDescriptor
         getDescriptorForType() {
       return getDescriptor();
@@ -152,6 +156,7 @@ public final class GitModel {
       return defaultInstance;
     }
 
+    @Override
     public RefData getDefaultInstanceForType() {
       return defaultInstance;
     }
@@ -222,6 +227,7 @@ public final class GitModel {
       return com.cloudata.git.GitModel.internal_static_RefData_descriptor;
     }
 
+    @Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.cloudata.git.GitModel.internal_static_RefData_fieldAccessorTable
@@ -231,6 +237,7 @@ public final class GitModel {
 
     public static com.google.protobuf.Parser<RefData> PARSER =
         new com.google.protobuf.AbstractParser<RefData>() {
+      @Override
       public RefData parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -251,12 +258,14 @@ public final class GitModel {
     /**
      * <code>optional bytes repository_id = 1;</code>
      */
+    @Override
     public boolean hasRepositoryId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>optional bytes repository_id = 1;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getRepositoryId() {
       return repositoryId_;
     }
@@ -267,12 +276,14 @@ public final class GitModel {
     /**
      * <code>optional string name = 2;</code>
      */
+    @Override
     public boolean hasName() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional string name = 2;</code>
      */
+    @Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -290,6 +301,7 @@ public final class GitModel {
     /**
      * <code>optional string name = 2;</code>
      */
+    @Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -310,12 +322,14 @@ public final class GitModel {
     /**
      * <code>optional string target_name = 3;</code>
      */
+    @Override
     public boolean hasTargetName() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional string target_name = 3;</code>
      */
+    @Override
     public java.lang.String getTargetName() {
       java.lang.Object ref = targetName_;
       if (ref instanceof java.lang.String) {
@@ -333,6 +347,7 @@ public final class GitModel {
     /**
      * <code>optional string target_name = 3;</code>
      */
+    @Override
     public com.google.protobuf.ByteString
         getTargetNameBytes() {
       java.lang.Object ref = targetName_;
@@ -353,12 +368,14 @@ public final class GitModel {
     /**
      * <code>optional bytes object_id = 4;</code>
      */
+    @Override
     public boolean hasObjectId() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional bytes object_id = 4;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getObjectId() {
       return objectId_;
     }
@@ -370,6 +387,7 @@ public final class GitModel {
       objectId_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
+    @Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -378,6 +396,7 @@ public final class GitModel {
       return true;
     }
 
+    @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -397,6 +416,7 @@ public final class GitModel {
     }
 
     private int memoizedSerializedSize = -1;
+    @Override
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
@@ -484,10 +504,12 @@ public final class GitModel {
     }
 
     public static Builder newBuilder() { return Builder.create(); }
+    @Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.cloudata.git.GitModel.RefData prototype) {
       return newBuilder().mergeFrom(prototype);
     }
+    @Override
     public Builder toBuilder() { return newBuilder(this); }
 
     @java.lang.Override
@@ -507,6 +529,7 @@ public final class GitModel {
         return com.cloudata.git.GitModel.internal_static_RefData_descriptor;
       }
 
+      @Override
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.cloudata.git.GitModel.internal_static_RefData_fieldAccessorTable
@@ -532,6 +555,7 @@ public final class GitModel {
         return new Builder();
       }
 
+      @Override
       public Builder clear() {
         super.clear();
         repositoryId_ = com.google.protobuf.ByteString.EMPTY;
@@ -545,19 +569,23 @@ public final class GitModel {
         return this;
       }
 
+      @Override
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
 
+      @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.cloudata.git.GitModel.internal_static_RefData_descriptor;
       }
 
+      @Override
       public com.cloudata.git.GitModel.RefData getDefaultInstanceForType() {
         return com.cloudata.git.GitModel.RefData.getDefaultInstance();
       }
 
+      @Override
       public com.cloudata.git.GitModel.RefData build() {
         com.cloudata.git.GitModel.RefData result = buildPartial();
         if (!result.isInitialized()) {
@@ -566,6 +594,7 @@ public final class GitModel {
         return result;
       }
 
+      @Override
       public com.cloudata.git.GitModel.RefData buildPartial() {
         com.cloudata.git.GitModel.RefData result = new com.cloudata.git.GitModel.RefData(this);
         int from_bitField0_ = bitField0_;
@@ -591,6 +620,7 @@ public final class GitModel {
         return result;
       }
 
+      @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.cloudata.git.GitModel.RefData) {
           return mergeFrom((com.cloudata.git.GitModel.RefData)other);
@@ -622,10 +652,12 @@ public final class GitModel {
         return this;
       }
 
+      @Override
       public final boolean isInitialized() {
         return true;
       }
 
+      @Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -650,12 +682,14 @@ public final class GitModel {
       /**
        * <code>optional bytes repository_id = 1;</code>
        */
+      @Override
       public boolean hasRepositoryId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>optional bytes repository_id = 1;</code>
        */
+      @Override
       public com.google.protobuf.ByteString getRepositoryId() {
         return repositoryId_;
       }
@@ -686,12 +720,14 @@ public final class GitModel {
       /**
        * <code>optional string name = 2;</code>
        */
+      @Override
       public boolean hasName() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional string name = 2;</code>
        */
+      @Override
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
@@ -706,6 +742,7 @@ public final class GitModel {
       /**
        * <code>optional string name = 2;</code>
        */
+      @Override
       public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
@@ -760,12 +797,14 @@ public final class GitModel {
       /**
        * <code>optional string target_name = 3;</code>
        */
+      @Override
       public boolean hasTargetName() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional string target_name = 3;</code>
        */
+      @Override
       public java.lang.String getTargetName() {
         java.lang.Object ref = targetName_;
         if (!(ref instanceof java.lang.String)) {
@@ -780,6 +819,7 @@ public final class GitModel {
       /**
        * <code>optional string target_name = 3;</code>
        */
+      @Override
       public com.google.protobuf.ByteString
           getTargetNameBytes() {
         java.lang.Object ref = targetName_;
@@ -834,12 +874,14 @@ public final class GitModel {
       /**
        * <code>optional bytes object_id = 4;</code>
        */
+      @Override
       public boolean hasObjectId() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional bytes object_id = 4;</code>
        */
+      @Override
       public com.google.protobuf.ByteString getObjectId() {
         return objectId_;
       }
@@ -944,6 +986,7 @@ public final class GitModel {
       return defaultInstance;
     }
 
+    @Override
     public RepositoryData getDefaultInstanceForType() {
       return defaultInstance;
     }
@@ -1009,6 +1052,7 @@ public final class GitModel {
       return com.cloudata.git.GitModel.internal_static_RepositoryData_descriptor;
     }
 
+    @Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.cloudata.git.GitModel.internal_static_RepositoryData_fieldAccessorTable
@@ -1018,6 +1062,7 @@ public final class GitModel {
 
     public static com.google.protobuf.Parser<RepositoryData> PARSER =
         new com.google.protobuf.AbstractParser<RepositoryData>() {
+      @Override
       public RepositoryData parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1042,6 +1087,7 @@ public final class GitModel {
      * pk
      * </pre>
      */
+    @Override
     public boolean hasName() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
@@ -1052,6 +1098,7 @@ public final class GitModel {
      * pk
      * </pre>
      */
+    @Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -1073,6 +1120,7 @@ public final class GitModel {
      * pk
      * </pre>
      */
+    @Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -1093,12 +1141,14 @@ public final class GitModel {
     /**
      * <code>optional bytes repository_id = 1;</code>
      */
+    @Override
     public boolean hasRepositoryId() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional bytes repository_id = 1;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getRepositoryId() {
       return repositoryId_;
     }
@@ -1109,12 +1159,14 @@ public final class GitModel {
     /**
      * <code>optional bytes owner_id = 2;</code>
      */
+    @Override
     public boolean hasOwnerId() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional bytes owner_id = 2;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getOwnerId() {
       return ownerId_;
     }
@@ -1125,6 +1177,7 @@ public final class GitModel {
       ownerId_ = com.google.protobuf.ByteString.EMPTY;
     }
     private byte memoizedIsInitialized = -1;
+    @Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -1133,6 +1186,7 @@ public final class GitModel {
       return true;
     }
 
+    @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -1149,6 +1203,7 @@ public final class GitModel {
     }
 
     private int memoizedSerializedSize = -1;
+    @Override
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
@@ -1232,10 +1287,12 @@ public final class GitModel {
     }
 
     public static Builder newBuilder() { return Builder.create(); }
+    @Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.cloudata.git.GitModel.RepositoryData prototype) {
       return newBuilder().mergeFrom(prototype);
     }
+    @Override
     public Builder toBuilder() { return newBuilder(this); }
 
     @java.lang.Override
@@ -1255,6 +1312,7 @@ public final class GitModel {
         return com.cloudata.git.GitModel.internal_static_RepositoryData_descriptor;
       }
 
+      @Override
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.cloudata.git.GitModel.internal_static_RepositoryData_fieldAccessorTable
@@ -1280,6 +1338,7 @@ public final class GitModel {
         return new Builder();
       }
 
+      @Override
       public Builder clear() {
         super.clear();
         name_ = "";
@@ -1291,19 +1350,23 @@ public final class GitModel {
         return this;
       }
 
+      @Override
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
 
+      @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.cloudata.git.GitModel.internal_static_RepositoryData_descriptor;
       }
 
+      @Override
       public com.cloudata.git.GitModel.RepositoryData getDefaultInstanceForType() {
         return com.cloudata.git.GitModel.RepositoryData.getDefaultInstance();
       }
 
+      @Override
       public com.cloudata.git.GitModel.RepositoryData build() {
         com.cloudata.git.GitModel.RepositoryData result = buildPartial();
         if (!result.isInitialized()) {
@@ -1312,6 +1375,7 @@ public final class GitModel {
         return result;
       }
 
+      @Override
       public com.cloudata.git.GitModel.RepositoryData buildPartial() {
         com.cloudata.git.GitModel.RepositoryData result = new com.cloudata.git.GitModel.RepositoryData(this);
         int from_bitField0_ = bitField0_;
@@ -1333,6 +1397,7 @@ public final class GitModel {
         return result;
       }
 
+      @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.cloudata.git.GitModel.RepositoryData) {
           return mergeFrom((com.cloudata.git.GitModel.RepositoryData)other);
@@ -1359,10 +1424,12 @@ public final class GitModel {
         return this;
       }
 
+      @Override
       public final boolean isInitialized() {
         return true;
       }
 
+      @Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1391,6 +1458,7 @@ public final class GitModel {
        * pk
        * </pre>
        */
+      @Override
       public boolean hasName() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
@@ -1401,6 +1469,7 @@ public final class GitModel {
        * pk
        * </pre>
        */
+      @Override
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (!(ref instanceof java.lang.String)) {
@@ -1419,6 +1488,7 @@ public final class GitModel {
        * pk
        * </pre>
        */
+      @Override
       public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
@@ -1485,12 +1555,14 @@ public final class GitModel {
       /**
        * <code>optional bytes repository_id = 1;</code>
        */
+      @Override
       public boolean hasRepositoryId() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional bytes repository_id = 1;</code>
        */
+      @Override
       public com.google.protobuf.ByteString getRepositoryId() {
         return repositoryId_;
       }
@@ -1521,12 +1593,14 @@ public final class GitModel {
       /**
        * <code>optional bytes owner_id = 2;</code>
        */
+      @Override
       public boolean hasOwnerId() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional bytes owner_id = 2;</code>
        */
+      @Override
       public com.google.protobuf.ByteString getOwnerId() {
         return ownerId_;
       }
@@ -1624,6 +1698,7 @@ public final class GitModel {
       return defaultInstance;
     }
 
+    @Override
     public UserAcl getDefaultInstanceForType() {
       return defaultInstance;
     }
@@ -1700,6 +1775,7 @@ public final class GitModel {
       return com.cloudata.git.GitModel.internal_static_UserAcl_descriptor;
     }
 
+    @Override
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
       return com.cloudata.git.GitModel.internal_static_UserAcl_fieldAccessorTable
@@ -1709,6 +1785,7 @@ public final class GitModel {
 
     public static com.google.protobuf.Parser<UserAcl> PARSER =
         new com.google.protobuf.AbstractParser<UserAcl>() {
+      @Override
       public UserAcl parsePartialFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -1729,12 +1806,14 @@ public final class GitModel {
     /**
      * <code>optional bytes user_id = 1;</code>
      */
+    @Override
     public boolean hasUserId() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
      * <code>optional bytes user_id = 1;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getUserId() {
       return userId_;
     }
@@ -1745,12 +1824,14 @@ public final class GitModel {
     /**
      * <code>optional .TargetType target_type = 2;</code>
      */
+    @Override
     public boolean hasTargetType() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
      * <code>optional .TargetType target_type = 2;</code>
      */
+    @Override
     public com.cloudata.git.GitModel.TargetType getTargetType() {
       return targetType_;
     }
@@ -1761,12 +1842,14 @@ public final class GitModel {
     /**
      * <code>optional bytes target_id = 3;</code>
      */
+    @Override
     public boolean hasTargetId() {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
      * <code>optional bytes target_id = 3;</code>
      */
+    @Override
     public com.google.protobuf.ByteString getTargetId() {
       return targetId_;
     }
@@ -1777,12 +1860,14 @@ public final class GitModel {
     /**
      * <code>optional bool owner = 4;</code>
      */
+    @Override
     public boolean hasOwner() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional bool owner = 4;</code>
      */
+    @Override
     public boolean getOwner() {
       return owner_;
     }
@@ -1794,6 +1879,7 @@ public final class GitModel {
       owner_ = false;
     }
     private byte memoizedIsInitialized = -1;
+    @Override
     public final boolean isInitialized() {
       byte isInitialized = memoizedIsInitialized;
       if (isInitialized != -1) return isInitialized == 1;
@@ -1802,6 +1888,7 @@ public final class GitModel {
       return true;
     }
 
+    @Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
@@ -1821,6 +1908,7 @@ public final class GitModel {
     }
 
     private int memoizedSerializedSize = -1;
+    @Override
     public int getSerializedSize() {
       int size = memoizedSerializedSize;
       if (size != -1) return size;
@@ -1908,10 +1996,12 @@ public final class GitModel {
     }
 
     public static Builder newBuilder() { return Builder.create(); }
+    @Override
     public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.cloudata.git.GitModel.UserAcl prototype) {
       return newBuilder().mergeFrom(prototype);
     }
+    @Override
     public Builder toBuilder() { return newBuilder(this); }
 
     @java.lang.Override
@@ -1931,6 +2021,7 @@ public final class GitModel {
         return com.cloudata.git.GitModel.internal_static_UserAcl_descriptor;
       }
 
+      @Override
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
         return com.cloudata.git.GitModel.internal_static_UserAcl_fieldAccessorTable
@@ -1956,6 +2047,7 @@ public final class GitModel {
         return new Builder();
       }
 
+      @Override
       public Builder clear() {
         super.clear();
         userId_ = com.google.protobuf.ByteString.EMPTY;
@@ -1969,19 +2061,23 @@ public final class GitModel {
         return this;
       }
 
+      @Override
       public Builder clone() {
         return create().mergeFrom(buildPartial());
       }
 
+      @Override
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
         return com.cloudata.git.GitModel.internal_static_UserAcl_descriptor;
       }
 
+      @Override
       public com.cloudata.git.GitModel.UserAcl getDefaultInstanceForType() {
         return com.cloudata.git.GitModel.UserAcl.getDefaultInstance();
       }
 
+      @Override
       public com.cloudata.git.GitModel.UserAcl build() {
         com.cloudata.git.GitModel.UserAcl result = buildPartial();
         if (!result.isInitialized()) {
@@ -1990,6 +2086,7 @@ public final class GitModel {
         return result;
       }
 
+      @Override
       public com.cloudata.git.GitModel.UserAcl buildPartial() {
         com.cloudata.git.GitModel.UserAcl result = new com.cloudata.git.GitModel.UserAcl(this);
         int from_bitField0_ = bitField0_;
@@ -2015,6 +2112,7 @@ public final class GitModel {
         return result;
       }
 
+      @Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
         if (other instanceof com.cloudata.git.GitModel.UserAcl) {
           return mergeFrom((com.cloudata.git.GitModel.UserAcl)other);
@@ -2042,10 +2140,12 @@ public final class GitModel {
         return this;
       }
 
+      @Override
       public final boolean isInitialized() {
         return true;
       }
 
+      @Override
       public Builder mergeFrom(
           com.google.protobuf.CodedInputStream input,
           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
@@ -2070,12 +2170,14 @@ public final class GitModel {
       /**
        * <code>optional bytes user_id = 1;</code>
        */
+      @Override
       public boolean hasUserId() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
        * <code>optional bytes user_id = 1;</code>
        */
+      @Override
       public com.google.protobuf.ByteString getUserId() {
         return userId_;
       }
@@ -2106,12 +2208,14 @@ public final class GitModel {
       /**
        * <code>optional .TargetType target_type = 2;</code>
        */
+      @Override
       public boolean hasTargetType() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
        * <code>optional .TargetType target_type = 2;</code>
        */
+      @Override
       public com.cloudata.git.GitModel.TargetType getTargetType() {
         return targetType_;
       }
@@ -2142,12 +2246,14 @@ public final class GitModel {
       /**
        * <code>optional bytes target_id = 3;</code>
        */
+      @Override
       public boolean hasTargetId() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
        * <code>optional bytes target_id = 3;</code>
        */
+      @Override
       public com.google.protobuf.ByteString getTargetId() {
         return targetId_;
       }
@@ -2178,12 +2284,14 @@ public final class GitModel {
       /**
        * <code>optional bool owner = 4;</code>
        */
+      @Override
       public boolean hasOwner() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional bool owner = 4;</code>
        */
+      @Override
       public boolean getOwner() {
         return owner_;
       }
@@ -2253,6 +2361,7 @@ public final class GitModel {
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
+        @Override
         public com.google.protobuf.ExtensionRegistry assignDescriptors(
             com.google.protobuf.Descriptors.FileDescriptor root) {
           descriptor = root;

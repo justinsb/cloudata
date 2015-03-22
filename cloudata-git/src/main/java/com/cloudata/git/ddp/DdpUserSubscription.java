@@ -1,6 +1,5 @@
 package com.cloudata.git.ddp;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,7 +9,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.protobuf.ByteString;
 import com.justinsb.ddpserver.DdpPublishContext;
-import com.justinsb.ddpserver.DdpSubscription;
 import com.justinsb.ddpserver.Jsonable;
 import com.justinsb.ddpserver.triggeredpoll.SimpleDdpSubscription;
 
