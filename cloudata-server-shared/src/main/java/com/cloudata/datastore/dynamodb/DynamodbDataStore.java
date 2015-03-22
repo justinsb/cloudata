@@ -3,7 +3,6 @@ package com.cloudata.datastore.dynamodb;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
-import com.amazonaws.services.dynamodbv2.document.Attribute;
 import com.amazonaws.services.dynamodbv2.model.AttributeAction;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.AttributeValueUpdate;
@@ -40,7 +38,6 @@ import com.cloudata.datastore.LimitModifier;
 import com.cloudata.datastore.Modifier;
 import com.cloudata.datastore.UniqueIndexViolation;
 import com.cloudata.datastore.WhereModifier;
-import com.cloudata.datastore.sql.SqlDataStore;
 import com.cloudata.util.ByteBufferInputStream;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
@@ -67,7 +64,7 @@ public class DynamodbDataStore implements DataStore {
 
   private static final ByteString EMPTY_RANGE_KEY = ByteString.copyFrom(new byte[] { 0 });
 
-  private static final Logger log = LoggerFactory.getLogger(SqlDataStore.class);
+  private static final Logger log = LoggerFactory.getLogger(DynamodbDataStore.class);
 
   final AmazonDynamoDBClient dynamoDB;
 
