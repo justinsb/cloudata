@@ -16,6 +16,7 @@
 	</properties>
 
 	<modules>
+		<module>jddp/ddpserver</module>
 		<!--<module>keyczar/java/code</module> -->
 		<!-- <module>barge</module> -->
 		<module>cloudata-shared</module>

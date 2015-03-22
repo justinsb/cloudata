@@ -1,3 +1,6 @@
 [submodule "keyczar"]
 	path = keyczar
 	url = https://github.com/justinsb/keyczar.git
+[submodule "jddp"]
+	path = jddp
+	url = https://github.com/justinsb/jddp.git
