@@ -17,7 +17,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>target/meteor/bundle/programs/web.browser</directory>
-			<outputDirectory>meteor/web.browser</outputDirectory>
+			<outputDirectory>meteor/programs/web.browser</outputDirectory>
 		</fileSet>
 	</fileSets>
 	<dependencySets>

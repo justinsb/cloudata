@@ -67,8 +67,10 @@ public class GitServer {
 
     DdpEndpoints.register(context, ddpDataSource);
 
-    File meteorBaseDir = new File("meteor/web.browser");
-
+    File meteorBaseDir = new File("meteor/programs/web.browser");
+    if (!meteorBaseDir.exists()) {
+      meteorBaseDir = new File("target/meteor/bundle/programs/web.browser");
+    }
     JsonObject meteorRuntimeConfig = new JsonObject();
     // e.g.
     // {"meteorRelease":"0.7.1.1","ROOT_URL":"http://someapp.meteor.com","ROOT_URL_PATH_PREFIX":"","accountsConfigCalled":true,"autoupdateVersion":"1d065893-1234-1234-1401-fb41bbeaaa2f"};</script>
