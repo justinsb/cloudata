@@ -15,6 +15,10 @@
 			<lineEnding>unix</lineEnding>
 			<fileMode>0744</fileMode>
 		</fileSet>
+		<fileSet>
+			<directory>target/meteor/bundle/programs/web.browser</directory>
+			<outputDirectory>meteor/web.browser</outputDirectory>
+		</fileSet>
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
