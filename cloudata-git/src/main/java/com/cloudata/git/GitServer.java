@@ -7,19 +7,23 @@ import javax.servlet.DispatcherType;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudata.auth.ProjectBasicAuthFilter;
 import com.cloudata.config.Configuration;
 import com.cloudata.git.ddp.GitDdpDataSource;
-import com.google.gerrit.httpd.GitOverHttpServlet;
+import com.google.gerrit.httpd.GitOverHttpFilter;
+import com.google.gson.JsonObject;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.justinsb.ddpserver.DdpEndpoints;
+import com.justinsb.meteor.BoilerplateFilter;
 
 public class GitServer {
   private static final Logger log = LoggerFactory.getLogger(GitServer.class);
@@ -63,14 +67,29 @@ public class GitServer {
 
     DdpEndpoints.register(context, ddpDataSource);
 
+    File meteorBaseDir = new File("meteor/web.browser");
+
+    JsonObject meteorRuntimeConfig = new JsonObject();
+    // e.g.
+    // {"meteorRelease":"0.7.1.1","ROOT_URL":"http://someapp.meteor.com","ROOT_URL_PATH_PREFIX":"","accountsConfigCalled":true,"autoupdateVersion":"1d065893-1234-1234-1401-fb41bbeaaa2f"};</script>
+
+    String bundledJsCssPrefix = ""; // "/";
+    BoilerplateFilter boilerplate = new BoilerplateFilter(meteorBaseDir, meteorRuntimeConfig, bundledJsCssPrefix);
+    context.addFilter(new FilterHolder(boilerplate), "/", EnumSet.of(DispatcherType.REQUEST));
+
     // FilterHolder filterHolder = new FilterHolder(injector.getInstance(GuiceFilter.class));
     // context.addFilter(filterHolder, "*", EnumSet.of(DispatcherType.REQUEST));
+
+    context.setBaseResource(Resource.newResource(meteorBaseDir));
+    context.addServlet(new ServletHolder(DefaultServlet.class), "/*");
 
     ProjectBasicAuthFilter projectBasicAuthFilter = injector.getInstance(ProjectBasicAuthFilter.class);
     context.addFilter(new FilterHolder(projectBasicAuthFilter), "/*", EnumSet.allOf(DispatcherType.class));
 
-    GitOverHttpServlet gitOverHttpServlet = injector.getInstance(GitOverHttpServlet.class);
-    context.addServlet(new ServletHolder(gitOverHttpServlet), "/*");
+    // GitOverHttpServlet gitOverHttpServlet = injector.getInstance(GitOverHttpServlet.class);
+    // context.addServlet(new ServletHolder(gitOverHttpServlet), "/*");
+    GitOverHttpFilter gitOverHttpFilter = injector.getInstance(GitOverHttpFilter.class);
+    context.addFilter(new FilterHolder(gitOverHttpFilter), "/*", EnumSet.of(DispatcherType.REQUEST));
 
     jetty.setHandler(context);
 
