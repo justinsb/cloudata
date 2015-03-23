@@ -6,7 +6,7 @@ RUN curl https://install.meteor.com | sh
 ADD . /src/
 #RUN cd /src; mvn install
 
-RUN cd /src/cloudata-git/src/main/webapp; meteor bundle --directory ../../../target/meteor
+RUN cd /src/cloudata-git/src/main/webapp; meteor build --directory ../../../target/meteor
 
 RUN cd /src; mvn install assembly:single
  
