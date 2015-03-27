@@ -49,15 +49,15 @@ public class ForceSslFilter implements Filter {
       return;
     }
 
-    String protocol = httpServletRequest.getProtocol();
+    String scheme = httpServletRequest.getScheme();
 
-    // TODO: X-Forwarded-Proto & other headers
+    // TODO: X-Forwarded & other headers
 
-    if ("https".equals(protocol)) {
+    if ("https".equals(scheme)) {
       httpServletResponse.setHeader("Strict-Transport-Security", stsHeader);
 
       next.doFilter(request, response);
-    } else if ("http".equals(protocol)) {
+    } else if ("http".equals(scheme)) {
       try {
         URI requestUri = new URI(httpServletRequest.getRequestURL().toString());
 
@@ -70,7 +70,7 @@ public class ForceSslFilter implements Filter {
         throw new IllegalStateException("Error constructing redirect URI", e);
       }
     } else {
-      log.warn("Unknown protocol {}", protocol);
+      log.warn("Unknown scheme {}", scheme);
       next.doFilter(request, response);
     }
   }
