@@ -51,7 +51,10 @@ public class ForceSslFilter implements Filter {
 
     String scheme = httpServletRequest.getScheme();
 
-    // TODO: X-Forwarded & other headers
+    String forwardedScheme = httpServletRequest.getHeader("X-Forwarded-Proto");
+    if (forwardedScheme != null) {
+      scheme = forwardedScheme;
+    }
 
     if ("https".equals(scheme)) {
       httpServletResponse.setHeader("Strict-Transport-Security", stsHeader);
