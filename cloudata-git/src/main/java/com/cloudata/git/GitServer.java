@@ -19,6 +19,7 @@ import com.cloudata.auth.ProjectBasicAuthFilter;
 import com.cloudata.config.Configuration;
 import com.cloudata.config.ProgramMode;
 import com.cloudata.git.ddp.GitDdpDataSource;
+import com.cloudata.git.web.ForceSslFilter;
 import com.google.gerrit.httpd.GitOverHttpFilter;
 import com.google.gson.JsonObject;
 import com.google.inject.Guice;
@@ -62,6 +63,9 @@ public class GitServer {
     server.setHandler(context);
 
     this.jetty = server;
+
+    context.addFilter(new FilterHolder(new ForceSslFilter(ForceSslFilter.DEFAULT_STS)), "/",
+        EnumSet.of(DispatcherType.REQUEST));
 
     GitDdpDataSource ddpDataSource = injector.getInstance(GitDdpDataSource.class);
     ddpDataSource.init();
