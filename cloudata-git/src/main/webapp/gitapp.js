@@ -11,7 +11,7 @@ if (Meteor.isClient) {
 	});
 	
 	Template.registerHelper("highlight", function (src) {
-		var result = hljs.highlightAuto(src, ['java']);
+		var result = hljs.highlightAuto(src, ['java','xml']);
 		return result.value;	
 	});
 	
