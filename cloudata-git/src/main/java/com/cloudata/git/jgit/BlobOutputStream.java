@@ -48,10 +48,7 @@ public class BlobOutputStream extends DfsOutputStream {
 
     @Override
     public void flush() {
-        // if (!closed) {
-        throw new UnsupportedOperationException();
-        // }
-        // upload();
+	// We don't actually flush till close()
     }
 
     @Override
